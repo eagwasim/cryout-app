@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "400664901505",
+    "firebase_url": "https://cry-out.firebaseio.com",
+    "project_id": "cry-out",
+    "storage_bucket": "cry-out.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:400664901505:android:f63f7c687b36c199695a80",
+        "android_client_info": {
+          "package_name": "com.noubug.app.cryout"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "400664901505-r74s8njsqugqapgpsj5spik0drckcbs8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwVFsokE-_v466HurIolBzYKhzVPaDFpA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "400664901505-r74s8njsqugqapgpsj5spik0drckcbs8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
