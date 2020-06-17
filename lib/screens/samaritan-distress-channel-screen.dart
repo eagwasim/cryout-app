@@ -1,9 +1,11 @@
 import 'package:bubble/bubble.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cryout_app/http/distress-resource.dart';
 import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/chat-message.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
 import 'package:cryout_app/models/user.dart';
+import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/widget-utils.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -13,9 +15,13 @@ import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class SamaritanDistressChannelScreen extends StatefulWidget {
+  final ReceivedDistressSignal receivedDistressSignal;
+
+  const SamaritanDistressChannelScreen({Key key, this.receivedDistressSignal}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
-    return _SamaritanDistressChannelScreenState();
+    return _SamaritanDistressChannelScreenState(this.receivedDistressSignal);
   }
 }
 
@@ -32,12 +38,18 @@ class _SamaritanDistressChannelScreenState extends State {
 
   User _user;
 
+  _SamaritanDistressChannelScreenState(this._receivedDistressSignal);
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferenceUtil.setString(PreferenceConstants.NEXT_SCREEN_FROM_NOTIFICATION, null);
+  }
+
   @override
   Widget build(BuildContext context) {
     _chatInputTextController = TextEditingController(text: _currentChatMessage);
-    if (_receivedDistressSignal == null) {
-      _receivedDistressSignal = ModalRoute.of(context).settings.arguments;
-    }
+
     if (!_setUpComplete) {
       _setUp();
     }
@@ -108,6 +120,7 @@ class _SamaritanDistressChannelScreenState extends State {
                       children: <Widget>[
                         Expanded(
                           child: TextField(
+                            maxLines: 2,
                             decoration: new InputDecoration(
                               enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide.none,
@@ -127,7 +140,10 @@ class _SamaritanDistressChannelScreenState extends State {
                           ),
                         ),
                         IconButton(
-                          icon: Icon(Icons.send),
+                          icon: Icon(
+                            Icons.send,
+                            color: Colors.blue[600],
+                          ),
                           onPressed: () {
                             _sendMessage(_currentChatMessage);
                           },
@@ -170,6 +186,18 @@ class _SamaritanDistressChannelScreenState extends State {
 
     _messageDBRef.push().set(chatMessage.toJSON());
 
+    DistressResource.notifyDistressChannelOfMessage(
+      context,
+      _receivedDistressSignal.distressId,
+      {
+        "senderUserId": _user.id,
+        "senderName": _user.firstName + " " + _user.lastName.substring(0, 1) + ".",
+        "message": message,
+        "distressUserId": _receivedDistressSignal.userId,
+        "messageType": "text"
+      },
+    );
+
     setState(() {
       _currentChatMessage = "";
     });
@@ -201,7 +229,5 @@ class _SamaritanDistressChannelScreenState extends State {
     _messageDBRef.push().set(chatMessage.toJSON());
   }
 
-  void _showReportUserDialog() {
-
-  }
+  void _showReportUserDialog() {}
 }

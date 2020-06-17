@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cryout_app/http/access-resource.dart';
 import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
+import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/translations.dart';
@@ -137,7 +138,7 @@ class _PhoneConfirmationScreenState extends State {
 
                 FireBaseHandler.subscribeToUserTopic(user.id);
 
-                Navigator.pushNamedAndRemoveUntil(context, await Routes.initialRoute(), (Route<dynamic> route) => false);
+                locator<NavigationService>().pushNamedAndRemoveUntil(await Routes.initialRoute());
               },
               wrapAlignment: WrapAlignment.spaceAround,
               pinBoxDecoration: ProvidedPinBoxDecoration.defaultPinBoxDecoration,

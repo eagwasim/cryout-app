@@ -5,6 +5,7 @@ import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/chat-message.dart';
 import 'package:cryout_app/models/distress-call.dart';
 import 'package:cryout_app/models/user.dart';
+import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/widget-utils.dart';
@@ -18,9 +19,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 class VictimDistressChannelScreen extends StatefulWidget {
+  final DistressCall distressCall;
+
+  const VictimDistressChannelScreen({Key key, this.distressCall}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
-    return _VictimDistressChannelScreenState();
+    return _VictimDistressChannelScreenState(this.distressCall);
   }
 }
 
@@ -28,6 +33,8 @@ class _VictimDistressChannelScreenState extends State {
   DistressCall _distressCall;
   TextEditingController _chatInputTextController;
   String _currentChatMessage = "";
+
+  _VictimDistressChannelScreenState(this._distressCall);
 
   bool _anchorToBottom = true;
   bool _setUpComplete = false;
@@ -41,9 +48,7 @@ class _VictimDistressChannelScreenState extends State {
   @override
   Widget build(BuildContext context) {
     _chatInputTextController = TextEditingController(text: _currentChatMessage);
-    if (_distressCall == null) {
-      _distressCall = ModalRoute.of(context).settings.arguments;
-    }
+
     if (!_setUpComplete) {
       _setUp();
     }
@@ -177,6 +182,18 @@ class _VictimDistressChannelScreenState extends State {
     setState(() {
       _currentChatMessage = "";
     });
+
+    DistressResource.notifyDistressChannelOfMessage(
+      context,
+      "${_distressCall.id}",
+      {
+        "senderUserId": _user.id,
+        "senderName": _user.firstName + " " + _user.lastName.substring(0, 1) + ".",
+        "message": message,
+        "distressUserId": _user.id,
+        "messageType": "text",
+      },
+    );
   }
 
   void _showCloseDistressDialog() {
@@ -238,6 +255,7 @@ class _VictimDistressChannelScreenState extends State {
       );
 
       _messageDBRef.push().set(chatMessage.toJSON());
+      FireBaseHandler.subscribeToDistressChannelTopic("${_distressCall.id}");
 
       Navigator.of(context).pop(true);
     } else {
@@ -283,6 +301,11 @@ class _VictimDistressChannelScreenState extends State {
         setState(() {
           _isUploadingImage = false;
         });
+        DistressResource.notifyDistressChannelOfMessage(
+          context,
+          "${_distressCall.id}",
+          {"senderUserId": _user.id, "senderName": _user.firstName + " " + _user.lastName.substring(0, 1) + ".", "message": url, "distressUserId": _user.id, "messageType": "img"},
+        );
       } else {
         setState(() {
           _isUploadingImage = false;

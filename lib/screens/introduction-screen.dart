@@ -1,3 +1,4 @@
+import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:flutter/material.dart';
@@ -57,10 +58,10 @@ class _AppIntroductionScreenState extends State {
           showSkipButton: true,
           skip: Text(Translations.of(context).text("screens.common.skip"), style: TextStyle(fontWeight: FontWeight.w600)),
           onSkip: () {
-            Navigator.of(context).pushNamedAndRemoveUntil(Routes.PHONE_VERIFICATION_SCREEN, (Route<dynamic> route) => false);
+            locator<NavigationService>().pushNamedAndRemoveUntil(Routes.PHONE_VERIFICATION_SCREEN);
           },
           onDone: () {
-            Navigator.of(context).pushNamedAndRemoveUntil(Routes.PHONE_VERIFICATION_SCREEN, (Route<dynamic> route) => false);
+            locator<NavigationService>().pushNamedAndRemoveUntil(Routes.PHONE_VERIFICATION_SCREEN);
           },
           dotsFlex: 1,
           curve: Curves.fastOutSlowIn,

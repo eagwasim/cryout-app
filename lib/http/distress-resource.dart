@@ -55,4 +55,18 @@ class DistressResource {
     }
     return response;
   }
+
+  static Future<Response> notifyDistressChannelOfMessage(BuildContext context, String id, dynamic data) async {
+    String token = await SharedPreferenceUtil.getToken();
+    Map<String, String> headers = Map.from(BaseResource.HEADERS);
+    headers["Authorization"] = "Bearer " + token;
+    Response response = await post(BaseResource.BASE_URL + _DISTRESS_CALL_BASE_ENDPOINT + "/$id" + "/messages/notify", headers: headers, body: jsonEncode(data));
+
+    if (response.statusCode == 401) {
+      if (await AccessResource.refreshToken(context)) {
+        return updateDistressSignalResponseStatus(context, id, data);
+      }
+    }
+    return response;
+  }
 }

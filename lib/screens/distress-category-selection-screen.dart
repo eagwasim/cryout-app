@@ -5,6 +5,8 @@ import 'package:cryout_app/http/distress-resource.dart';
 import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/distress-call.dart';
 import 'package:cryout_app/models/user.dart';
+import 'package:cryout_app/utils/firebase-handler.dart';
+import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
@@ -128,8 +130,6 @@ class _DistressCategorySelectionScreenState extends State {
 
     User _user = await SharedPreferenceUtil.currentUser();
 
-    await SharedPreferenceUtil.setCurrentDistressCall(distressCall);
-
     DatabaseReference _userPreferenceDatabaseReference = database.reference().child('users').reference().child("${_user.id}").reference().child("preferences").reference();
     await _userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).set(distressCall.toJson());
 
@@ -137,6 +137,8 @@ class _DistressCategorySelectionScreenState extends State {
       _processing = false;
     });
 
-    Navigator.of(context).popAndPushNamed(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN, arguments: distressCall);
+    FireBaseHandler.subscribeToDistressChannelTopic("${distressCall.id}");
+
+    locator<NavigationService>().popAndPushNamed(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN, arguments: distressCall);
   }
 }

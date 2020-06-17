@@ -1,17 +1,8 @@
 import 'package:cryout_app/application.dart';
-import 'package:cryout_app/screens/base-screen.dart';
-import 'package:cryout_app/screens/distress-category-selection-screen.dart';
-import 'package:cryout_app/screens/introduction-screen.dart';
-import 'package:cryout_app/screens/notifications-screen.dart';
-import 'package:cryout_app/screens/phone-confirmation-screen.dart';
-import 'package:cryout_app/screens/phone-verification-screen.dart';
-import 'package:cryout_app/screens/samaritan-distress-channel-screen.dart';
-import 'package:cryout_app/screens/splash-screen.dart';
-import 'package:cryout_app/screens/user-profile-picture-update-screen.dart';
-import 'package:cryout_app/screens/user-profile-update-screen.dart';
-import 'package:cryout_app/screens/victim-distress-channel-screen.dart';
 import 'package:cryout_app/utils/background_location_update.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
+import 'package:cryout_app/utils/navigation-service.dart';
+import 'package:cryout_app/utils/notification-handler.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -19,8 +10,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationHandler.initialize();
+  FireBaseHandler.configure();
+  setupLocator();
   runApp(MyApp());
+
 }
 
 final FirebaseDatabase database = FirebaseDatabase.instance;
@@ -41,8 +37,6 @@ class _MyAppState<MyApp> extends State {
 
     _localeOverrideDelegate = SpecificLocalizationDelegate(null);
     applic.onLocaleChanged = onLocaleChange;
-
-    FireBaseHandler.configure();
 
     database.setPersistenceEnabled(true);
     database.setPersistenceCacheSizeBytes(100000000);
@@ -124,19 +118,8 @@ class _MyAppState<MyApp> extends State {
         iconTheme: IconThemeData(color: Colors.grey[50]),
       ),
       initialRoute: Routes.SPLASH_SCREEN,
-      routes: {
-        Routes.INTRODUCTION_SCREEN: (context) => AppIntroductionScreen(),
-        Routes.BASE_SCREEN: (context) => BaseScreen(),
-        Routes.SPLASH_SCREEN: (context) => SplashScreen(),
-        Routes.PHONE_VERIFICATION_SCREEN: (context) => PhoneVerificationScreen(),
-        Routes.PHONE_CONFIRMATION_SCREEN: (context) => PhoneConfirmationScreen(),
-        Routes.USER_PROFILE_UPDATE_SCREEN: (context) => UserProfileUpdateScreen(),
-        Routes.USER_PROFILE_PHOTO_UPDATE_SCREEN: (context) => UserProfilePictureUpdateScreen(),
-        Routes.DISTRESS_CATEGORY_SELECTION_SCREEN: (context) => DistressCategorySelectionScreen(),
-        Routes.VICTIM_DISTRESS_CHANNEL_SCREEN: (context) => VictimDistressChannelScreen(),
-        Routes.NOTIFICATIONS_SCREEN: (context) => NotificationScreen(),
-        Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN: (context) => SamaritanDistressChannelScreen(),
-      },
+      onGenerateRoute: generateRoute,
+      navigatorKey: locator<NavigationService>().navigatorKey,
     );
   }
 

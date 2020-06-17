@@ -58,7 +58,11 @@ class SharedPreferenceUtil {
 
   static Future<void> setBool(String key, bool value) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setBool(key, value);
+    if (value == null) {
+      prefs.remove(key);
+    } else {
+      prefs.setBool(key, value);
+    }
   }
 
   static Future<void> savePhoneNumberForVerification(String phoneNumber) async {

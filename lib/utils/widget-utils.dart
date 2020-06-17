@@ -220,7 +220,7 @@ class WidgetUtils {
                       child: Text(
                         cm.userName + " · " + timeago.format(cm.dateCreated, locale: 'en_short'),
                         textAlign: TextAlign.start,
-                        style: TextStyle(fontSize: 8, color: Colors.grey),
+                        style: TextStyle(fontSize: 8, color: Colors.grey[200]),
                       ),
                     )
                   ],
@@ -279,7 +279,7 @@ class WidgetUtils {
                       child: Text(
                           cm.userName == null ? "" :  cm.userName + " · " + timeago.format(cm.dateCreated, locale: 'en_short'),
                         textAlign: TextAlign.start,
-                        style: TextStyle(fontSize: 8, color: Colors.grey),
+                        style: TextStyle(fontSize: 8, color: Colors.grey[200]),
                       ),
                     )
                   ],
@@ -299,7 +299,7 @@ class WidgetUtils {
         margin: BubbleEdges.only(top: 0),
         alignment: Alignment.topRight,
         nip: BubbleNip.rightBottom,
-        color: Colors.grey[800],
+        color: Colors.blue[600],
         child: Container(
           constraints: BoxConstraints(maxWidth: MediaQuery
               .of(context)
@@ -318,7 +318,7 @@ class WidgetUtils {
                 child: Text(
                   timeago.format(cm.dateCreated, locale: 'en_short'),
                   textAlign: TextAlign.end,
-                  style: TextStyle(fontSize: 8, color: Colors.grey),
+                  style: TextStyle(fontSize: 8, color: Colors.grey[200]),
                 ),
               )
             ],
@@ -335,7 +335,7 @@ class WidgetUtils {
         margin: BubbleEdges.only(top: 0),
         alignment: Alignment.topRight,
         nip: BubbleNip.rightBottom,
-        color: Colors.grey[800],
+          color: Colors.blue[600],
         child: Container(
           constraints: BoxConstraints(maxWidth: MediaQuery
               .of(context)
@@ -360,7 +360,7 @@ class WidgetUtils {
                 child: Text(
                   timeago.format(cm.dateCreated, locale: 'en_short'),
                   textAlign: TextAlign.end,
-                  style: TextStyle(fontSize: 8, color: Colors.grey),
+                  style: TextStyle(fontSize: 8, color: Colors.grey[200]),
                 ),
               )
             ],

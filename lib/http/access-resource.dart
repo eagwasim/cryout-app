@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cryout_app/http/base-resource.dart';
+import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:flutter/cupertino.dart';
@@ -24,7 +25,7 @@ class AccessResource {
     Response response = await get(BaseResource.BASE_URL + "/token/refresh?refreshToken=" + refreshToken);
 
     if (response.statusCode != 200) {
-      Navigator.of(buildContext).pushNamedAndRemoveUntil(Routes.PHONE_VERIFICATION_SCREEN, (Route<dynamic> route) => false);
+      locator<NavigationService>().pushNamedAndRemoveUntil(Routes.PHONE_VERIFICATION_SCREEN);
       return false;
     }
 

@@ -1,15 +1,14 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cryout_app/http/distress-resource.dart';
 import 'package:cryout_app/http/user-resource.dart';
 import 'package:cryout_app/main.dart';
-import 'package:cryout_app/models/chat-message.dart';
 import 'package:cryout_app/models/distress-call.dart';
 import 'package:cryout_app/models/notification.dart';
 import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/background_location_update.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
+import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
@@ -76,7 +75,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
         leading: IconButton(
           icon: Icon(Icons.rss_feed, color: _hasPendingNotifications ? Colors.deepOrange : Colors.grey),
           onPressed: () {
-            Future<dynamic> resp = Navigator.pushNamed(context, Routes.NOTIFICATIONS_SCREEN);
+            Future<dynamic> resp = locator<NavigationService>().navigateTo(Routes.NOTIFICATIONS_SCREEN);
             resp.then((value) => {updateNotifications()});
           },
         ),
@@ -142,9 +141,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                               ),
                             ),
                             onTap: () {
-                              Navigator.of(context).pushNamed(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN, arguments: _currentDistressCall).then((value) => {
-                                    if (value) {print("VALUE RETURNEDDDDDDDDDDDDDDDDDDDDDDD"), _setUp()}
-                                  });
+                              locator<NavigationService>().pushNamed(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN, arguments: _currentDistressCall);
                             },
                           ),
                         ),
@@ -222,7 +219,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
               padding: const EdgeInsets.only(bottom: 8.0),
               child: RaisedButton.icon(
                 onPressed: () {
-                  Navigator.of(context).pushNamed(Routes.DISTRESS_CATEGORY_SELECTION_SCREEN).then((value) => {_setUp()});
+                  locator<NavigationService>().pushNamed(Routes.DISTRESS_CATEGORY_SELECTION_SCREEN).then((value) => {_setUp()});
                 },
                 icon: Icon(
                   Icons.error_outline,

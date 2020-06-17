@@ -1,5 +1,6 @@
 import 'package:cryout_app/http/access-resource.dart';
 import 'package:cryout_app/http/base-resource.dart';
+import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/translations.dart';
@@ -125,7 +126,7 @@ class _PhoneVerificationScreenState extends State {
 
                               await SharedPreferenceUtil.savePhoneNumberForVerification(_internationalizedPhoneNumber);
 
-                              Navigator.of(context).pushNamed(Routes.PHONE_CONFIRMATION_SCREEN);
+                              locator<NavigationService>().pushNamed(Routes.PHONE_CONFIRMATION_SCREEN);
 
                               setState(() {
                                 _isProcessing = false;

@@ -1,6 +1,7 @@
 import 'package:cryout_app/http/base-resource.dart';
 import 'package:cryout_app/http/user-resource.dart';
 import 'package:cryout_app/models/user.dart';
+import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/translations.dart';
@@ -274,7 +275,7 @@ class _UserProfileUpdateScreenState extends State {
 
                                 await SharedPreferenceUtil.saveUser(_user);
 
-                                Navigator.of(context).pushNamedAndRemoveUntil(Routes.USER_PROFILE_PHOTO_UPDATE_SCREEN, (Route<dynamic> route) => false);
+                                locator<NavigationService>().pushNamedAndRemoveUntil(Routes.USER_PROFILE_PHOTO_UPDATE_SCREEN);
                               }
                             },
                           ),

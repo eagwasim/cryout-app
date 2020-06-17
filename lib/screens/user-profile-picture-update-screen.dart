@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cryout_app/http/user-resource.dart';
 import 'package:cryout_app/models/user.dart';
+import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/translations.dart';
@@ -214,7 +215,7 @@ class _ProfilePictureUpdateScreenState extends State {
 
       await SharedPreferenceUtil.saveUser(_user);
 
-      Navigator.of(context).pushNamedAndRemoveUntil(Routes.BASE_SCREEN, (Route<dynamic> route) => false);
+      locator<NavigationService>().pushNamedAndRemoveUntil(Routes.BASE_SCREEN);
     } else {
       print("Saving Failed ${response.statusCode}");
       setState(() {

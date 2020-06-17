@@ -25,12 +25,23 @@ class NotificationRepository {
   static Future<List<InAppNotification>> getAll() async {
     final db = await DatabaseProvider.dbp.database;
     List<Map<String, dynamic>> result = await db.rawQuery("select * from notifications order by dateCreated desc");
-
+print(result);
     if (result.isEmpty) {
       return [];
     }
 
     return result.map((e) => InAppNotification.fromJSON(e)).toList();
+  }
+
+  static Future<InAppNotification> getById(String id) async {
+    final db = await DatabaseProvider.dbp.database;
+    List<Map<String, dynamic>> result = await db.rawQuery("select * from notifications where notificationId = '$id'");
+
+    if (result.isEmpty) {
+      return null;
+    }
+
+    return result.map((e) => InAppNotification.fromJSON(e)).toList().first;
   }
 
   static Future<void> save(InAppNotification notification) async {
@@ -46,7 +57,6 @@ class NotificationRepository {
   static Future<void> clearUnreadNotificationCount() async {
     final db = await DatabaseProvider.dbp.database;
     await db.rawQuery('update notifications set opened = 1 where opened = 0');
-    print("DELETED Objecs");
   }
 
   static Future<void> deleteNotification(InAppNotification inAppNotification) async {
