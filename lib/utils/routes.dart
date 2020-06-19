@@ -14,6 +14,7 @@ class Routes {
   static const VICTIM_DISTRESS_CHANNEL_SCREEN = "/victim-distress-channel-screen";
   static const NOTIFICATIONS_SCREEN = "/notifications-screen";
   static const SAMARITAN_DISTRESS_CHANNEL_SCREEN = "/samaritan-distress-channel-screen";
+  static const VIEW_DISTRESS_LOCATION_ON_MAP = "/view-distress-location-on-map";
 
   static Future<String> initialRoute() async {
     User user = await SharedPreferenceUtil.currentUser();

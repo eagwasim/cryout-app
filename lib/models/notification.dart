@@ -25,7 +25,7 @@ class NotificationRepository {
   static Future<List<InAppNotification>> getAll() async {
     final db = await DatabaseProvider.dbp.database;
     List<Map<String, dynamic>> result = await db.rawQuery("select * from notifications order by dateCreated desc");
-print(result);
+
     if (result.isEmpty) {
       return [];
     }

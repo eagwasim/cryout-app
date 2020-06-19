@@ -11,6 +11,7 @@ import 'package:cryout_app/screens/splash-screen.dart';
 import 'package:cryout_app/screens/user-profile-picture-update-screen.dart';
 import 'package:cryout_app/screens/user-profile-update-screen.dart';
 import 'package:cryout_app/screens/victim-distress-channel-screen.dart';
+import 'package:cryout_app/screens/view-distress-location-on-map-scree.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -76,6 +77,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN:
       var argument = settings.arguments as ReceivedDistressSignal;
       return MaterialPageRoute(builder: (context) => SamaritanDistressChannelScreen(receivedDistressSignal: argument));
+    case Routes.VIEW_DISTRESS_LOCATION_ON_MAP:
+      var argument = settings.arguments as ReceivedDistressSignal;
+      return MaterialPageRoute(builder: (context) => ViewDistressLocationOnMapScreen(distressSignal: argument));
     default:
       return MaterialPageRoute(builder: (context) => SplashScreen());
   }

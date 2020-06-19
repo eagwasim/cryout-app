@@ -81,9 +81,7 @@ class WidgetUtils {
 
   static Widget getLoaderWidget(BuildContext context, String text) {
     return Scaffold(
-      backgroundColor: Theme
-          .of(context)
-          .backgroundColor,
+      backgroundColor: Theme.of(context).backgroundColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -204,10 +202,7 @@ class WidgetUtils {
               nip: BubbleNip.leftBottom,
               color: Colors.grey[900],
               child: Container(
-                constraints: BoxConstraints(maxWidth: MediaQuery
-                    .of(context)
-                    .size
-                    .width * 0.7),
+                constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -256,10 +251,7 @@ class WidgetUtils {
               nip: BubbleNip.leftBottom,
               color: Colors.grey[900],
               child: Container(
-                constraints: BoxConstraints(maxWidth: MediaQuery
-                    .of(context)
-                    .size
-                    .width * 0.7),
+                constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -277,7 +269,7 @@ class WidgetUtils {
                     Padding(
                       padding: const EdgeInsets.all(2),
                       child: Text(
-                          cm.userName == null ? "" :  cm.userName + " · " + timeago.format(cm.dateCreated, locale: 'en_short'),
+                        cm.userName == null ? "" : cm.userName + " · " + timeago.format(cm.dateCreated, locale: 'en_short'),
                         textAlign: TextAlign.start,
                         style: TextStyle(fontSize: 8, color: Colors.grey[200]),
                       ),
@@ -301,10 +293,7 @@ class WidgetUtils {
         nip: BubbleNip.rightBottom,
         color: Colors.blue[600],
         child: Container(
-          constraints: BoxConstraints(maxWidth: MediaQuery
-              .of(context)
-              .size
-              .width * 0.7),
+          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[
@@ -335,12 +324,9 @@ class WidgetUtils {
         margin: BubbleEdges.only(top: 0),
         alignment: Alignment.topRight,
         nip: BubbleNip.rightBottom,
-          color: Colors.blue[600],
+        color: Colors.blue[600],
         child: Container(
-          constraints: BoxConstraints(maxWidth: MediaQuery
-              .of(context)
-              .size
-              .width * 0.7),
+          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[
@@ -428,6 +414,39 @@ class WidgetUtils {
           ],
         );
       },
+    );
+  }
+
+ static Widget getCounterBadgeForIcon(IconData iconData, int counter, Color color) {
+    return new Stack(
+      children: <Widget>[
+        Icon(iconData),
+        counter != 0
+            ? new Positioned(
+                right: 11,
+                top: 11,
+                child: new Container(
+                  padding: EdgeInsets.all(2),
+                  decoration: new BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  constraints: BoxConstraints(
+                    minWidth: 14,
+                    minHeight: 14,
+                  ),
+                  child: Text(
+                    '$counter',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 8,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              )
+            : new Container()
+      ],
     );
   }
 }

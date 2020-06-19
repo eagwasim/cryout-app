@@ -48,6 +48,8 @@ dependencies:
   timeago: ^2.0.26
   uuid: ^2.1.0
   get_it:
+  google_maps_flutter: ^0.5.28+1
+  flutter_webview_plugin: ^0.3.11
   provider:
   #firebase_auth: ^0.16.1
   international_phone_input:

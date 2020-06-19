@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/notification.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
@@ -231,6 +232,15 @@ class _NotificationScreenState extends State {
   void _ignoreDistressSignal(InAppNotification inAppNotification, ReceivedDistressSignal receivedDistressSignal) async {
     FireBaseHandler.unSubscribeToDistressChannelTopic(receivedDistressSignal.distressId);
     SharedPreferenceUtil.setBool(PreferenceConstants.DISTRESS_CHANNEL_MUTED + receivedDistressSignal.distressId, null);
+
+    if (!await SharedPreferenceUtil.getBool("logged.count." + receivedDistressSignal.distressId, false)) {
+      var _distressChannelStatRef = database.reference().child('distress_channel').reference().child("${receivedDistressSignal.distressId}").reference().child("stats").reference();
+      var dbSS = await _distressChannelStatRef.child("samaritan_count").once();
+      var _samaritanCount = dbSS == null || dbSS.value == null ? 0 : dbSS.value as int;
+      _distressChannelStatRef.child("samaritan_count").set(_samaritanCount - 1);
+      SharedPreferenceUtil.setBool("logged.count." + receivedDistressSignal.distressId, null);
+    }
+
     await NotificationRepository.deleteNotification(inAppNotification);
   }
 }
