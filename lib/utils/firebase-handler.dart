@@ -81,4 +81,9 @@ class FireBaseHandler {
     _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings(sound: true, badge: true, alert: true));
     _firebaseMessaging.onIosSettingsRegistered.listen((IosNotificationSettings settings) {});
   }
+
+  static unsubscribeFromAllTopics() async {
+    await _firebaseMessaging.deleteInstanceID();
+    configure();
+  }
 }

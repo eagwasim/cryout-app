@@ -117,7 +117,11 @@ class SharedPreferenceUtil {
     if (dc == null) {
       return null;
     }
-
     return DistressCall.fromJSON(jsonDecode(dc));
+  }
+
+  static Future<void> clear() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
   }
 }

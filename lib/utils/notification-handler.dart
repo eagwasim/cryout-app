@@ -19,7 +19,7 @@ import 'package:path_provider/path_provider.dart';
 class NotificationHandler {
   static final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  static Future<void> initialize() async{
+  static Future<void> initialize() async {
     var initializationSettingsAndroid = AndroidInitializationSettings('ic_stat_alarm_1');
     var initializationSettingsIOS = IOSInitializationSettings(onDidReceiveLocalNotification: _onDidReceiveLocalNotification);
     var initializationSettings = InitializationSettings(initializationSettingsAndroid, initializationSettingsIOS);
@@ -27,6 +27,11 @@ class NotificationHandler {
   }
 
   static Future<void> handleInAppNotification(dynamic data) async {
+    User user = await SharedPreferenceUtil.currentUser();
+
+    if (user == null) {
+      return;
+    }
     // We would only send a notification or data but not both.
     if (data.containsKey('notification') && data['notification'].containsKey('title') && data['notification']['title'] != '' && data['notification']['title'] != null) {
       _showGenericNotification(data['notification']['title'], data['notification']['body']);

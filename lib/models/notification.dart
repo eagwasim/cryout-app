@@ -63,4 +63,9 @@ class NotificationRepository {
     final db = await DatabaseProvider.dbp.database;
     await db.rawQuery("delete from notifications where notificationId = '${inAppNotification.notificationId}'");
   }
+
+  static Future<void> clear() async {
+    final db = await DatabaseProvider.dbp.database;
+    await db.rawQuery("delete from notifications");
+  }
 }

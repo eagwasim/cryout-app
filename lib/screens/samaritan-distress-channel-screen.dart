@@ -60,7 +60,7 @@ class _SamaritanDistressChannelScreenState extends State {
 
   void _select(Choice choice) {
     if (choice.id == 1) {
-      locator<NavigationService>().pushNamed(Routes.VIEW_DISTRESS_LOCATION_ON_MAP, arguments: _receivedDistressSignal);
+      locator<NavigationService>().pushNamed(Routes.VIEW_DISTRESS_LOCATION_ON_MAP_SCREEN, arguments: _receivedDistressSignal);
     }
   }
 
@@ -246,7 +246,9 @@ class _SamaritanDistressChannelScreenState extends State {
   }
 
   void _toggleMuteDistressChannel() async {
+
     await SharedPreferenceUtil.setBool("${PreferenceConstants.DISTRESS_CHANNEL_MUTED}${_receivedDistressSignal.distressId}", !_isChannelMuted);
+
     setState(() {
       _isChannelMuted = !_isChannelMuted;
     });

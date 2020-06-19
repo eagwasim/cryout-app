@@ -8,6 +8,7 @@ import 'package:cryout_app/screens/phone-confirmation-screen.dart';
 import 'package:cryout_app/screens/phone-verification-screen.dart';
 import 'package:cryout_app/screens/samaritan-distress-channel-screen.dart';
 import 'package:cryout_app/screens/splash-screen.dart';
+import 'package:cryout_app/screens/static-page-screen.dart';
 import 'package:cryout_app/screens/user-profile-picture-update-screen.dart';
 import 'package:cryout_app/screens/user-profile-update-screen.dart';
 import 'package:cryout_app/screens/victim-distress-channel-screen.dart';
@@ -77,9 +78,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN:
       var argument = settings.arguments as ReceivedDistressSignal;
       return MaterialPageRoute(builder: (context) => SamaritanDistressChannelScreen(receivedDistressSignal: argument));
-    case Routes.VIEW_DISTRESS_LOCATION_ON_MAP:
+    case Routes.VIEW_DISTRESS_LOCATION_ON_MAP_SCREEN:
       var argument = settings.arguments as ReceivedDistressSignal;
       return MaterialPageRoute(builder: (context) => ViewDistressLocationOnMapScreen(distressSignal: argument));
+    case Routes.STATIC_WEB_PAGE_VIEW_SCREEN:
+      var argument = settings.arguments as WebPageModel;
+      return MaterialPageRoute(builder: (context) => StaticPageScreen(webPageModel: argument));
     default:
       return MaterialPageRoute(builder: (context) => SplashScreen());
   }

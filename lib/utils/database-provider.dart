@@ -1,3 +1,4 @@
+import 'package:cryout_app/models/notification.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseProvider {
@@ -40,4 +41,5 @@ class DatabaseProvider {
       version: 1,
     );
   }
+
 }

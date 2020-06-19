@@ -19,7 +19,6 @@ class BackgroundLocationUpdate {
     // 2.  Configure the plugin
     //
     bg.BackgroundGeolocation.ready(
-
       bg.Config(
         desiredAccuracy: bg.Config.DESIRED_ACCURACY_LOW,
         distanceFilter: 10.0,
@@ -33,13 +32,12 @@ class BackgroundLocationUpdate {
           title: "Samaritan",
           text: "You are available to receive distress signals",
         ),
-
       ),
     );
   }
 
-  static void stopLocationTracking() {
-    bg.BackgroundGeolocation.stop();
+  static Future stopLocationTracking() async {
+    await bg.BackgroundGeolocation.stop();
   }
 
   static void startLocationTracking() {

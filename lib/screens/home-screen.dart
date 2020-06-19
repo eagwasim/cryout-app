@@ -1,12 +1,15 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cryout_app/http/base-resource.dart';
 import 'package:cryout_app/http/user-resource.dart';
 import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/distress-call.dart';
 import 'package:cryout_app/models/notification.dart';
 import 'package:cryout_app/models/user.dart';
+import 'package:cryout_app/screens/static-page-screen.dart';
 import 'package:cryout_app/utils/background_location_update.dart';
+import 'package:cryout_app/utils/database-provider.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/preference-constants.dart';
@@ -18,6 +21,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
+import 'package:package_info/package_info.dart';
+import 'package:sqflite/sqflite.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -30,7 +35,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
   User _user;
   bool _samaritan;
   bool _hasPendingNotifications = false;
-
+  PackageInfo _packageInfo;
   DistressCall _currentDistressCall;
 
   DatabaseReference _userPreferenceDatabaseReference;
@@ -87,12 +92,14 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                 fit: BoxFit.cover,
                 imageUrl: _user == null ? "https://via.placeholder.com/44x44?text=|" : _user.profilePhoto,
                 fadeOutDuration: const Duration(seconds: 1),
-                fadeInDuration: const Duration(seconds: 3),
+                fadeInDuration: const Duration(seconds: 1),
                 height: 28,
                 width: 28,
               ),
             ),
-            onPressed: () {},
+            onPressed: () {
+              _showUserDetails();
+            },
           ),
         ],
       ),
@@ -184,7 +191,10 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                                   Icons.help_outline,
                                   color: Colors.grey,
                                 ),
-                                onPressed: () {},
+                                onPressed: () {
+                                  locator<NavigationService>()
+                                      .pushNamed(Routes.STATIC_WEB_PAGE_VIEW_SCREEN, arguments: WebPageModel("Samaritan mode", "${BaseResource.BASE_URL}/pages/samaritan-help"));
+                                },
                               ),
                               Switch(
                                 value: _samaritan != null && _samaritan,
@@ -276,6 +286,8 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
       setState(() {});
     }
 
+    _packageInfo = await PackageInfo.fromPlatform();
+
     if (_userPreferenceDatabaseReference == null) {
       _userPreferenceDatabaseReference = database.reference().child('users').reference().child("${_user.id}").reference().child("preferences").reference();
       _userPreferenceDatabaseReference.keepSynced(true);
@@ -339,5 +351,169 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
     setState(() {
       _hasPendingNotifications = hasNotification;
     });
+  }
+
+  void _showUserDetails() {
+    // flutter defined function
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          contentPadding: EdgeInsets.only(top: 16, left: 8, right: 8, bottom: 0),
+          titlePadding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          content: Container(
+            constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width * 0.9),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(30),
+                      child: CachedNetworkImage(
+                        fit: BoxFit.cover,
+                        imageUrl: _user.profilePhoto == null ? "https://via.placeholder.com/44x44?text=|" : _user.profilePhoto,
+                        fadeOutDuration: const Duration(seconds: 1),
+                        fadeInDuration: const Duration(seconds: 0),
+                        height: 40,
+                        width: 40,
+                      ),
+                    ),
+                    Expanded(
+                        child: Padding(
+                      padding: const EdgeInsets.only(right: 8.0, left: 4.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(right: 0.0, left: 8.0, top: 0, bottom: 4),
+                            child: Row(
+                              children: <Widget>[
+                                Expanded(child: Text(_user.firstName + " " + _user.lastName, style: TextStyle(fontSize: 16))),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                            child: Row(
+                              children: <Widget>[
+                                Expanded(
+                                    child: Text(
+                                  _user.emailAddress,
+                                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500, fontSize: 14),
+                                )),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                            child: Row(
+                              children: <Widget>[
+                                Expanded(
+                                    child: Text(
+                                  _user.gender + " | " + _user.phoneNumber,
+                                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500, fontSize: 14),
+                                )),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    )),
+                  ],
+                ),
+                Divider(),
+                FlatButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    locator<NavigationService>().pushNamed(Routes.STATIC_WEB_PAGE_VIEW_SCREEN, arguments: WebPageModel("Privacy Policy", "${BaseResource.BASE_URL}/pages/privacy-policy"));
+                  },
+                  icon: Icon(Icons.verified_user),
+                  label: Text("Privacy Policy"),
+                  padding: EdgeInsets.all(4),
+                ),
+                FlatButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    locator<NavigationService>().pushNamed(Routes.STATIC_WEB_PAGE_VIEW_SCREEN, arguments: WebPageModel("Terms of Service", "${BaseResource.BASE_URL}/pages/terms-of-service"));
+                  },
+                  icon: Icon(Icons.info_outline),
+                  label: Text("Terms of service"),
+                  padding: EdgeInsets.all(4),
+                ),
+                FlatButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    locator<NavigationService>().pushNamed(Routes.STATIC_WEB_PAGE_VIEW_SCREEN, arguments: WebPageModel("About Cry Out", "${BaseResource.BASE_URL}/pages/about-cryout"));
+                  },
+                  icon: Icon(Icons.help_outline),
+                  label: Text("About Cry Out | version: ${_packageInfo.version}"),
+                  padding: EdgeInsets.all(4),
+                ),
+                Divider(),
+                FlatButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _showLogOutDialog();
+                    },
+                    icon: Icon(Icons.exit_to_app),
+                    label: Text("Log out"),
+                    padding: EdgeInsets.all(4)),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showLogOutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          contentPadding: EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 1),
+          titlePadding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          title: Text("Log out?"),
+          content: Text("Would you like to log out of this application?"),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text(
+                "Logout",
+                style: TextStyle(color: Colors.red),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _logOutOfApplication();
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  void _logOutOfApplication() async {
+    await SharedPreferenceUtil.clear();
+    await FireBaseHandler.unsubscribeFromAllTopics();
+    await NotificationRepository.clear();
+    await BackgroundLocationUpdate.stopLocationTracking();
+    locator<NavigationService>().pushNamedAndRemoveUntil(Routes.INTRODUCTION_SCREEN);
   }
 }

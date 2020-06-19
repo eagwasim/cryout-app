@@ -141,14 +141,9 @@ class _ProfilePictureUpdateScreenState extends State {
                 children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: FlatButton(
+                    child: RaisedButton(
                       shape: RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(25.0),
-                        side: BorderSide(
-                          color: Theme
-                              .of(context)
-                              .accentColor,
-                        ),
                       ),
                       child: Text(_translations.text("screens.common.done")),
                       onPressed: () async {

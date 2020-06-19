@@ -100,6 +100,14 @@ class _UserProfileUpdateScreenState extends State {
               child: SingleChildScrollView(
                 child: Column(
                   children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 16),
+                          child: Text("Updating this info later is currently not possible"),
+                        ),
+                      ],
+                    ),
                     Padding(
                       padding: const EdgeInsets.all(8),
                       child: TextField(
