@@ -7,6 +7,8 @@ import 'package:cryout_app/models/distress-call.dart';
 import 'package:cryout_app/models/notification.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
 import 'package:cryout_app/models/user.dart';
+import 'package:cryout_app/utils/background_location_update.dart';
+import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/routes.dart';
@@ -45,8 +47,21 @@ class NotificationHandler {
 
     if (data['data']['type'] == NOTIFICATION_TYPE_DISTRESS_SIGNAL_ALERT) {
       _handleNewDistressSignalNotification(data['data']);
-    } else if (data['data']['type'] == NOTIFICATION_TYPE_DISTRESS_CHANNEL_MESSAGE) {}
-    _handleDistressChannelMessage(data['data']);
+    } else if (data['data']['type'] == NOTIFICATION_TYPE_DISTRESS_CHANNEL_MESSAGE) {
+      _handleDistressChannelMessage(data['data']);
+    } else if (data['data']['type'] == NOTIFICATION_TYPE_ACCOUNT_BLOCKED) {
+      _handleAccountBlocked();
+    }
+  }
+
+  static void _handleAccountBlocked() async {
+    await SharedPreferenceUtil.clear();
+    await FireBaseHandler.unsubscribeFromAllTopics();
+    await NotificationRepository.clear();
+    await BackgroundLocationUpdate.stopLocationTracking();
+    locator<NavigationService>().pushNamedAndRemoveUntil(Routes.INTRODUCTION_SCREEN);
+
+    _showGenericNotification('Account Suspended!', 'Your account would be unsuspended after a week');
   }
 
   static Future<void> _handleDistressChannelMessage(dynamic data) async {
@@ -277,4 +292,5 @@ class NotificationHandler {
 
   static const String NOTIFICATION_TYPE_DISTRESS_SIGNAL_ALERT = 'DISTRESS_SIGNAL_ALERT';
   static const String NOTIFICATION_TYPE_DISTRESS_CHANNEL_MESSAGE = 'DISTRESS_CHANNEL_MESSAGE';
+  static const String NOTIFICATION_TYPE_ACCOUNT_BLOCKED = 'ACCOUNT_BLOCKED';
 }

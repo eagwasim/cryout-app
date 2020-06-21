@@ -10,6 +10,7 @@ class UserResource {
   static const String UPDATE_USER_PROFILE = "/api/v1/users";
   static const String UPDATE_USER_SAMARITAN_MODE = "/samaritan/mode";
   static const String UPDATE_USER_SAMARITAN_LOCATION = "/samaritan/location";
+  static const String REPORT_USER = "/report";
 
   static Future<Response> updateUser(BuildContext context, Map<String, dynamic> body) async {
     String token = await SharedPreferenceUtil.getToken();
@@ -50,6 +51,22 @@ class UserResource {
     headers["Authorization"] = "Bearer " + token;
 
     Response response = await post(BaseResource.BASE_URL + UPDATE_USER_PROFILE + UPDATE_USER_SAMARITAN_LOCATION, headers: headers, body: jsonEncode(body));
+
+    if (response.statusCode == 401) {
+      if (await AccessResource.refreshToken(context)) {
+        return updateSamaritanMode(context, body);
+      }
+    }
+    return response;
+  }
+
+  static Future<Response> reportUser(BuildContext context, Map<String, dynamic> body) async {
+    String token = await SharedPreferenceUtil.getToken();
+
+    Map<String, String> headers = Map.from(BaseResource.HEADERS);
+    headers["Authorization"] = "Bearer " + token;
+
+    Response response = await post(BaseResource.BASE_URL + UPDATE_USER_PROFILE + REPORT_USER, headers: headers, body: jsonEncode(body));
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {

@@ -1,12 +1,15 @@
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:bubble/bubble.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cryout_app/http/user-resource.dart';
 import 'package:cryout_app/models/chat-message.dart';
 import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:toast/toast.dart';
 
 class WidgetUtils {
   static BoxDecoration getDefaultGradientBackground() {
@@ -187,13 +190,18 @@ class WidgetUtils {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: CachedNetworkImage(
-                fit: BoxFit.cover,
-                imageUrl: cm.userProfilePhoto == null ? "https://via.placeholder.com/44x44?text=|" : cm.userProfilePhoto,
-                height: 28,
-                width: 28,
+            InkWell(
+              onTap: () {
+                _showReportUserDialog(context, cm.userId);
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: CachedNetworkImage(
+                  fit: BoxFit.cover,
+                  imageUrl: cm.userProfilePhoto == null ? "https://via.placeholder.com/44x44?text=|" : cm.userProfilePhoto,
+                  height: 28,
+                  width: 28,
+                ),
               ),
             ),
             Bubble(
@@ -236,13 +244,18 @@ class WidgetUtils {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: CachedNetworkImage(
-                fit: BoxFit.cover,
-                imageUrl: cm.userProfilePhoto == null ? "https://via.placeholder.com/44x44?text=|" : cm.userProfilePhoto,
-                height: 28,
-                width: 28,
+            InkWell(
+              onTap: () {
+                _showReportUserDialog(context, cm.userId);
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: CachedNetworkImage(
+                  fit: BoxFit.cover,
+                  imageUrl: cm.userProfilePhoto == null ? "https://via.placeholder.com/44x44?text=|" : cm.userProfilePhoto,
+                  height: 28,
+                  width: 28,
+                ),
               ),
             ),
             Bubble(
@@ -417,7 +430,7 @@ class WidgetUtils {
     );
   }
 
- static Widget getCounterBadgeForIcon(IconData iconData, int counter, Color color) {
+  static Widget getCounterBadgeForIcon(IconData iconData, int counter, Color color) {
     return new Stack(
       children: <Widget>[
         Icon(iconData),
@@ -448,5 +461,58 @@ class WidgetUtils {
             : new Container()
       ],
     );
+  }
+
+  static final List<String> _reasons = ["Inappropriate Messages", "Suspicious activities", "Impersonation", "Poses threat", "Spam", "Fraud"];
+
+ static  void _showReportUserDialog(BuildContext context, String userId) {
+    // flutter defined function
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          contentPadding: EdgeInsets.only(top: 16, left: 8, right: 8, bottom: 0),
+          titlePadding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text("Report user"),
+            ],
+          ),
+          content: Container(
+            constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width * 0.9),
+            child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _reasons
+                    .map((e) => Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: FlatButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _reportUser(context, userId, e);
+                        },
+                        child: Text(e),
+                        padding: EdgeInsets.all(4),
+                      ),
+                    ),
+                  ],
+                ))
+                    .toList()),
+          ),
+        );
+      },
+    );
+  }
+
+  static Future<void> _reportUser(BuildContext context, String userId, String reason) async {
+    Toast.show("Sending report...", context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+
+    UserResource.reportUser(context, {"userId": userId, "reason": reason});
   }
 }

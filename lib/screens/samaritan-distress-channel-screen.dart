@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cryout_app/http/distress-resource.dart';
+import 'package:cryout_app/http/user-resource.dart';
 import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/chat-message.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
@@ -15,6 +16,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:toast/toast.dart';
 
 class SamaritanDistressChannelScreen extends StatefulWidget {
   final ReceivedDistressSignal receivedDistressSignal;
@@ -29,7 +32,7 @@ class SamaritanDistressChannelScreen extends StatefulWidget {
 
 const List<Choice> choices = const <Choice>[
   const Choice(title: ' View location', icon: Icons.map, id: 1),
-  const Choice(title: ' Report user', icon: Icons.report, id: 2),
+  const Choice(title: ' Report', icon: Icons.report, id: 2),
 ];
 
 class _SamaritanDistressChannelScreenState extends State {
@@ -39,7 +42,6 @@ class _SamaritanDistressChannelScreenState extends State {
 
   bool _anchorToBottom = true;
   bool _setUpComplete = false;
-  bool _isReportingUser = false;
   bool _isChannelMuted = false;
 
   int _samaritanCount = 0;
@@ -61,6 +63,8 @@ class _SamaritanDistressChannelScreenState extends State {
   void _select(Choice choice) {
     if (choice.id == 1) {
       locator<NavigationService>().pushNamed(Routes.VIEW_DISTRESS_LOCATION_ON_MAP_SCREEN, arguments: _receivedDistressSignal);
+    } else if (choice.id == 2) {
+      _showReportUserDialog(_receivedDistressSignal.userId);
     }
   }
 
@@ -246,7 +250,6 @@ class _SamaritanDistressChannelScreenState extends State {
   }
 
   void _toggleMuteDistressChannel() async {
-
     await SharedPreferenceUtil.setBool("${PreferenceConstants.DISTRESS_CHANNEL_MUTED}${_receivedDistressSignal.distressId}", !_isChannelMuted);
 
     setState(() {
@@ -258,5 +261,58 @@ class _SamaritanDistressChannelScreenState extends State {
   void dispose() {
     super.dispose();
     _samaritanCountListener.cancel();
+  }
+
+  static final List<String> _reasons = ["False alarm", "Inappropriate Messages", "Suspicious activities", "Impersonation", "Poses threat", "Spam", "Fraud"];
+
+  void _showReportUserDialog(String userId) {
+    // flutter defined function
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          contentPadding: EdgeInsets.only(top: 16, left: 8, right: 8, bottom: 0),
+          titlePadding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text("Report Signal",),
+            ],
+          ),
+          content: Container(
+            constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width * 0.9),
+            child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _reasons
+                    .map((e) => Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: FlatButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  _reportUser(context, userId, e);
+                                },
+                                child: Text(e),
+                                padding: EdgeInsets.all(4),
+                              ),
+                            ),
+                          ],
+                        ))
+                    .toList()),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _reportUser(BuildContext context, String userId, String reason) async {
+    Toast.show("Sending report...", context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+
+    UserResource.reportUser(context, {"userId": userId, "reason": reason});
   }
 }

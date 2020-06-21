@@ -12,8 +12,8 @@ import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_native_admob/flutter_native_admob.dart';
-import 'package:flutter_native_admob/native_admob_controller.dart';
+//import 'package:flutter_native_admob/flutter_native_admob.dart';
+//import 'package:flutter_native_admob/native_admob_controller.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class NotificationScreen extends StatefulWidget {
@@ -26,7 +26,7 @@ class NotificationScreen extends StatefulWidget {
 class _NotificationScreenState extends State {
   bool _isLoading = false;
 
-  final _nativeAdController = NativeAdmobController();
+ // final _nativeAdController = NativeAdmobController();
 
   @override
   void initState() {
@@ -87,12 +87,12 @@ class _NotificationScreenState extends State {
             height: 90,
             padding: EdgeInsets.all(10),
             margin: EdgeInsets.only(bottom: 20.0),
-            child: NativeAdmob(
+           /* child: NativeAdmob(
               // Your ad unit id
               adUnitID: Platform.isIOS ? "ca-app-pub-6773273500391344/2976291867" : "ca-app-pub-6773273500391344/8803333610",
               controller: _nativeAdController,
               type: NativeAdmobType.banner,
-            ),
+            ),*/
           ),
         ],
       ),
