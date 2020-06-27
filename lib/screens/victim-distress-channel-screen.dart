@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cryout_app/http/distress-resource.dart';
@@ -8,6 +9,7 @@ import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
+import 'package:cryout_app/utils/translations.dart';
 import 'package:cryout_app/utils/widget-utils.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
@@ -32,7 +34,9 @@ class VictimDistressChannelScreen extends StatefulWidget {
 class _VictimDistressChannelScreenState extends State {
   DistressCall _distressCall;
   TextEditingController _chatInputTextController;
+  Translations _translations;
   String _currentChatMessage = "";
+  int _samaritanCount = 0;
 
   _VictimDistressChannelScreenState(this._distressCall);
 
@@ -42,25 +46,46 @@ class _VictimDistressChannelScreenState extends State {
   bool _isUploadingImage = false;
 
   DatabaseReference _messageDBRef;
+  StreamSubscription<Event> _samaritanCountListener;
 
   User _user;
 
   @override
+  void dispose() {
+    if (_samaritanCountListener != null) _samaritanCountListener.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     _chatInputTextController = TextEditingController(text: _currentChatMessage);
+    _translations = Translations.of(context);
 
     if (!_setUpComplete) {
       _setUp();
     }
 
     return !_setUpComplete
-        ? WidgetUtils.getLoaderWidget(context, "loading...")
+        ? WidgetUtils.getLoaderWidget(context, _translations.text("screens.common.loading"))
         : Scaffold(
             backgroundColor: Theme.of(context).backgroundColor,
             appBar: AppBar(
               backgroundColor: Colors.red,
-              title: Text(_distressCall.details),
+              title: Column(
+                children: <Widget>[
+                  Text(_translations.text("choices.distress.categories.${_distressCall.details}")),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      "$_samaritanCount ${_translations.text("screens.common.samaritans")}",
+                      style: TextStyle(fontSize: 10, color: Colors.grey),
+                    ),
+                  )
+                ],
+                crossAxisAlignment: CrossAxisAlignment.start,
+              ),
               elevation: 0,
+              centerTitle: false,
               brightness: Brightness.dark,
               actions: <Widget>[
                 _isDismissingDistressCall
@@ -116,7 +141,7 @@ class _VictimDistressChannelScreenState extends State {
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide.none,
                               ),
-                              hintText: "Send message to distress channel...",
+                              hintText: _translations.text("screens.samaritan-distress-channel-screen.send-message"),
                             ),
                             autofocus: false,
                             controller: _chatInputTextController,
@@ -161,6 +186,18 @@ class _VictimDistressChannelScreenState extends State {
 
     _messageDBRef = database.reference().child('distress_channel').reference().child("${_distressCall.id}").reference().child("messages").reference();
     _messageDBRef.keepSynced(true);
+
+    DatabaseReference _distressChannelStatRef = database.reference().child('distress_channel').reference().child("${_distressCall.id}").reference().child("stats").reference();
+    _distressChannelStatRef.child("samaritan_count").keepSynced(true);
+
+    var dbSS = await _distressChannelStatRef.child("samaritan_count").once();
+    _samaritanCount = dbSS == null || dbSS.value == null ? 0 : (dbSS.value as int);
+
+    _samaritanCountListener = _distressChannelStatRef.child("samaritan_count").onChildChanged.listen((event) {
+      setState(() {
+        _samaritanCount = event.snapshot.value;
+      });
+    });
 
     setState(() {
       _setUpComplete = true;
@@ -208,19 +245,19 @@ class _VictimDistressChannelScreenState extends State {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          title: new Text("Resolve"),
-          content: new Text("If you are out of distress please proceed with resolving it. Users on the channel will be notified that the distress has been resolved."),
+          title: new Text(_translations.text("screens.victim-distress-channel-screen.resolve")),
+          content: new Text(_translations.text("screens.victim-distress-channel-screen.resolve.message")),
           actions: <Widget>[
             // usually buttons at the bottom of the dialog
             new FlatButton(
-              child: new Text("Cancel", style: TextStyle(color: Colors.deepOrange)),
+              child: new Text(_translations.text("screens.common.cancel"), style: TextStyle(color: Colors.deepOrange)),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             new FlatButton(
               child: new Text(
-                "Resolve",
+                _translations.text("screens.victim-distress-channel-screen.resolve"),
                 style: TextStyle(color: Colors.green),
               ),
               onPressed: () {
@@ -247,7 +284,7 @@ class _VictimDistressChannelScreenState extends State {
       DatabaseReference _messageDBRef = database.reference().child('distress_channel').reference().child("${_distressCall.id}").reference().child("messages").reference();
 
       ChatMessage chatMessage = ChatMessage(
-        body: "${_user.shortName()} left the channel. Distress resolved. If you still suspect something weired, please send the police to ${_user.gender == "MALE" ? "his" : "her"}",
+        body: "${_user.shortName()} ${_translations.text("screens.victim-distress-channel-screen.left.the.chat")}",
         userId: _user.id,
         dateCreated: DateTime.now(),
         displayType: "n",
@@ -310,14 +347,14 @@ class _VictimDistressChannelScreenState extends State {
           _isUploadingImage = false;
         });
 
-        WidgetUtils.showAlertDialog(context, "Error", "Could not upload your image at this time");
+        WidgetUtils.showAlertDialog(context, _translations.text("screens.common.error.general.title"), _translations.text("screens.common.error.upload.image.message"));
       }
     } on Exception catch (e) {
       print(e);
       setState(() {
         _isUploadingImage = false;
       });
-      WidgetUtils.showAlertDialog(context, "Error", "Could not upload your image at this time");
+      WidgetUtils.showAlertDialog(context, _translations.text("screens.common.error.general.title"), _translations.text("screens.common.error.upload.image.message"));
     }
   }
 }

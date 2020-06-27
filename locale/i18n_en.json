@@ -16,6 +16,7 @@
   "screens.common.refresh.is-refresh-failed": "Refresh failed",
   "screens.common.error.general.title": "Error",
   "screens.common.error.general.message": "An error occurred while processing your request",
+  "screens.common.error.upload.image.message": "Could not upload your image at this time",
   "screens.common.gender.pronoun.his": "his",
   "screens.common.gender.pronoun.her": "her",
   "screens.common.gender.pronoun.their": "their",
@@ -79,12 +80,15 @@
   "screens.distress-category-selection.sending-distress-signal": "Sending distress signal..",
   "screens.distress-category-selection.error-in-sending": "Could not send a distress call at this time, please check your internet and try again",
   "screens.distress.signals.title": "Distress Signals",
-  "screens.distress.signals.empty": "You have no active any distress signals",
+  "screens.distress.signals.empty": "You have no active distress signals",
   "screens.samaritan-distress-channel-screen.send-message": "Send message to distress channel...",
   "screens.samaritan-distress-channel-screen.report-signal": "Report Signal",
   "screens.samaritan-distress-channel-screen.send-report": "Sending report...",
   "screens.samaritan-distress-channel-screen.failed-to-load": "Failed to load",
   "screens.samaritan-distress-channel-screen.loading-failed": "Loading failed...",
   "screens.samaritan-distress-channel-screen.choices.view-location": " View location",
-  "screens.samaritan-distress-channel-screen.choices.report": " Report"
+  "screens.samaritan-distress-channel-screen.choices.report": " Report",
+  "screens.victim-distress-channel-screen.resolve": "Resolve",
+  "screens.victim-distress-channel-screen.resolve.message": "If you are out of distress please proceed with resolving it. Users on the channel will be notified that the distress has been resolved.",
+  "screens.victim-distress-channel-screen.left.the.chat": "left the channel. Distress resolved. If you still suspect something weired, please report to the appropriate authority"
 }

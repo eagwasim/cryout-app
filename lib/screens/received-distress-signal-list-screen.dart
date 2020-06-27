@@ -82,6 +82,7 @@ class _ReceivedDistressSignalListScreenState extends State {
               backgroundColor: Theme.of(context).backgroundColor,
               iconTheme: Theme.of(context).iconTheme,
               elevation: 0,
+              centerTitle: false,
               brightness: Theme.of(context).brightness,
               title: Text(_translations.text("screens.distress.signals.title"), style: TextStyle(color: Theme.of(context).textTheme.headline1.color)),
               actions: <Widget>[
@@ -228,7 +229,7 @@ class _ReceivedDistressSignalListScreenState extends State {
                             padding: const EdgeInsets.only(right: 0.0, left: 8.0, top: 0, bottom: 4),
                             child: Row(
                               children: <Widget>[
-                                Expanded(child: Text( _translations.text("choices.distress.categories.${receivedDistressSignal.detail}"), style: TextStyle(fontSize: 18))),
+                                Expanded(child: Text(_translations.text("choices.distress.categories.${receivedDistressSignal.detail}"), style: TextStyle(fontSize: 18))),
                               ],
                             ),
                           ),
@@ -298,6 +299,15 @@ class _ReceivedDistressSignalListScreenState extends State {
 
   void _checkOutDistressSignal(ReceivedDistressSignal receivedDistressSignal) async {
     FireBaseHandler.subscribeToDistressChannelTopic(receivedDistressSignal.distressId);
+
+    if (!await SharedPreferenceUtil.getBool("logged.count." + receivedDistressSignal.distressId, false)) {
+      var _distressChannelStatRef = database.reference().child('distress_channel').reference().child("${receivedDistressSignal.distressId}").reference().child("stats").reference();
+      var dbSS = await _distressChannelStatRef.child("samaritan_count").once();
+      var _samaritanCount = dbSS == null || dbSS.value == null ? 0 : dbSS.value as int;
+      _distressChannelStatRef.child("samaritan_count").set(_samaritanCount + 1);
+      await SharedPreferenceUtil.setBool("logged.count." + receivedDistressSignal.distressId, true);
+    }
+
     locator<NavigationService>().pushNamed(Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN, arguments: receivedDistressSignal.distressId);
   }
 
@@ -318,11 +328,11 @@ class _ReceivedDistressSignalListScreenState extends State {
     FireBaseHandler.unSubscribeToDistressChannelTopic(receivedDistressSignal.distressId);
     SharedPreferenceUtil.setBool(PreferenceConstants.DISTRESS_CHANNEL_MUTED + receivedDistressSignal.distressId, null);
 
-    if (!await SharedPreferenceUtil.getBool("logged.count." + receivedDistressSignal.distressId, false)) {
+    if (await SharedPreferenceUtil.getBool("logged.count." + receivedDistressSignal.distressId, false)) {
       var _distressChannelStatRef = database.reference().child('distress_channel').reference().child("${receivedDistressSignal.distressId}").reference().child("stats").reference();
       var dbSS = await _distressChannelStatRef.child("samaritan_count").once();
       var _samaritanCount = dbSS == null || dbSS.value == null ? 0 : dbSS.value as int;
-      _distressChannelStatRef.child("samaritan_count").set(_samaritanCount - 1);
+      if (_samaritanCount > 0) _distressChannelStatRef.child("samaritan_count").set(_samaritanCount - 1);
       SharedPreferenceUtil.setBool("logged.count." + receivedDistressSignal.distressId, null);
     }
 

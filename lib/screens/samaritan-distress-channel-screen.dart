@@ -8,6 +8,7 @@ import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/chat-message.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
 import 'package:cryout_app/models/user.dart';
+import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/pop-up-menu.dart';
 import 'package:cryout_app/utils/preference-constants.dart';
@@ -236,20 +237,17 @@ class _SamaritanDistressChannelScreenState extends State {
     _messageDBRef.keepSynced(true);
 
     _distressChannelStatRef = database.reference().child('distress_channel').reference().child("${_receivedDistressSignal.distressId}").reference().child("stats").reference();
+    _distressChannelStatRef.child("samaritan_count").keepSynced(true);
 
     var dbSS = await _distressChannelStatRef.child("samaritan_count").once();
     _samaritanCount = dbSS == null || dbSS.value == null ? 1 : (dbSS.value as int);
-
-    if (!await SharedPreferenceUtil.getBool("logged.count." + _receivedDistressSignal.distressId, false)) {
-      await _distressChannelStatRef.child("samaritan_count").set(_samaritanCount);
-      SharedPreferenceUtil.setBool("logged.count." + _receivedDistressSignal.distressId, true);
-    }
 
     _samaritanCountListener = _distressChannelStatRef.child("samaritan_count").onChildChanged.listen((event) {
       setState(() {
         _samaritanCount = event.snapshot.value;
       });
     });
+
     _isChannelMuted = await SharedPreferenceUtil.getBool("${PreferenceConstants.DISTRESS_CHANNEL_MUTED}${_receivedDistressSignal.distressId}", false);
     setState(() {
       _setUpComplete = true;
@@ -285,6 +283,13 @@ class _SamaritanDistressChannelScreenState extends State {
 
   void _toggleMuteDistressChannel() async {
     await SharedPreferenceUtil.setBool("${PreferenceConstants.DISTRESS_CHANNEL_MUTED}${_receivedDistressSignal.distressId}", !_isChannelMuted);
+
+    if (_isChannelMuted) {
+      FireBaseHandler.unSubscribeToDistressChannelTopic(_receivedDistressSignalId);
+    } else {
+      FireBaseHandler.subscribeToDistressChannelTopic(_receivedDistressSignalId);
+    }
+
     setState(() {
       _isChannelMuted = !_isChannelMuted;
     });
