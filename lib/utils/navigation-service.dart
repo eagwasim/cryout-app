@@ -44,6 +44,10 @@ class NavigationService {
   Future<dynamic> pushNamedAndRemoveUntil(String routeName) {
     return navigatorKey.currentState.pushNamedAndRemoveUntil(routeName, (Route<dynamic> route) => false);
   }
+
+  Future<dynamic> pushNamedAndRemoveInstance(String routeName) {
+    return navigatorKey.currentState.pushNamedAndRemoveUntil(routeName, (Route<dynamic> route) => route.settings.name == routeName);
+  }
 }
 
 GetIt locator = GetIt.instance;

@@ -32,26 +32,28 @@ class FireBaseHandler {
     if (instance == null) {
       instance = FireBaseHandler(context);
     }
+
     return instance;
   }
 
   static Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) async {
-    print("onBackground: $message");
-    // NotificationHandler.handleInAppNotification(message, true);
+    NotificationHandler.handleInAppNotification(message, false);
   }
 
   static void configure() {
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
-        // NotificationHandler.handleInAppNotification(message, false);
+        NotificationHandler.handleInAppNotification(message, false);
       },
       onBackgroundMessage: myBackgroundMessageHandler,
       onLaunch: (Map<String, dynamic> message) async {
         print("onLaunch: $message");
+        NotificationHandler.handleInAppNotification(message, true);
       },
       onResume: (Map<String, dynamic> message) async {
         print("onResume: $message");
+        NotificationHandler.handleInAppNotification(message, true);
       },
     );
   }

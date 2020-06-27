@@ -57,7 +57,7 @@ class ReceivedDistressSignal {
 
   static ReceivedDistressSignal fromJSON(dynamic json) {
     return ReceivedDistressSignal(
-      id: json["id"],
+      id: EtcUtils.getInt(json["id"]),
       age: json["age"],
       detail: json["detail"],
       dateCreated: EtcUtils.dateTimeFrom(json["dateCreated"]),
@@ -80,7 +80,7 @@ class ReceivedDistressSignalRepository {
     final db = await DatabaseProvider.dbp.database;
 
     List<Map<String, dynamic>> result = await db.rawQuery("select * from received_distress_signals order by dateCreated desc");
-
+    print(result);
     if (result.isEmpty) {
       return [];
     }

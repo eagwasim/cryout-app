@@ -21,6 +21,7 @@ import 'package:path_provider/path_provider.dart';
 
 class NotificationHandler {
   static final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  static final Map<String, bool> _notificationChanelSubscription = {};
 
   static Future<void> initialize() async {
     var initializationSettingsAndroid = AndroidInitializationSettings('ic_stat_alarm_1');
@@ -29,16 +30,11 @@ class NotificationHandler {
     await flutterLocalNotificationsPlugin.initialize(initializationSettings, onSelectNotification: _selectNotification);
   }
 
-  static Future<void> handleInAppNotification(dynamic data, bool isBackground) async {
+  static Future<void> handleInAppNotification(dynamic data, bool isAppLaunch) async {
     try {
       User user = await SharedPreferenceUtil.currentUser();
 
       if (user == null) {
-        return;
-      }
-      // We would only send a notification or data but not both.
-      if (data.containsKey('notification') && data['notification'].containsKey('title') && data['notification']['title'] != '' && data['notification']['title'] != null) {
-        _showGenericNotification(data['notification']['title'], data['notification']['body']);
         return;
       }
 
@@ -50,29 +46,40 @@ class NotificationHandler {
       }
 
       if (notificationData['type'] == NOTIFICATION_TYPE_DISTRESS_SIGNAL_ALERT) {
-        _handleNewDistressSignalNotification(notificationData);
+        _handleNewDistressSignalNotification(notificationData, isAppLaunch);
       } else if (notificationData['type'] == NOTIFICATION_TYPE_DISTRESS_CHANNEL_MESSAGE) {
-        _handleDistressChannelMessage(notificationData);
+        _handleDistressChannelMessage(notificationData, isAppLaunch);
       } else if (notificationData['type'] == NOTIFICATION_TYPE_ACCOUNT_BLOCKED) {
-        _handleAccountBlocked();
+        _handleAccountBlocked(isAppLaunch);
       }
     } catch (e) {
       print(e);
     }
   }
 
-  static void _handleAccountBlocked() async {
+  static void subscribeRoute(String route) {
+    _notificationChanelSubscription[route] = true;
+  }
+
+  static void unsubscribeRoute(String route) {
+    _notificationChanelSubscription.remove(route);
+  }
+
+  static void _handleAccountBlocked(bool isAppLaunch) async {
     await SharedPreferenceUtil.clear();
     await FireBaseHandler.unsubscribeFromAllTopics();
     await ReceivedDistressSignalRepository.clear();
     await ReceivedSafeWalkRepository.clear();
     await BackgroundLocationUpdate.stopLocationTracking();
+
     locator<NavigationService>().pushNamedAndRemoveUntil(Routes.INTRODUCTION_SCREEN);
 
-    _showGenericNotification('Account Suspended!', 'Your account would be unsuspended after a week');
+    if (!isAppLaunch) {
+      _showGenericNotification('Account Suspended!', 'Your account would be unsuspended after a week');
+    }
   }
 
-  static Future<void> _handleDistressChannelMessage(dynamic data) async {
+  static Future<void> _handleDistressChannelMessage(dynamic data, bool isAppLaunch) async {
     User user = await SharedPreferenceUtil.currentUser();
 
     String senderUserId = data["senderUserId"];
@@ -95,40 +102,43 @@ class NotificationHandler {
     if (user.id == distressUserId) {
       var payload = {"route": Routes.VICTIM_DISTRESS_CHANNEL_SCREEN, "distressChannelId": distressChannelId};
 
-      if (messageType == 'text') {
-        _showMessageNotification(senderName, message, payload);
-      } else if (messageType == 'img') {
-        _showMessageNotificationWithImage(senderName, "Image", message, payload);
+      if (!isAppLaunch || !_notificationChanelSubscription.containsKey(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN + distressChannelId)) {
+        if (messageType == 'text') {
+          _showMessageNotification(senderName, message, payload);
+        } else if (messageType == 'img') {
+          _showMessageNotificationWithImage(senderName, "Image", message, payload);
+        }
+      } else {
+        _handleVictimDistressSignalMessageNotificationClick(payload);
       }
     } else {
-      var notificationId = "$distressUserId-$distressChannelId";
+      var payload = {"route": Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN, "distressChannelId": distressChannelId};
 
-      //if (await R.getById(notificationId) == null) {
-      //  print("NOTIFICATION NOT FOUND");
-       // return;
-      //}
-      var payload = {"route": Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN, "notificationId": notificationId};
-
-      if (messageType == 'text') {
-        _showMessageNotification(senderName, message, payload);
-      } else if (messageType == 'img') {
-        _showMessageNotificationWithImage(senderName, "Image", message, payload);
+      if (!isAppLaunch || !_notificationChanelSubscription.containsKey(Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN + distressChannelId)) {
+        if (messageType == 'text') {
+          _showMessageNotification(senderName, message, payload);
+        } else if (messageType == 'img') {
+          _showMessageNotificationWithImage(senderName, "Image", message, payload);
+        }
+      } else {
+        _handleSamaritanDistressSignalMessageNotificationClick(payload);
       }
     }
   }
 
-  static Future<void> _handleNewDistressSignalNotification(dynamic data) async {
+  static Future<void> _handleNewDistressSignalNotification(dynamic data, bool isAppLaunch) async {
     ReceivedDistressSignal receivedDistressSignal = ReceivedDistressSignal.fromJSON(data);
 
-    await ReceivedDistressSignalRepository.save(receivedDistressSignal);
-
-    var payload = {"route": Routes.RECEIVED_DISTRESS_SIGNAL_SCREEN};
-
-    _showDistressSignalNotification(
-      'Distress Signal: ${receivedDistressSignal.detail}',
-      '${receivedDistressSignal.firstName} broadcast a distress signal ${receivedDistressSignal.distance == null ? "" : receivedDistressSignal.distance + "km near you"}',
-      payload,
-    );
+    if (!isAppLaunch) {
+      var payload = {"route": Routes.RECEIVED_DISTRESS_SIGNAL_SCREEN};
+      _showDistressSignalNotification(
+        'Distress Signal: ${receivedDistressSignal.detail}',
+        '${receivedDistressSignal.firstName} broadcast a distress signal ${receivedDistressSignal.distance == null ? "" : receivedDistressSignal.distance + "km near you"}',
+        payload,
+      );
+    } else {
+      _handleDistressSignalNotificationClick();
+    }
   }
 
   static Future<void> _selectNotification(String payload) async {
@@ -156,27 +166,18 @@ class NotificationHandler {
     var currentDistressCall = (dbSS == null || dbSS.value == null) ? null : DistressCall.fromJSON(dbSS.value);
 
     // Not the current distress call so skip notification
-    if ("${currentDistressCall.id}" != data['route']) {
+    if (currentDistressCall == null || "${currentDistressCall.id}" != data['distressChannelId']) {
       return;
     }
-    // Future.delayed(Duration(seconds: 1), () {
     locator<NavigationService>().pushNamed(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN, arguments: currentDistressCall);
-    // });
   }
 
   static Future<void> _handleSamaritanDistressSignalMessageNotificationClick(dynamic data) async {
-    //InAppNotification inAppNotification = await NotificationRepository.getById(data['notificationId']);
-
-   // if (inAppNotification == null) {
-    //  return;
-  //  }
-  //  locator<NavigationService>().pushNamed(Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN, arguments: ReceivedDistressSignal.fromJSON(jsonDecode(inAppNotification.notificationData)));
+    locator<NavigationService>().pushNamed(Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN, arguments: data["distressChannelId"]);
   }
 
   static Future<void> _handleDistressSignalNotificationClick() async {
-    //  Future.delayed(Duration(seconds: 1), () {
-    locator<NavigationService>().navigateTo(Routes.RECEIVED_DISTRESS_SIGNAL_SCREEN);
-    //});
+    locator<NavigationService>().pushNamed(Routes.RECEIVED_DISTRESS_SIGNAL_SCREEN);
   }
 
   static Future<void> _onDidReceiveLocalNotification(int id, String title, String body, String payload) async {
