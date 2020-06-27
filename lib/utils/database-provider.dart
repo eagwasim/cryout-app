@@ -1,4 +1,3 @@
-import 'package:cryout_app/models/notification.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseProvider {
@@ -23,7 +22,7 @@ class DatabaseProvider {
 
   openDB() async {
     var databasesPath = await getDatabasesPath();
-    String path = databasesPath + '/cry_out_v0.db';
+    String path = databasesPath + '/cry_out.db';
 
     // Delete the database
     //deleteDatabase(path);
@@ -34,12 +33,14 @@ class DatabaseProvider {
       // When the database is first created, create a table to store dogs.
       onCreate: (db, version) {
         // Run the CREATE TABLE statement on the database.
-        db.execute("CREATE TABLE notifications (notificationId TEXT PRIMARY KEY, notificationType TEXT, notificationData TEXT, dateCreated INTEGER, opened INTEGER);");
+        db.execute(
+            "CREATE TABLE received_distress_signals (id INTEGER PRIMARY KEY, age TEXT, detail TEXT, dateCreated INTEGER, opened INTEGER, distressId TEXT, firstName TEXT, lastName TEXT, gender TEXT, phone TEXT, photo TEXT, userId TEXT, distance TEXT, location TEXT);");
+        db.execute(
+            "CREATE TABLE received_safe_walks (id INTEGER PRIMARY KEY, safeWalkId TEXT, userId TEXT, destination TEXT, userFirstName TEXT, userLastName TEXT, userPhoto TEXT, dateCreated INTEGER, opened INTEGER);");
       },
       // Set the version. This executes the onCreate function and provides a
       // path to perform database upgrades and downgrades.
       version: 1,
     );
   }
-
 }

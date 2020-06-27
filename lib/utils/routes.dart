@@ -12,7 +12,7 @@ class Routes {
   static const USER_PROFILE_PHOTO_UPDATE_SCREEN = '/user-profile-photo-update-screen';
   static const DISTRESS_CATEGORY_SELECTION_SCREEN = "/distress-category-selection";
   static const VICTIM_DISTRESS_CHANNEL_SCREEN = "/victim-distress-channel-screen";
-  static const NOTIFICATIONS_SCREEN = "/notifications-screen";
+  static const RECEIVED_DISTRESS_SIGNAL_SCREEN = "/distress-signal-list-screen";
   static const SAMARITAN_DISTRESS_CHANNEL_SCREEN = "/samaritan-distress-channel-screen";
   static const VIEW_DISTRESS_LOCATION_ON_MAP_SCREEN = "/view-distress-location-on-map-screen";
   static const STATIC_WEB_PAGE_VIEW_SCREEN = "/static-web-page-screen";

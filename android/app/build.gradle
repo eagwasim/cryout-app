@@ -67,7 +67,7 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.google.firebase:firebase-messaging:20.2.0"
+    implementation "com.google.firebase:firebase-messaging:20.2.1"
     androidTestImplementation 'androidx.test:runner:1.2.1'                   // or JUST ADDED
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'   // or  JUST ADDED
 }

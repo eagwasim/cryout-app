@@ -247,8 +247,7 @@ class _VictimDistressChannelScreenState extends State {
       DatabaseReference _messageDBRef = database.reference().child('distress_channel').reference().child("${_distressCall.id}").reference().child("messages").reference();
 
       ChatMessage chatMessage = ChatMessage(
-        body: "${_user.firstName + " " + _user.lastName.substring(0, 1)} left the channel. "
-            "Distress resolved. If you still suspect something weired, please send the police to ${_user.gender == "MALE" ? "his" : "her"}",
+        body: "${_user.shortName()} left the channel. Distress resolved. If you still suspect something weired, please send the police to ${_user.gender == "MALE" ? "his" : "her"}",
         userId: _user.id,
         dateCreated: DateTime.now(),
         displayType: "n",

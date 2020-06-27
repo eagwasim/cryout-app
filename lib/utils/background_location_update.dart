@@ -25,12 +25,13 @@ class BackgroundLocationUpdate {
         stopOnTerminate: false,
         startOnBoot: true,
         debug: false,
+        allowIdenticalLocations: false,
         logLevel: bg.Config.LOG_LEVEL_VERBOSE,
         notification: bg.Notification(
           smallIcon: "drawable/ic_stat_alarm_1",
           color: "#00b0ff",
-          title: "Samaritan",
-          text: "You are available to receive distress signals",
+          title: "",
+          text: "You have samaritan mode or safe walk active",
         ),
       ),
     );

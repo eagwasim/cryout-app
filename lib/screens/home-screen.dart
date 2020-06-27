@@ -5,24 +5,23 @@ import 'package:cryout_app/http/base-resource.dart';
 import 'package:cryout_app/http/user-resource.dart';
 import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/distress-call.dart';
-import 'package:cryout_app/models/notification.dart';
+import 'package:cryout_app/models/received-distress-signal.dart';
+import 'package:cryout_app/models/recieved-safe-walk.dart';
 import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/screens/static-page-screen.dart';
 import 'package:cryout_app/utils/background_location_update.dart';
-import 'package:cryout_app/utils/database-provider.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
+import 'package:cryout_app/utils/translations.dart';
 import 'package:cryout_app/utils/widget-utils.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
-import 'package:package_info/package_info.dart';
-import 'package:sqflite/sqflite.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -34,8 +33,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State with WidgetsBindingObserver {
   User _user;
   bool _samaritan;
-  bool _hasPendingNotifications = false;
-  PackageInfo _packageInfo;
+
+  Translations _translations;
+
   DistressCall _currentDistressCall;
 
   DatabaseReference _userPreferenceDatabaseReference;
@@ -45,13 +45,10 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
   void initState() {
     super.initState();
     FireBaseHandler.requestPermission();
-    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-
     super.dispose();
     _preferenceListeners.forEach((element) {
       element.cancel();
@@ -65,6 +62,10 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
       _setUp();
     }
 
+    if (_translations == null) {
+      _translations = Translations.of(context);
+    }
+
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
@@ -72,19 +73,22 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
         iconTheme: Theme.of(context).iconTheme,
         elevation: 0,
         title: Text(
-          "Personal Safety",
+          _translations.text("screens.home.title"),
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.headline1.color),
         ),
-        centerTitle: true,
+        centerTitle: false,
         brightness: Theme.of(context).brightness,
-        leading: IconButton(
-          icon: Icon(Icons.rss_feed, color: _hasPendingNotifications ? Colors.deepOrange : Colors.grey),
-          onPressed: () {
-            Future<dynamic> resp = locator<NavigationService>().navigateTo(Routes.NOTIFICATIONS_SCREEN);
-            resp.then((value) => {updateNotifications()});
-          },
-        ),
         actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.rss_feed, color: Colors.grey),
+            onPressed: () {
+              locator<NavigationService>().navigateTo(Routes.RECEIVED_DISTRESS_SIGNAL_SCREEN);
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.directions_walk, color: Colors.grey),
+            onPressed: () {},
+          ),
           IconButton(
             icon: ClipRRect(
               borderRadius: BorderRadius.circular(15),
@@ -106,128 +110,231 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
       body: SafeArea(
         child: ListView(
           children: <Widget>[
-            Padding(
-              padding: EdgeInsets.all(4),
-            ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                Text(
-                  "Hi " + (_user == null ? "" : (_user.lastName + " " + _user.firstName)),
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16.0, bottom: 8, top: 8),
+                  child: Text(
+                    _translations.text("screens.common.hi") + " " + (_user == null ? "" : _user.fullName()),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+                  ),
                 ),
               ],
             ),
             Padding(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.only(left: 20.0, bottom: 8, right: 20.0),
+              child: Divider(),
             ),
             _currentDistressCall == null
                 ? SizedBox.shrink()
-                : Row(
-                    children: <Widget>[
-                      Expanded(
-                          child: Padding(
-                        padding: EdgeInsets.only(left: 8, right: 8, bottom: 4),
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: InkWell(
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 16.0, right: 8, top: 8, bottom: 8),
-                              child: Row(
-                                children: <Widget>[
-                                  Expanded(
-                                    child: Text(
-                                      "${_currentDistressCall.details}",
-                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                                    ),
-                                  ),
-                                  WidgetUtils.glowingIconFor(context, Icons.error_outline, Colors.deepOrange)
-                                ],
+                : Padding(
+                    padding: const EdgeInsets.only(left: 16.0, bottom: 8, right: 16),
+                    child: Text(
+                      _translations.text("screens.home.active-distress-signal"),
+                      style: Theme.of(context).textTheme.caption,
+                    ),
+                  ),
+            _currentDistressCall == null
+                ? SizedBox.shrink()
+                : Padding(
+                    padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: InkWell(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 16.0, right: 8, top: 8, bottom: 8),
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Text(
+                                  _translations.text("choices.distress.categories.${_currentDistressCall.details}"),
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                ),
                               ),
-                            ),
-                            onTap: () {
-                              locator<NavigationService>().pushNamed(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN, arguments: _currentDistressCall);
-                            },
+                              WidgetUtils.glowingIconFor(context, Icons.error_outline, Colors.deepOrange)
+                            ],
                           ),
                         ),
-                      ))
-                    ],
+                        onTap: () {
+                          locator<NavigationService>().pushNamed(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN, arguments: _currentDistressCall);
+                        },
+                      ),
+                    )),
+            _currentDistressCall == null
+                ? SizedBox.shrink()
+                : Padding(
+                    padding: const EdgeInsets.only(left: 20.0, bottom: 8, right: 20.0),
+                    child: Divider(),
                   ),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 8, right: 8, bottom: 8),
-                    child: Card(
-                      child: Column(
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Image.asset(
-                              _user == null ? "assets/images/superman.png" : _user.gender == "MALE" ? "assets/images/superman.png" : "assets/images/superwoman.png",
-                              height: 140,
-                            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+              child: Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        child: Image.asset(
+                          _user == null ? "assets/images/superman.png" : _user.gender == "MALE" ? "assets/images/superman.png" : "assets/images/superwoman.png",
+                          height: 90,
+                          width: 90,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.white70,
                           ),
-                          Divider(),
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
                           Row(
                             children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.only(left: 16.0, right: 16),
-                                child: Text(
-                                  "Samaritan mode",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: Text(
+                                    _translations.text("screens.home.samaritan-mode"),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ),
-                              Expanded(
-                                child: Container(),
-                              ),
-                              IconButton(
-                                icon: Icon(
-                                  Icons.help_outline,
-                                  color: Colors.grey,
-                                ),
-                                onPressed: () {
-                                  locator<NavigationService>()
-                                      .pushNamed(Routes.STATIC_WEB_PAGE_VIEW_SCREEN, arguments: WebPageModel("Samaritan mode", "${BaseResource.BASE_URL}/pages/samaritan-help"));
-                                },
-                              ),
                               Switch(
+                                activeColor: Theme.of(context).accentColor,
                                 value: _samaritan != null && _samaritan,
                                 onChanged: (value) {
                                   setState(() {
                                     _samaritan = value;
                                   });
-
                                   updateSamaritanMode(context, value);
                                 },
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               )
                             ],
+                          ),
+                          Divider(),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Text(
+                              _translations.text("screens.home.samaritan-mode.details"),
+                              style: Theme.of(context).textTheme.caption,
+                            ),
                           )
                         ],
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                    )
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+              child: Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        child: Image.asset(
+                          _user.getWalkingImageAsset(),
+                          height: 90,
+                          width: 90,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.white70,
+                          ),
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                  ),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: Text(
+                                    _translations.text("screens.home.safe-walk"),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              FlatButton(
+                                onPressed: () {},
+                                child: Text(
+                                  _translations.text("screens.home.safe-walk.start"),
+                                  style: TextStyle(color: Theme.of(context).accentColor),
+                                ),
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                padding: const EdgeInsets.only(right: 0, left: 0, bottom: 0, top: 0),
+                              )
+                            ],
+                          ),
+                          Divider(),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Text(
+                              _translations.text("screens.home.safe-walk.detail"),
+                              style: Theme.of(context).textTheme.caption,
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                  ],
                 ),
-              ],
+              ),
             ),
-            Expanded(
-              child: Container(),
-            ),
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(
+                  child: Text(
+                _translations.text("screens.home.fine-print"),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontStyle: FontStyle.italic,
+                  color: Theme.of(context).textTheme.caption.color.withAlpha(100),
+                ),
+                textAlign: TextAlign.center,
+              )),
+            )
           ],
+          shrinkWrap: false,
         ),
       ),
       floatingActionButton: _currentDistressCall == null
           ? Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
               child: RaisedButton.icon(
+                elevation: 4,
                 onPressed: () {
                   locator<NavigationService>().pushNamed(Routes.DISTRESS_CATEGORY_SELECTION_SCREEN).then((value) => {_setUp()});
                 },
@@ -236,7 +343,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                   color: Colors.white,
                 ),
                 label: Text(
-                  "Send Distress Signal",
+                  _translations.text("screens.home.call-to-action"),
                   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Colors.white),
                 ),
                 shape: RoundedRectangleBorder(
@@ -286,8 +393,6 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
       setState(() {});
     }
 
-    _packageInfo = await PackageInfo.fromPlatform();
-
     if (_userPreferenceDatabaseReference == null) {
       _userPreferenceDatabaseReference = database.reference().child('users').reference().child("${_user.id}").reference().child("preferences").reference();
       _userPreferenceDatabaseReference.keepSynced(true);
@@ -298,8 +403,6 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
 
     dbSS = await _userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).once();
     _currentDistressCall = (dbSS == null || dbSS.value == null) ? null : DistressCall.fromJSON(dbSS.value);
-
-    _hasPendingNotifications = await NotificationRepository.hasUnReadNotifications();
 
     if (_preferenceListeners.isEmpty) {
       _preferenceListeners.add(_userPreferenceDatabaseReference.child(PreferenceConstants.SAMARITAN_MODE_ENABLED).onChildChanged.listen((event) {
@@ -335,22 +438,12 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed) {
       // user returned to our app
-      bool hasNotification = await NotificationRepository.hasUnReadNotifications();
-      setState(() {
-        _hasPendingNotifications = hasNotification;
-      });
+
     } else if (state == AppLifecycleState.inactive) {
       // app is inactive
     } else if (state == AppLifecycleState.paused) {
       // user is about quit our app temporally
     }
-  }
-
-  void updateNotifications() async {
-    bool hasNotification = await NotificationRepository.hasUnReadNotifications();
-    setState(() {
-      _hasPendingNotifications = hasNotification;
-    });
   }
 
   void _showUserDetails() {
@@ -432,10 +525,20 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                 FlatButton.icon(
                   onPressed: () {
                     Navigator.of(context).pop();
+                    //locator<NavigationService>().pushNamed(Routes.STATIC_WEB_PAGE_VIEW_SCREEN, arguments: WebPageModel("Privacy Policy", "${BaseResource.BASE_URL}/pages/privacy-policy"));
+                  },
+                  icon: Icon(Icons.group),
+                  label: Text(_translations.text("screens.home.emergency-contacts")),
+                  padding: EdgeInsets.all(4),
+                ),
+                Divider(),
+                FlatButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
                     locator<NavigationService>().pushNamed(Routes.STATIC_WEB_PAGE_VIEW_SCREEN, arguments: WebPageModel("Privacy Policy", "${BaseResource.BASE_URL}/pages/privacy-policy"));
                   },
                   icon: Icon(Icons.verified_user),
-                  label: Text("Privacy Policy"),
+                  label: Text(_translations.text("screens.home.privacy-policy")),
                   padding: EdgeInsets.all(4),
                 ),
                 FlatButton.icon(
@@ -444,16 +547,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                     locator<NavigationService>().pushNamed(Routes.STATIC_WEB_PAGE_VIEW_SCREEN, arguments: WebPageModel("Terms of Service", "${BaseResource.BASE_URL}/pages/terms-of-service"));
                   },
                   icon: Icon(Icons.info_outline),
-                  label: Text("Terms of service"),
-                  padding: EdgeInsets.all(4),
-                ),
-                FlatButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    locator<NavigationService>().pushNamed(Routes.STATIC_WEB_PAGE_VIEW_SCREEN, arguments: WebPageModel("About Cry Out", "${BaseResource.BASE_URL}/pages/about-cryout"));
-                  },
-                  icon: Icon(Icons.help_outline),
-                  label: Text("About Cry Out | version: ${_packageInfo.version}"),
+                  label: Text(_translations.text("screens.home.terms-of-service")),
                   padding: EdgeInsets.all(4),
                 ),
                 Divider(),
@@ -463,7 +557,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                       _showLogOutDialog();
                     },
                     icon: Icon(Icons.exit_to_app),
-                    label: Text("Log out"),
+                    label: Text(_translations.text("screens.home.log-out")),
                     padding: EdgeInsets.all(4)),
               ],
             ),
@@ -484,18 +578,18 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          title: Text("Log out?"),
-          content: Text("Would you like to log out of this application?"),
+          title: Text(_translations.text("screens.home.log-out")),
+          content: Text(_translations.text("screens.home.log-out.details")),
           actions: <Widget>[
             FlatButton(
-              child: Text("Cancel"),
+              child: Text(_translations.text("screens.common.cancel")),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             FlatButton(
               child: Text(
-                "Logout",
+                _translations.text("screens.home.log-out"),
                 style: TextStyle(color: Colors.red),
               ),
               onPressed: () {
@@ -512,7 +606,8 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
   void _logOutOfApplication() async {
     await SharedPreferenceUtil.clear();
     await FireBaseHandler.unsubscribeFromAllTopics();
-    await NotificationRepository.clear();
+    await ReceivedDistressSignalRepository.clear();
+    await ReceivedSafeWalkRepository.clear();
     await BackgroundLocationUpdate.stopLocationTracking();
     locator<NavigationService>().pushNamedAndRemoveUntil(Routes.INTRODUCTION_SCREEN);
   }

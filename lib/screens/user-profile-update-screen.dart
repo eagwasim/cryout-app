@@ -86,6 +86,7 @@ class _UserProfileUpdateScreenState extends State {
       appBar: AppBar(
         backgroundColor: Theme.of(context).backgroundColor,
         elevation: 0,
+        centerTitle: false,
         brightness: Theme.of(context).brightness,
         title: Text(
           _translations.text("screens.name-update.title"),
@@ -104,7 +105,7 @@ class _UserProfileUpdateScreenState extends State {
                       children: <Widget>[
                         Padding(
                           padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 16),
-                          child: Text("Updating this info later is currently not possible"),
+                          child: Text(_translations.text("screens.name-update.message")),
                         ),
                       ],
                     ),
@@ -182,7 +183,7 @@ class _UserProfileUpdateScreenState extends State {
                               },
                             ),
                             Text(
-                              "Female",
+                              _translations.text("screens.name-update.hints.gender.female"),
                               style: TextStyle(fontSize: 18),
                             )
                           ],
@@ -199,7 +200,24 @@ class _UserProfileUpdateScreenState extends State {
                               },
                             ),
                             Text(
-                              "Male",
+                              _translations.text("screens.name-update.hints.gender.male"),
+                              style: TextStyle(fontSize: 18),
+                            )
+                          ],
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Radio(
+                              value: GenderConstant.NON_BINARY,
+                              groupValue: _gender,
+                              onChanged: (GenderConstant value) {
+                                setState(() {
+                                  _gender = value;
+                                });
+                              },
+                            ),
+                            Text(
+                              _translations.text("screens.name-update.hints.gender.non_binary"),
                               style: TextStyle(fontSize: 18),
                             )
                           ],
@@ -277,7 +295,7 @@ class _UserProfileUpdateScreenState extends State {
                                   setState(() {
                                     _processing = false;
                                   });
-                                  WidgetUtils.showAlertDialog(context, "Error", "An error occurred while updating");
+                                  WidgetUtils.showAlertDialog(context, _translations.text("screens.common.error.general.title"), _translations.text("screens.common.error.general.message"));
                                   return;
                                 }
 

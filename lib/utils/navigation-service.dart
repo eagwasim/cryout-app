@@ -3,7 +3,7 @@ import 'package:cryout_app/models/received-distress-signal.dart';
 import 'package:cryout_app/screens/base-screen.dart';
 import 'package:cryout_app/screens/distress-category-selection-screen.dart';
 import 'package:cryout_app/screens/introduction-screen.dart';
-import 'package:cryout_app/screens/notifications-screen.dart';
+import 'package:cryout_app/screens/received-distress-signal-list-screen.dart';
 import 'package:cryout_app/screens/phone-confirmation-screen.dart';
 import 'package:cryout_app/screens/phone-verification-screen.dart';
 import 'package:cryout_app/screens/samaritan-distress-channel-screen.dart';
@@ -73,11 +73,11 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case Routes.VICTIM_DISTRESS_CHANNEL_SCREEN:
       var argument = settings.arguments as DistressCall;
       return MaterialPageRoute(builder: (context) => VictimDistressChannelScreen(distressCall: argument));
-    case Routes.NOTIFICATIONS_SCREEN:
-      return MaterialPageRoute(builder: (context) => NotificationScreen());
+    case Routes.RECEIVED_DISTRESS_SIGNAL_SCREEN:
+      return MaterialPageRoute(builder: (context) => ReceivedDistressSignalListScreen());
     case Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN:
-      var argument = settings.arguments as ReceivedDistressSignal;
-      return MaterialPageRoute(builder: (context) => SamaritanDistressChannelScreen(receivedDistressSignal: argument));
+      var argument = settings.arguments as String;
+      return MaterialPageRoute(builder: (context) => SamaritanDistressChannelScreen(receivedDistressSignalId: argument));
     case Routes.VIEW_DISTRESS_LOCATION_ON_MAP_SCREEN:
       var argument = settings.arguments as ReceivedDistressSignal;
       return MaterialPageRoute(builder: (context) => ViewDistressLocationOnMapScreen(distressSignal: argument));

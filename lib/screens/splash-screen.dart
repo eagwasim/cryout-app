@@ -7,7 +7,7 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Future.sync(() async {
-      locator<NavigationService>().pushReplacementNamed(await Routes.initialRoute());
+      locator<NavigationService>().pushNamedAndRemoveUntil(await Routes.initialRoute());
     });
     return Container();
   }

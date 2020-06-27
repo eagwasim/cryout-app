@@ -5,9 +5,9 @@ import 'package:cryout_app/http/user-resource.dart';
 import 'package:cryout_app/models/chat-message.dart';
 import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/routes.dart';
+import 'package:cryout_app/utils/translations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:http/http.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:toast/toast.dart';
 
@@ -159,7 +159,7 @@ class WidgetUtils {
           color: Colors.red.withOpacity(0.8),
         ),
         onPressed: () {
-          Navigator.pushNamed(context, Routes.NOTIFICATIONS_SCREEN);
+          Navigator.pushNamed(context, Routes.RECEIVED_DISTRESS_SIGNAL_SCREEN);
         },
       ),
     );
@@ -400,6 +400,8 @@ class WidgetUtils {
   }
 
   static void _showLargeImage(BuildContext context, String imageUrl) {
+    Translations _trans = Translations.of(context);
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -419,7 +421,7 @@ class WidgetUtils {
           actions: <Widget>[
             // usually buttons at the bottom of the dialog
             FlatButton(
-              child: new Text("Close"),
+              child: new Text(_trans.text("screens.common.done")),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -463,9 +465,9 @@ class WidgetUtils {
     );
   }
 
-  static final List<String> _reasons = ["Inappropriate Messages", "Suspicious activities", "Impersonation", "Poses threat", "Spam", "Fraud"];
+  static final List<String> _reasons = ["inappropriate-message", "suspicious-activities", "impersonation", "poses-threat", "spam", "fraud"];
 
- static  void _showReportUserDialog(BuildContext context, String userId) {
+  static void _showReportUserDialog(BuildContext context, String userId) {
     // flutter defined function
     showDialog(
       context: context,
@@ -490,19 +492,19 @@ class WidgetUtils {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: _reasons
                     .map((e) => Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: FlatButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _reportUser(context, userId, e);
-                        },
-                        child: Text(e),
-                        padding: EdgeInsets.all(4),
-                      ),
-                    ),
-                  ],
-                ))
+                          children: <Widget>[
+                            Expanded(
+                              child: FlatButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  _reportUser(context, userId, e);
+                                },
+                                child: Text(e),
+                                padding: EdgeInsets.all(4),
+                              ),
+                            ),
+                          ],
+                        ))
                     .toList()),
           ),
         );

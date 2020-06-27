@@ -107,6 +107,15 @@ class _PhoneConfirmationScreenState extends State {
                   return;
                 }
 
+                if (resp.statusCode == HttpStatus.forbidden) {
+                  WidgetUtils.showAlertDialog(
+                    context,
+                    'Account suspended!',
+                    'Your account is currently suspended.',
+                  );
+                  return;
+                }
+
                 if (resp.statusCode != HttpStatus.ok) {
                   WidgetUtils.showAlertDialog(
                     context,

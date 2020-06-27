@@ -55,9 +55,41 @@ class User {
       'profilePhoto': profilePhoto,
     };
   }
+
+  String shortName() {
+    return "${firstName + " " + lastName.substring(0, 1)}.";
+  }
+
+  String fullName() {
+    return "${firstName + " " + lastName}";
+  }
+
+  String genderPronoun() {
+    if (gender == "MALE") {
+      return "his";
+    }
+
+    if (gender == "FEMALE") {
+      return "her";
+    }
+
+    return "their";
+  }
+
+  String getWalkingImageAsset() {
+    if (gender == "MALE") {
+      return "assets/images/male_walking.png";
+    }
+
+    if (gender == "FEMALE") {
+      return "assets/images/female_walking.png";
+    }
+
+    return "assets/images/female_walking.png";
+  }
 }
 
-enum GenderConstant { MALE, FEMALE }
+enum GenderConstant { MALE, FEMALE, NON_BINARY }
 
 extension ParseToString on GenderConstant {
   String toShortString() {

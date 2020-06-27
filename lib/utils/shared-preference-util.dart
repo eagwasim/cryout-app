@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:cryout_app/models/distress-call.dart';
+import 'package:cryout_app/models/received-distress-signal.dart';
+import 'package:cryout_app/models/safe-walk.dart';
 import 'package:cryout_app/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,6 +12,7 @@ class SharedPreferenceUtil {
   static const _CURRENT_PHONE_NUMBER_FOR_VERIFICATION = "CURRENT_PHONE_NUMBER_FOR_VERIFICATION";
   static const _USER_AUTHENTICATION_TOKEN = "USER_AUTHENTICATION_TOKEN";
   static const _CURRENT_DISTRESS_CALL = "CURRENT_DISTRESS_CALL";
+  static const _CACHED_RECIEVED_DISTRESS_CALL = "CACHED_DISTRESS_CALL_";
 
   static Future<User> currentUser() async {
     final prefs = await SharedPreferences.getInstance();
@@ -123,5 +126,37 @@ class SharedPreferenceUtil {
   static Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+  }
+
+  static Future<ReceivedDistressSignal> getCachedDistressCall(String distressCallId) async {
+    final prefs = await SharedPreferences.getInstance();
+    String dc = prefs.getString("$_CACHED_RECIEVED_DISTRESS_CALL.$distressCallId");
+
+    if (dc == null) {
+      return null;
+    }
+
+    return ReceivedDistressSignal.fromJSON(jsonDecode(dc));
+  }
+
+  static Future<void> saveCachedDistressCall(ReceivedDistressSignal receivedDistressSignal) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("$_CACHED_RECIEVED_DISTRESS_CALL.${receivedDistressSignal.distressId}", jsonEncode(receivedDistressSignal.toJSON()));
+  }
+
+  static Future<DistressCall> getCachedSafeWalkCall(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    String dc = prefs.getString("$_CACHED_RECIEVED_DISTRESS_CALL.$id");
+
+    if (dc == null) {
+      return null;
+    }
+
+    return DistressCall.fromJSON(jsonDecode(dc));
+  }
+
+  static Future<void> saveCachedSafeWalkCall(String id, SafeWalk safeWalk) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("$_CACHED_RECIEVED_DISTRESS_CALL.$id", jsonEncode(safeWalk.toJson()));
   }
 }

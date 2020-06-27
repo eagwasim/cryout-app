@@ -10,6 +10,7 @@ import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
+import 'package:cryout_app/utils/translations.dart';
 import 'package:cryout_app/utils/widget-utils.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -25,8 +26,9 @@ class DistressCategorySelectionScreen extends StatefulWidget {
 }
 
 class _DistressCategorySelectionScreenState extends State {
-  List<String> _categories = ["Accident", "Fire Outbreak", "Robbery", "Domestic Abuse", "Rape", "Suicide", "Murder", "Health Emergency", "Missing Person", "Kidnapping"];
+  List<String> _categories = ["accident", "fire-outbreak", "robbery", "domestic-abuse", "rape", "suicide", "murder", "health-emergency", "missing-person", "kidnapping", "police-brutality"];
 
+  Translations _translations;
   bool _processing = false;
   Location _location = new Location();
 
@@ -38,13 +40,17 @@ class _DistressCategorySelectionScreenState extends State {
   void initState() {
     super.initState();
     _categories.sort();
-    _categories.add("Other Emergencies");
+    _categories.add("other-emergencies");
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_translations == null) {
+      _translations = Translations.of(context);
+    }
+
     return _processing
-        ? WidgetUtils.getLoaderWidget(context, "Sending distress signal...")
+        ? WidgetUtils.getLoaderWidget(context, _translations.text("screens.distress-category-selection.sending-distress-signal"))
         : Scaffold(
             backgroundColor: Theme.of(context).backgroundColor,
             appBar: AppBar(
@@ -54,7 +60,7 @@ class _DistressCategorySelectionScreenState extends State {
               iconTheme: IconThemeData(color: Colors.grey[600]),
               centerTitle: false,
               title: Text(
-                "Whats the emergency?",
+                _translations.text("screens.distress-category-selection.whats-the-emergency"),
                 textAlign: TextAlign.start,
                 style: TextStyle(color: Theme.of(context).textTheme.title.color),
               ),
@@ -64,7 +70,7 @@ class _DistressCategorySelectionScreenState extends State {
               itemCount: _categories.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text(_categories[index]),
+                  title: Text(_translations.text("choices.distress.categories.${_categories[index]}")),
                   onTap: () {
                     _sendDistressSignal(_categories[index]);
                   },
@@ -109,8 +115,6 @@ class _DistressCategorySelectionScreenState extends State {
 
     _locationData = await _location.getLocation();
 
-    print("LOCATION RETRIEVED");
-
     Response response = await DistressResource.sendDistressCall(context, {"lat": "${_locationData.latitude}", "lon": "${_locationData.longitude}", "details": selection});
 
     print("RESPONSE ${response.statusCode}");
@@ -120,7 +124,7 @@ class _DistressCategorySelectionScreenState extends State {
         _processing = false;
       });
 
-      WidgetUtils.showAlertDialog(context, "Error", "Could not send a distress call at this time, please check your internet and try again");
+      WidgetUtils.showAlertDialog(context, _translations.text("screens.common.error.general.title"), _translations.text("screens.distress-category-selection.error-in-sending"));
       return;
     }
 

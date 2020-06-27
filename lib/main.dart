@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cryout_app/application.dart';
 import 'package:cryout_app/utils/background_location_update.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
@@ -16,7 +18,6 @@ void main() async {
   FireBaseHandler.configure();
   setupLocator();
   runApp(MyApp());
-
 }
 
 final FirebaseDatabase database = FirebaseDatabase.instance;
@@ -24,6 +25,7 @@ final FirebaseDatabase database = FirebaseDatabase.instance;
 class MyApp extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
+    //FirebaseAdMob.instance.initialize(appId: Platform.isIOS ? FireBaseHandler.IOS_AD_APP_ID : FireBaseHandler.ANDROID_AD_APP_ID);
     return _MyAppState();
   }
 }

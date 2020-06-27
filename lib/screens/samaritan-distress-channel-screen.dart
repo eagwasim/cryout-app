@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:cryout_app/http/distress-resource.dart';
+import 'package:cryout_app/http/samaritan-resource.dart';
 import 'package:cryout_app/http/user-resource.dart';
 import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/chat-message.dart';
@@ -11,6 +13,7 @@ import 'package:cryout_app/utils/pop-up-menu.dart';
 import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
+import 'package:cryout_app/utils/translations.dart';
 import 'package:cryout_app/utils/widget-utils.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
@@ -20,29 +23,32 @@ import 'package:http/http.dart';
 import 'package:toast/toast.dart';
 
 class SamaritanDistressChannelScreen extends StatefulWidget {
-  final ReceivedDistressSignal receivedDistressSignal;
+  final String receivedDistressSignalId;
 
-  const SamaritanDistressChannelScreen({Key key, this.receivedDistressSignal}) : super(key: key);
+  const SamaritanDistressChannelScreen({Key key, this.receivedDistressSignalId}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return _SamaritanDistressChannelScreenState(this.receivedDistressSignal);
+    return _SamaritanDistressChannelScreenState(this.receivedDistressSignalId);
   }
 }
 
 const List<Choice> choices = const <Choice>[
-  const Choice(title: ' View location', icon: Icons.map, id: 1),
-  const Choice(title: ' Report', icon: Icons.report, id: 2),
+  const Choice(title: 'view-location', icon: Icons.map, id: 1),
+  const Choice(title: 'report', icon: Icons.report, id: 2),
 ];
 
 class _SamaritanDistressChannelScreenState extends State {
+  String _receivedDistressSignalId;
   ReceivedDistressSignal _receivedDistressSignal;
   TextEditingController _chatInputTextController;
+  Translations _translations;
   String _currentChatMessage = "";
 
   bool _anchorToBottom = true;
   bool _setUpComplete = false;
   bool _isChannelMuted = false;
+  bool _loadingFailed = false;
 
   int _samaritanCount = 0;
 
@@ -52,12 +58,11 @@ class _SamaritanDistressChannelScreenState extends State {
 
   User _user;
 
-  _SamaritanDistressChannelScreenState(this._receivedDistressSignal);
+  _SamaritanDistressChannelScreenState(this._receivedDistressSignalId);
 
   @override
   void initState() {
     super.initState();
-    SharedPreferenceUtil.setString(PreferenceConstants.NEXT_SCREEN_FROM_NOTIFICATION, null);
   }
 
   void _select(Choice choice) {
@@ -72,124 +77,159 @@ class _SamaritanDistressChannelScreenState extends State {
   Widget build(BuildContext context) {
     _chatInputTextController = TextEditingController(text: _currentChatMessage);
 
+    if (_translations == null) {
+      _translations = Translations.of(context);
+    }
+
     if (!_setUpComplete) {
       _setUp();
+      return WidgetUtils.getLoaderWidget(context, _translations.text("screens.common.loading"));
     }
-    return !_setUpComplete
-        ? WidgetUtils.getLoaderWidget(context, "loading...")
-        : Scaffold(
-            backgroundColor: Theme.of(context).backgroundColor,
-            appBar: AppBar(
-              backgroundColor: Theme.of(context).backgroundColor,
-              iconTheme: Theme.of(context).iconTheme,
-              title: Column(
-                children: <Widget>[
-                  Text(
-                    _receivedDistressSignal.detail,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.headline1.color),
+
+    if (_loadingFailed) {
+      return _getRetryScreen();
+    }
+
+    return Scaffold(
+      backgroundColor: Theme.of(context).backgroundColor,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).backgroundColor,
+        iconTheme: Theme.of(context).iconTheme,
+        title: Column(
+          children: <Widget>[
+            Text(
+              _translations.text("choices.distress.categories.${_receivedDistressSignal.detail}"),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.headline1.color),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 4.0),
+              child: Text(
+                _receivedDistressSignal.firstName + " " + _receivedDistressSignal.lastName.substring(0, 1) + ". & $_samaritanCount ${_translations.text("screens.common.samaritans")}",
+                style: TextStyle(fontSize: 10, color: Colors.grey),
+              ),
+            )
+          ],
+          crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+        elevation: 1,
+        brightness: Theme.of(context).brightness,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(_isChannelMuted ? Icons.notifications_off : Icons.notifications_active),
+            onPressed: () {
+              _toggleMuteDistressChannel();
+            },
+          ),
+          PopupMenuButton<Choice>(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            onSelected: _select,
+            itemBuilder: (BuildContext context) {
+              return choices.map((Choice choice) {
+                return PopupMenuItem<Choice>(
+                  value: choice,
+                  child: Row(
+                    children: <Widget>[
+                      Icon(choice.icon),
+                      Text(
+                        _translations.text("screens.samaritan-distress-channel-screen.choices.${choice.title}"),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4.0),
-                    child: Text(
-                      _receivedDistressSignal.firstName + " " + _receivedDistressSignal.lastName.substring(0, 1) + ". & $_samaritanCount samaritan(s)",
-                      style: TextStyle(fontSize: 10, color: Colors.grey),
+                );
+              }).toList();
+            },
+          ),
+        ],
+      ),
+      body: Column(
+        children: <Widget>[
+          Flexible(
+            child: FirebaseAnimatedList(
+              key: ValueKey<bool>(_anchorToBottom),
+              query: _messageDBRef,
+              reverse: _anchorToBottom,
+              sort: _anchorToBottom ? (DataSnapshot a, DataSnapshot b) => b.key.compareTo(a.key) : null,
+              itemBuilder: (BuildContext context, DataSnapshot snapshot, Animation<double> animation, int index) {
+                ChatMessage cm = ChatMessage.fromJSON(snapshot.value);
+                return SizeTransition(
+                  sizeFactor: animation,
+                  child: WidgetUtils.getChatMessageView(_user, context, cm),
+                );
+              },
+            ),
+          ),
+          Divider(
+            height: 1,
+          ),
+          Container(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Expanded(
+                    child: TextField(
+                      maxLines: 4,
+                      minLines: 1,
+                      textInputAction: TextInputAction.newline,
+                      decoration: new InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                        ),
+                        hintText: _translations.text("screens.samaritan-distress-channel-screen.send-message"),
+                      ),
+                      autofocus: false,
+                      controller: _chatInputTextController,
+                      keyboardType: TextInputType.text,
+                      style: TextStyle(fontSize: 15),
+                      onChanged: (newValue) {
+                        _currentChatMessage = newValue;
+                      },
                     ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.send,
+                      color: Colors.blue[600],
+                    ),
+                    onPressed: () {
+                      _sendMessage(_currentChatMessage);
+                    },
                   )
                 ],
-                crossAxisAlignment: CrossAxisAlignment.start,
               ),
-              elevation: 1,
-              brightness: Theme.of(context).brightness,
-              actions: <Widget>[
-                IconButton(
-                  icon: Icon(_isChannelMuted ? Icons.notifications_off : Icons.notifications_active),
-                  onPressed: () {
-                    _toggleMuteDistressChannel();
-                  },
-                ),
-                PopupMenuButton<Choice>(
-                  onSelected: _select,
-                  itemBuilder: (BuildContext context) {
-                    return choices.map((Choice choice) {
-                      return PopupMenuItem<Choice>(
-                        value: choice,
-                        child: Row(
-                          children: <Widget>[Icon(choice.icon), Text(choice.title)],
-                        ),
-                      );
-                    }).toList();
-                  },
-                ),
-              ],
             ),
-            body: Column(
-              children: <Widget>[
-                Flexible(
-                  child: FirebaseAnimatedList(
-                    key: ValueKey<bool>(_anchorToBottom),
-                    query: _messageDBRef,
-                    reverse: _anchorToBottom,
-                    sort: _anchorToBottom ? (DataSnapshot a, DataSnapshot b) => b.key.compareTo(a.key) : null,
-                    itemBuilder: (BuildContext context, DataSnapshot snapshot, Animation<double> animation, int index) {
-                      ChatMessage cm = ChatMessage.fromJSON(snapshot.value);
-                      return SizeTransition(
-                        sizeFactor: animation,
-                        child: WidgetUtils.getChatMessageView(_user, context, cm),
-                      );
-                    },
-                  ),
-                ),
-                Divider(
-                  height: 1,
-                ),
-                Container(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 4),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Expanded(
-                          child: TextField(
-                            maxLines: 4,
-                            minLines: 1,
-                            textInputAction: TextInputAction.newline,
-                            decoration: new InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide.none,
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide.none,
-                              ),
-                              hintText: "Send message to distress channel...",
-                            ),
-                            autofocus: false,
-                            controller: _chatInputTextController,
-                            keyboardType: TextInputType.text,
-                            style: TextStyle(fontSize: 15),
-                            onChanged: (newValue) {
-                              _currentChatMessage = newValue;
-                            },
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.send,
-                            color: Colors.blue[600],
-                          ),
-                          onPressed: () {
-                            _sendMessage(_currentChatMessage);
-                          },
-                        )
-                      ],
-                    ),
-                  ),
-                )
-              ],
-            ),
-          );
+          )
+        ],
+      ),
+    );
   }
 
   void _setUp() async {
+    _receivedDistressSignal = await SharedPreferenceUtil.getCachedDistressCall(_receivedDistressSignalId);
+
+    if (_receivedDistressSignal == null) {
+      Response response = await SamaritanResource.getUserReceivedDistressSignal(context, _receivedDistressSignalId);
+
+      if (response.statusCode != 200) {
+        setState(() {
+          _loadingFailed = true;
+          _setUpComplete = true;
+        });
+        return;
+      } else {
+        _loadingFailed = false;
+      }
+
+      _receivedDistressSignal = ReceivedDistressSignal.fromJSON(jsonDecode(response.body)['data']);
+      SharedPreferenceUtil.saveCachedDistressCall(_receivedDistressSignal);
+    }
+
     _user = await SharedPreferenceUtil.currentUser();
 
     _messageDBRef = database.reference().child('distress_channel').reference().child("${_receivedDistressSignal.distressId}").reference().child("messages").reference();
@@ -235,13 +275,7 @@ class _SamaritanDistressChannelScreenState extends State {
     DistressResource.notifyDistressChannelOfMessage(
       context,
       _receivedDistressSignal.distressId,
-      {
-        "senderUserId": _user.id,
-        "senderName": _user.firstName + " " + _user.lastName.substring(0, 1) + ".",
-        "message": message,
-        "distressUserId": _receivedDistressSignal.userId,
-        "messageType": "text"
-      },
+      {"senderUserId": _user.id, "senderName": _user.shortName(), "message": message, "distressUserId": _receivedDistressSignal.userId, "messageType": "text"},
     );
 
     setState(() {
@@ -251,7 +285,6 @@ class _SamaritanDistressChannelScreenState extends State {
 
   void _toggleMuteDistressChannel() async {
     await SharedPreferenceUtil.setBool("${PreferenceConstants.DISTRESS_CHANNEL_MUTED}${_receivedDistressSignal.distressId}", !_isChannelMuted);
-
     setState(() {
       _isChannelMuted = !_isChannelMuted;
     });
@@ -260,10 +293,10 @@ class _SamaritanDistressChannelScreenState extends State {
   @override
   void dispose() {
     super.dispose();
-    _samaritanCountListener.cancel();
+    if (_samaritanCountListener != null) _samaritanCountListener.cancel();
   }
 
-  static final List<String> _reasons = ["False alarm", "Inappropriate Messages", "Suspicious activities", "Impersonation", "Poses threat", "Spam", "Fraud"];
+  static final List<String> _reasons = ["false-alarm", "inappropriate-message", "suspicious-activities", "impersonation", "poses-threat", "spam", "fraud"];
 
   void _showReportUserDialog(String userId) {
     // flutter defined function
@@ -280,7 +313,9 @@ class _SamaritanDistressChannelScreenState extends State {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text("Report Signal",),
+              Text(
+                _translations.text("screens.samaritan-distress-channel-screen.report-signal"),
+              ),
             ],
           ),
           content: Container(
@@ -297,7 +332,7 @@ class _SamaritanDistressChannelScreenState extends State {
                                   Navigator.of(context).pop();
                                   _reportUser(context, userId, e);
                                 },
-                                child: Text(e),
+                                child: Text(_translations.text("choices.report.user.$e")),
                                 padding: EdgeInsets.all(4),
                               ),
                             ),
@@ -311,8 +346,40 @@ class _SamaritanDistressChannelScreenState extends State {
   }
 
   Future<void> _reportUser(BuildContext context, String userId, String reason) async {
-    Toast.show("Sending report...", context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
-
+    Toast.show(_translations.text("screens.samaritan-distress-channel-screen.send-report"), context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
     UserResource.reportUser(context, {"userId": userId, "reason": reason});
+  }
+
+  Widget _getRetryScreen() {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).backgroundColor,
+        iconTheme: Theme.of(context).iconTheme,
+        title: Text(
+          _translations.text(_translations.text("screens.samaritan-distress-channel-screen.failed-to-load")),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.headline1.color),
+        ),
+        elevation: 1,
+        brightness: Theme.of(context).brightness,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Text(_translations.text("screens.samaritan-distress-channel-screen.loading-failed")),
+            RaisedButton(
+              child: Text(_translations.text("screens.common.retry")),
+              onPressed: () {
+                setState(() {
+                  _setUpComplete = false;
+                  _loadingFailed = false;
+                });
+              },
+            )
+          ],
+        ),
+      ),
+    );
   }
 }

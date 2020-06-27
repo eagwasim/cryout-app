@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>400664901505-prtqdtvat385tudk7rem7muo88nt0ihq.apps.googleusercontent.com</string>
+	<string>400664901505-52moniho736373sq2ib97e03o204puhv.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.400664901505-prtqdtvat385tudk7rem7muo88nt0ihq</string>
+	<string>com.googleusercontent.apps.400664901505-52moniho736373sq2ib97e03o204puhv</string>
 	<key>API_KEY</key>
 	<string>AIzaSyCrLmqbKX_XIr6D6IYBLDPAhltVNtOzk-E</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.noubug.app.CryOut</string>
+	<string>com.noubug.app.ios.CryOut</string>
 	<key>PROJECT_ID</key>
 	<string>cry-out</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,7 +29,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:400664901505:ios:8808472a69d02fe9695a80</string>
+	<string>1:400664901505:ios:7f3fb7b77b27ab0f695a80</string>
 	<key>DATABASE_URL</key>
 	<string>https://cry-out.firebaseio.com</string>
 </dict>

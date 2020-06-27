@@ -4,8 +4,9 @@ import 'dart:typed_data';
 
 import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/distress-call.dart';
-import 'package:cryout_app/models/notification.dart';
+
 import 'package:cryout_app/models/received-distress-signal.dart';
+import 'package:cryout_app/models/recieved-safe-walk.dart';
 import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/background_location_update.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
@@ -28,36 +29,43 @@ class NotificationHandler {
     await flutterLocalNotificationsPlugin.initialize(initializationSettings, onSelectNotification: _selectNotification);
   }
 
-  static Future<void> handleInAppNotification(dynamic data) async {
-    User user = await SharedPreferenceUtil.currentUser();
+  static Future<void> handleInAppNotification(dynamic data, bool isBackground) async {
+    try {
+      User user = await SharedPreferenceUtil.currentUser();
 
-    if (user == null) {
-      return;
-    }
-    // We would only send a notification or data but not both.
-    if (data.containsKey('notification') && data['notification'].containsKey('title') && data['notification']['title'] != '' && data['notification']['title'] != null) {
-      _showGenericNotification(data['notification']['title'], data['notification']['body']);
-      return;
-    }
+      if (user == null) {
+        return;
+      }
+      // We would only send a notification or data but not both.
+      if (data.containsKey('notification') && data['notification'].containsKey('title') && data['notification']['title'] != '' && data['notification']['title'] != null) {
+        _showGenericNotification(data['notification']['title'], data['notification']['body']);
+        return;
+      }
 
-    // Return is notification type isn't specified
-    if (!data.containsKey('data') || !data['data'].containsKey('type')) {
-      return;
-    }
+      var notificationData = Platform.isIOS ? data : data['data'];
 
-    if (data['data']['type'] == NOTIFICATION_TYPE_DISTRESS_SIGNAL_ALERT) {
-      _handleNewDistressSignalNotification(data['data']);
-    } else if (data['data']['type'] == NOTIFICATION_TYPE_DISTRESS_CHANNEL_MESSAGE) {
-      _handleDistressChannelMessage(data['data']);
-    } else if (data['data']['type'] == NOTIFICATION_TYPE_ACCOUNT_BLOCKED) {
-      _handleAccountBlocked();
+      // Return is notification type isn't specified
+      if (notificationData == null || !notificationData.containsKey('type')) {
+        return;
+      }
+
+      if (notificationData['type'] == NOTIFICATION_TYPE_DISTRESS_SIGNAL_ALERT) {
+        _handleNewDistressSignalNotification(notificationData);
+      } else if (notificationData['type'] == NOTIFICATION_TYPE_DISTRESS_CHANNEL_MESSAGE) {
+        _handleDistressChannelMessage(notificationData);
+      } else if (notificationData['type'] == NOTIFICATION_TYPE_ACCOUNT_BLOCKED) {
+        _handleAccountBlocked();
+      }
+    } catch (e) {
+      print(e);
     }
   }
 
   static void _handleAccountBlocked() async {
     await SharedPreferenceUtil.clear();
     await FireBaseHandler.unsubscribeFromAllTopics();
-    await NotificationRepository.clear();
+    await ReceivedDistressSignalRepository.clear();
+    await ReceivedSafeWalkRepository.clear();
     await BackgroundLocationUpdate.stopLocationTracking();
     locator<NavigationService>().pushNamedAndRemoveUntil(Routes.INTRODUCTION_SCREEN);
 
@@ -95,10 +103,10 @@ class NotificationHandler {
     } else {
       var notificationId = "$distressUserId-$distressChannelId";
 
-      if (await NotificationRepository.getById(notificationId) == null) {
-        print("NOTIFICATION NOT FOUND");
-        return;
-      }
+      //if (await R.getById(notificationId) == null) {
+      //  print("NOTIFICATION NOT FOUND");
+       // return;
+      //}
       var payload = {"route": Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN, "notificationId": notificationId};
 
       if (messageType == 'text') {
@@ -110,22 +118,11 @@ class NotificationHandler {
   }
 
   static Future<void> _handleNewDistressSignalNotification(dynamic data) async {
-    String notificationType = data["type"];
-    String notificationId = data["id"];
-
     ReceivedDistressSignal receivedDistressSignal = ReceivedDistressSignal.fromJSON(data);
 
-    InAppNotification notification = InAppNotification(
-      notificationId: notificationId,
-      notificationType: notificationType,
-      dateCreated: DateTime.now().millisecondsSinceEpoch,
-      notificationData: jsonEncode(receivedDistressSignal.toJSON()),
-      opened: 0,
-    );
+    await ReceivedDistressSignalRepository.save(receivedDistressSignal);
 
-    await NotificationRepository.save(notification);
-
-    var payload = {"route": Routes.NOTIFICATIONS_SCREEN};
+    var payload = {"route": Routes.RECEIVED_DISTRESS_SIGNAL_SCREEN};
 
     _showDistressSignalNotification(
       'Distress Signal: ${receivedDistressSignal.detail}',
@@ -141,7 +138,7 @@ class NotificationHandler {
 
     var payloadData = jsonDecode(payload);
 
-    if (payloadData['route'] == Routes.NOTIFICATIONS_SCREEN) {
+    if (payloadData['route'] == Routes.RECEIVED_DISTRESS_SIGNAL_SCREEN) {
       _handleDistressSignalNotificationClick();
     } else if (payloadData['route'] == Routes.VICTIM_DISTRESS_CHANNEL_SCREEN) {
       _handleVictimDistressSignalMessageNotificationClick(payloadData);
@@ -168,17 +165,17 @@ class NotificationHandler {
   }
 
   static Future<void> _handleSamaritanDistressSignalMessageNotificationClick(dynamic data) async {
-    InAppNotification inAppNotification = await NotificationRepository.getById(data['notificationId']);
+    //InAppNotification inAppNotification = await NotificationRepository.getById(data['notificationId']);
 
-    if (inAppNotification == null) {
-      return;
-    }
-    locator<NavigationService>().pushNamed(Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN, arguments: ReceivedDistressSignal.fromJSON(jsonDecode(inAppNotification.notificationData)));
+   // if (inAppNotification == null) {
+    //  return;
+  //  }
+  //  locator<NavigationService>().pushNamed(Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN, arguments: ReceivedDistressSignal.fromJSON(jsonDecode(inAppNotification.notificationData)));
   }
 
   static Future<void> _handleDistressSignalNotificationClick() async {
     //  Future.delayed(Duration(seconds: 1), () {
-    locator<NavigationService>().navigateTo(Routes.NOTIFICATIONS_SCREEN);
+    locator<NavigationService>().navigateTo(Routes.RECEIVED_DISTRESS_SIGNAL_SCREEN);
     //});
   }
 
