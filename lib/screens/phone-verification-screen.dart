@@ -85,7 +85,6 @@ class _PhoneVerificationScreenState extends State {
                 onPhoneNumberChange: onPhoneNumberChange,
                 initialPhoneNumber: _phoneNUmber,
                 initialSelection: _isoCode,
-                enabledCountries: ["+234"],
               ),
             ),
             Expanded(

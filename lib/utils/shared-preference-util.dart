@@ -13,6 +13,7 @@ class SharedPreferenceUtil {
   static const _USER_AUTHENTICATION_TOKEN = "USER_AUTHENTICATION_TOKEN";
   static const _CURRENT_DISTRESS_CALL = "CURRENT_DISTRESS_CALL";
   static const _CACHED_RECIEVED_DISTRESS_CALL = "CACHED_DISTRESS_CALL_";
+  static const _TOPICS = "REGISTERED_TOPICS_KEY";
 
   static Future<User> currentUser() async {
     final prefs = await SharedPreferences.getInstance();
@@ -159,4 +160,39 @@ class SharedPreferenceUtil {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString("$_CACHED_RECIEVED_DISTRESS_CALL.$id", jsonEncode(safeWalk.toJson()));
   }
+
+  static Future<void> addToRegisteredTopic(String topicId) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> topicList = prefs.getStringList(_TOPICS);
+    if (topicList == null) {
+      topicList = new List();
+    }
+
+    topicList.add(topicId);
+    prefs.setStringList(_TOPICS, topicList);
+  }
+
+  static Future<void> removeFromTopicList(String topicId) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> topicList = prefs.getStringList(_TOPICS);
+    if (topicList == null) {
+      topicList = new List();
+    }
+
+    topicList.removeWhere((e) {
+      return topicId == e;
+    });
+    prefs.setStringList(_TOPICS, topicList);
+  }
+
+  static Future<List<String>> getSubScribedTopics() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> topicList = prefs.getStringList(_TOPICS);
+
+    if (topicList == null) {
+      topicList = new List();
+    }
+    return topicList;
+  }
+
 }

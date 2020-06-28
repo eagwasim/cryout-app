@@ -10,6 +10,7 @@ import 'package:cryout_app/models/received-distress-signal.dart';
 import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
+import 'package:cryout_app/utils/notification-handler.dart';
 import 'package:cryout_app/utils/pop-up-menu.dart';
 import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/routes.dart';
@@ -51,10 +52,7 @@ class _SamaritanDistressChannelScreenState extends State {
   bool _isChannelMuted = false;
   bool _loadingFailed = false;
 
-  int _samaritanCount = 0;
-
   DatabaseReference _messageDBRef;
-  DatabaseReference _distressChannelStatRef;
   StreamSubscription<Event> _samaritanCountListener;
 
   User _user;
@@ -63,6 +61,7 @@ class _SamaritanDistressChannelScreenState extends State {
 
   @override
   void initState() {
+    NotificationHandler.subscribeRoute("${Routes.VICTIM_DISTRESS_CHANNEL_SCREEN}$_receivedDistressSignalId");
     super.initState();
   }
 
@@ -105,7 +104,7 @@ class _SamaritanDistressChannelScreenState extends State {
             Padding(
               padding: const EdgeInsets.only(top: 4.0),
               child: Text(
-                _receivedDistressSignal.firstName + " " + _receivedDistressSignal.lastName.substring(0, 1) + ". & $_samaritanCount ${_translations.text("screens.common.samaritans")}",
+                _receivedDistressSignal.firstName + " " + _receivedDistressSignal.lastName.substring(0, 1) + ".",
                 style: TextStyle(fontSize: 10, color: Colors.grey),
               ),
             )
@@ -236,18 +235,6 @@ class _SamaritanDistressChannelScreenState extends State {
     _messageDBRef = database.reference().child('distress_channel').reference().child("${_receivedDistressSignal.distressId}").reference().child("messages").reference();
     _messageDBRef.keepSynced(true);
 
-    _distressChannelStatRef = database.reference().child('distress_channel').reference().child("${_receivedDistressSignal.distressId}").reference().child("stats").reference();
-    _distressChannelStatRef.child("samaritan_count").keepSynced(true);
-
-    var dbSS = await _distressChannelStatRef.child("samaritan_count").once();
-    _samaritanCount = dbSS == null || dbSS.value == null ? 1 : (dbSS.value as int);
-
-    _samaritanCountListener = _distressChannelStatRef.child("samaritan_count").onChildChanged.listen((event) {
-      setState(() {
-        _samaritanCount = event.snapshot.value;
-      });
-    });
-
     _isChannelMuted = await SharedPreferenceUtil.getBool("${PreferenceConstants.DISTRESS_CHANNEL_MUTED}${_receivedDistressSignal.distressId}", false);
     setState(() {
       _setUpComplete = true;
@@ -298,6 +285,7 @@ class _SamaritanDistressChannelScreenState extends State {
   @override
   void dispose() {
     super.dispose();
+    NotificationHandler.unsubscribeRoute("${Routes.VICTIM_DISTRESS_CHANNEL_SCREEN}$_receivedDistressSignalId");
     if (_samaritanCountListener != null) _samaritanCountListener.cancel();
   }
 

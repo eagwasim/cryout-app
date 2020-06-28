@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cryout_app/application.dart';
 import 'package:cryout_app/utils/background_location_update.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';

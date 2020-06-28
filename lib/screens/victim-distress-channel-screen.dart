@@ -7,7 +7,9 @@ import 'package:cryout_app/models/chat-message.dart';
 import 'package:cryout_app/models/distress-call.dart';
 import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
+import 'package:cryout_app/utils/notification-handler.dart';
 import 'package:cryout_app/utils/preference-constants.dart';
+import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:cryout_app/utils/widget-utils.dart';
@@ -36,7 +38,6 @@ class _VictimDistressChannelScreenState extends State {
   TextEditingController _chatInputTextController;
   Translations _translations;
   String _currentChatMessage = "";
-  int _samaritanCount = 0;
 
   _VictimDistressChannelScreenState(this._distressCall);
 
@@ -46,13 +47,12 @@ class _VictimDistressChannelScreenState extends State {
   bool _isUploadingImage = false;
 
   DatabaseReference _messageDBRef;
-  StreamSubscription<Event> _samaritanCountListener;
 
   User _user;
 
   @override
   void dispose() {
-    if (_samaritanCountListener != null) _samaritanCountListener.cancel();
+    NotificationHandler.unsubscribeRoute("${Routes.VICTIM_DISTRESS_CHANNEL_SCREEN}${_distressCall.id}");
     super.dispose();
   }
 
@@ -77,7 +77,7 @@ class _VictimDistressChannelScreenState extends State {
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
                     child: Text(
-                      "$_samaritanCount ${_translations.text("screens.common.samaritans")}",
+                      "",
                       style: TextStyle(fontSize: 10, color: Colors.grey),
                     ),
                   )
@@ -187,21 +187,11 @@ class _VictimDistressChannelScreenState extends State {
     _messageDBRef = database.reference().child('distress_channel').reference().child("${_distressCall.id}").reference().child("messages").reference();
     _messageDBRef.keepSynced(true);
 
-    DatabaseReference _distressChannelStatRef = database.reference().child('distress_channel').reference().child("${_distressCall.id}").reference().child("stats").reference();
-    _distressChannelStatRef.child("samaritan_count").keepSynced(true);
-
-    var dbSS = await _distressChannelStatRef.child("samaritan_count").once();
-    _samaritanCount = dbSS == null || dbSS.value == null ? 0 : (dbSS.value as int);
-
-    _samaritanCountListener = _distressChannelStatRef.child("samaritan_count").onChildChanged.listen((event) {
-      setState(() {
-        _samaritanCount = event.snapshot.value;
-      });
-    });
-
     setState(() {
       _setUpComplete = true;
     });
+
+    NotificationHandler.subscribeRoute("${Routes.VICTIM_DISTRESS_CHANNEL_SCREEN}${_distressCall.id}");
   }
 
   void _sendMessage(String message) {

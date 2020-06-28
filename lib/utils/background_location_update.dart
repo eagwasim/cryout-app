@@ -1,4 +1,4 @@
-import 'package:cryout_app/http/user-resource.dart';
+import 'package:cryout_app/http/samaritan-resource.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_background_geolocation/flutter_background_geolocation.dart' as bg;
 
@@ -7,7 +7,7 @@ class BackgroundLocationUpdate {
     // Fired whenever a location is recorded
     bg.BackgroundGeolocation.onLocation((bg.Location location) {
       print('[location] - $location');
-      UserResource.updateSamaritanLocation(_buildContext, {'lat': location.coords.latitude, 'lon': location.coords.longitude});
+      SamaritanResource.updateSamaritanLocation(_buildContext, {'lat': location.coords.latitude, 'lon': location.coords.longitude});
     });
 
     // Fired whenever the state of location-services changes.  Always fired at boot
@@ -20,8 +20,8 @@ class BackgroundLocationUpdate {
     //
     bg.BackgroundGeolocation.ready(
       bg.Config(
-        desiredAccuracy: bg.Config.DESIRED_ACCURACY_LOW,
-        distanceFilter: 10.0,
+        desiredAccuracy: bg.Config.DESIRED_ACCURACY_HIGH,
+        distanceFilter: 1.0,
         stopOnTerminate: false,
         startOnBoot: true,
         debug: false,
@@ -44,4 +44,5 @@ class BackgroundLocationUpdate {
   static void startLocationTracking() {
     bg.BackgroundGeolocation.start();
   }
+
 }

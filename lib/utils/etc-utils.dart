@@ -7,7 +7,7 @@ class EtcUtils {
     return parsed != null && parsed > 10;
   }
 
-  static int getInt(dynamic d){
+  static int getInt(dynamic d) {
     if (d is String && isNumeric(d)) {
       return int.parse(d);
     } else if (d is int) {
@@ -17,7 +17,6 @@ class EtcUtils {
   }
 
   static int dateTimeFrom(dynamic d) {
-
     if (d is String) {
       if (isNumeric(d)) {
         return int.parse(d);
@@ -30,3 +29,5 @@ class EtcUtils {
     }
   }
 }
+
+

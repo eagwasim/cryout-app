@@ -5,13 +5,16 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cryout_app/http/samaritan-resource.dart';
 import 'package:cryout_app/main.dart';
+import 'package:cryout_app/models/chat-message.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
+import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/translations.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_admob/flutter_native_admob.dart';
@@ -301,10 +304,17 @@ class _ReceivedDistressSignalListScreenState extends State {
     FireBaseHandler.subscribeToDistressChannelTopic(receivedDistressSignal.distressId);
 
     if (!await SharedPreferenceUtil.getBool("logged.count." + receivedDistressSignal.distressId, false)) {
-      var _distressChannelStatRef = database.reference().child('distress_channel').reference().child("${receivedDistressSignal.distressId}").reference().child("stats").reference();
-      var dbSS = await _distressChannelStatRef.child("samaritan_count").once();
-      var _samaritanCount = dbSS == null || dbSS.value == null ? 0 : dbSS.value as int;
-      _distressChannelStatRef.child("samaritan_count").set(_samaritanCount + 1);
+      User user = await SharedPreferenceUtil.currentUser();
+      DatabaseReference reference = database.reference().child('distress_channel').reference().child("${receivedDistressSignal.distressId}").reference().child("messages").reference();
+
+      ChatMessage chatMessage = ChatMessage(
+        body: user.shortName() + " ${_translations.text("screens.common.messages.joined")}",
+        dateCreated: DateTime.now(),
+        displayType: "n",
+      );
+
+      reference.push().set(chatMessage.toJSON());
+
       await SharedPreferenceUtil.setBool("logged.count." + receivedDistressSignal.distressId, true);
     }
 
@@ -329,10 +339,16 @@ class _ReceivedDistressSignalListScreenState extends State {
     SharedPreferenceUtil.setBool(PreferenceConstants.DISTRESS_CHANNEL_MUTED + receivedDistressSignal.distressId, null);
 
     if (await SharedPreferenceUtil.getBool("logged.count." + receivedDistressSignal.distressId, false)) {
-      var _distressChannelStatRef = database.reference().child('distress_channel').reference().child("${receivedDistressSignal.distressId}").reference().child("stats").reference();
-      var dbSS = await _distressChannelStatRef.child("samaritan_count").once();
-      var _samaritanCount = dbSS == null || dbSS.value == null ? 0 : dbSS.value as int;
-      if (_samaritanCount > 0) _distressChannelStatRef.child("samaritan_count").set(_samaritanCount - 1);
+      User user = await SharedPreferenceUtil.currentUser();
+      DatabaseReference reference = database.reference().child('distress_channel').reference().child("${receivedDistressSignal.distressId}").reference().child("messages").reference();
+
+      ChatMessage chatMessage = ChatMessage(
+        body: user.shortName() + " ${_translations.text("screens.common.messages.left")}",
+        dateCreated: DateTime.now(),
+        displayType: "n",
+      );
+
+      reference.push().set(chatMessage.toJSON());
       SharedPreferenceUtil.setBool("logged.count." + receivedDistressSignal.distressId, null);
     }
 

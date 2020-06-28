@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cryout_app/utils/notification-handler.dart';
+import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -66,34 +67,42 @@ class FireBaseHandler {
 
   static void subscribeToUserTopic(String userId) {
     _firebaseMessaging.subscribeToTopic(_USER_TOPIC_PREFIX + "$userId");
+    SharedPreferenceUtil.addToRegisteredTopic(_USER_TOPIC_PREFIX + "$userId");
   }
 
   static void unSubscribeToUserTopic(String userId) {
     _firebaseMessaging.unsubscribeFromTopic(_USER_TOPIC_PREFIX + "$userId");
+    SharedPreferenceUtil.removeFromTopicList(_USER_TOPIC_PREFIX + "$userId");
   }
 
   static void subscribeToSamaritanTopic(String userId) {
     _firebaseMessaging.subscribeToTopic(_SAMARITAN_TOPIC_PREFIX + "$userId");
+    SharedPreferenceUtil.addToRegisteredTopic(_SAMARITAN_TOPIC_PREFIX + "$userId");
   }
 
   static void unSubscribeToSamaritanTopic(String userId) {
     _firebaseMessaging.unsubscribeFromTopic(_SAMARITAN_TOPIC_PREFIX + "$userId");
+    SharedPreferenceUtil.removeFromTopicList(_SAMARITAN_TOPIC_PREFIX + "$userId");
   }
 
   static void subscribeToDistressChannelTopic(String channelId) {
     _firebaseMessaging.subscribeToTopic(_DISTRESS_CHANNEL_TOPIC_PREFIX + "$channelId");
+    SharedPreferenceUtil.addToRegisteredTopic(_DISTRESS_CHANNEL_TOPIC_PREFIX + "$channelId");
   }
 
   static void unSubscribeToDistressChannelTopic(String channelId) {
     _firebaseMessaging.unsubscribeFromTopic(_DISTRESS_CHANNEL_TOPIC_PREFIX + "$channelId");
+    SharedPreferenceUtil.removeFromTopicList(_DISTRESS_CHANNEL_TOPIC_PREFIX + "$channelId");
   }
 
   static void subscribeSafeWalkChannelTopic(String channelId) {
     _firebaseMessaging.subscribeToTopic(_SAFE_WALK_CHANNEL_TOPIC + "$channelId");
+    SharedPreferenceUtil.addToRegisteredTopic(_SAFE_WALK_CHANNEL_TOPIC + "$channelId");
   }
 
   static void unSubscribeToSafeWalkChannelTopic(String channelId) {
     _firebaseMessaging.unsubscribeFromTopic(_SAFE_WALK_CHANNEL_TOPIC + "$channelId");
+    SharedPreferenceUtil.removeFromTopicList(_SAFE_WALK_CHANNEL_TOPIC + "$channelId");
   }
 
   static void iOSPermission() {
@@ -102,7 +111,9 @@ class FireBaseHandler {
   }
 
   static unsubscribeFromAllTopics() async {
-    await _firebaseMessaging.deleteInstanceID();
-    configure();
+    List<String> topic = await SharedPreferenceUtil.getSubScribedTopics();
+    topic.forEach((element) {
+      _firebaseMessaging.unsubscribeFromTopic(element);
+    });
   }
 }

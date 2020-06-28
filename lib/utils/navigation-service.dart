@@ -2,10 +2,12 @@ import 'package:cryout_app/models/distress-call.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
 import 'package:cryout_app/screens/base-screen.dart';
 import 'package:cryout_app/screens/distress-category-selection-screen.dart';
+import 'package:cryout_app/screens/emergency-contacts-management-screen.dart';
 import 'package:cryout_app/screens/introduction-screen.dart';
-import 'package:cryout_app/screens/received-distress-signal-list-screen.dart';
 import 'package:cryout_app/screens/phone-confirmation-screen.dart';
 import 'package:cryout_app/screens/phone-verification-screen.dart';
+import 'package:cryout_app/screens/received-distress-signal-list-screen.dart';
+import 'package:cryout_app/screens/safewalk-creation-screen.dart';
 import 'package:cryout_app/screens/samaritan-distress-channel-screen.dart';
 import 'package:cryout_app/screens/splash-screen.dart';
 import 'package:cryout_app/screens/static-page-screen.dart';
@@ -88,6 +90,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case Routes.STATIC_WEB_PAGE_VIEW_SCREEN:
       var argument = settings.arguments as WebPageModel;
       return MaterialPageRoute(builder: (context) => StaticPageScreen(webPageModel: argument));
+    case Routes.MANAGE_EMERGENCY_CONTACTS_SCREEN:
+      return MaterialPageRoute(builder: (context) => EmergencyContactsManagementScreen());
+    case Routes.START_SAFE_WALK_SCREEN :
+      return MaterialPageRoute(builder: (context) => SafeWalkCreationScreen());
     default:
       return MaterialPageRoute(builder: (context) => SplashScreen());
   }

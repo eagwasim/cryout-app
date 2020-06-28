@@ -37,6 +37,7 @@ class DatabaseProvider {
             "CREATE TABLE received_distress_signals (id INTEGER PRIMARY KEY, age TEXT, detail TEXT, dateCreated INTEGER, opened INTEGER, distressId TEXT, firstName TEXT, lastName TEXT, gender TEXT, phone TEXT, photo TEXT, userId TEXT, distance TEXT, location TEXT);");
         db.execute(
             "CREATE TABLE received_safe_walks (id INTEGER PRIMARY KEY, safeWalkId TEXT, userId TEXT, destination TEXT, userFirstName TEXT, userLastName TEXT, userPhoto TEXT, dateCreated INTEGER, opened INTEGER);");
+        db.execute("CREATE TABLE emergency_contacts (id INTEGER PRIMARY KEY, fullName TEXT, phoneNumber TEXT);");
       },
       // Set the version. This executes the onCreate function and provides a
       // path to perform database upgrades and downgrades.

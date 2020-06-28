@@ -4,7 +4,6 @@ import 'dart:typed_data';
 
 import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/distress-call.dart';
-
 import 'package:cryout_app/models/received-distress-signal.dart';
 import 'package:cryout_app/models/recieved-safe-walk.dart';
 import 'package:cryout_app/models/user.dart';

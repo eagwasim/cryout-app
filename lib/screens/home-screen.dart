@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cryout_app/http/base-resource.dart';
-import 'package:cryout_app/http/user-resource.dart';
+import 'package:cryout_app/http/samaritan-resource.dart';
 import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/distress-call.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
@@ -183,6 +183,79 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
                         child: Image.asset(
+                          _user.getWalkingImageAsset(),
+                          height: 90,
+                          width: 90,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.white70,
+                          ),
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: Text(
+                                    _translations.text("screens.home.safe-walk"),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              FlatButton(
+                                onPressed: () {
+                                  locator<NavigationService>().pushNamed(Routes.START_SAFE_WALK_SCREEN).then((value) => {_setUp()});
+                                },
+                                child: Text(
+                                  _translations.text("screens.home.safe-walk.start"),
+                                  style: TextStyle(color: Theme.of(context).accentColor),
+                                ),
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                padding: const EdgeInsets.only(right: 0, left: 0, bottom: 0, top: 0),
+                              )
+                            ],
+                          ),
+                          Divider(),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Text(
+                              _translations.text("screens.home.safe-walk.detail"),
+                              style: Theme.of(context).textTheme.caption,
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+              child: Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        child: Image.asset(
                           _user == null ? "assets/images/superman.png" : _user.gender == "MALE" ? "assets/images/superman.png" : "assets/images/superwoman.png",
                           height: 90,
                           width: 90,
@@ -243,77 +316,6 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
-              child: Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        child: Image.asset(
-                          _user.getWalkingImageAsset(),
-                          height: 90,
-                          width: 90,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.white70,
-                          ),
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 8),
-                                  child: Text(
-                                    _translations.text("screens.home.safe-walk"),
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              FlatButton(
-                                onPressed: () {},
-                                child: Text(
-                                  _translations.text("screens.home.safe-walk.start"),
-                                  style: TextStyle(color: Theme.of(context).accentColor),
-                                ),
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                padding: const EdgeInsets.only(right: 0, left: 0, bottom: 0, top: 0),
-                              )
-                            ],
-                          ),
-                          Divider(),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: Text(
-                              _translations.text("screens.home.safe-walk.detail"),
-                              style: Theme.of(context).textTheme.caption,
-                            ),
-                          )
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-            Padding(
               padding: EdgeInsets.all(16),
               child: Center(
                   child: Text(
@@ -357,7 +359,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
   }
 
   void updateSamaritanMode(BuildContext context, bool _samaritanModeEnabled) async {
-    Response resp = await UserResource.updateSamaritanMode(context, {"samaritanModeEnabled": _samaritanModeEnabled});
+    Response resp = await SamaritanResource.updateSamaritanMode(context, {"samaritanModeEnabled": _samaritanModeEnabled});
 
     if (resp.statusCode != 200) {
       _samaritanModeEnabled = !_samaritanModeEnabled;
@@ -510,7 +512,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                               children: <Widget>[
                                 Expanded(
                                     child: Text(
-                                  _user.gender + " | " + _user.phoneNumber,
+                                  _translations.text("screens.name-update.hints.gender.${_user.gender.toLowerCase()}").toLowerCase() + " | " + _user.phoneNumber,
                                   style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500, fontSize: 14),
                                 )),
                               ],
@@ -525,29 +527,10 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                 FlatButton.icon(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    //locator<NavigationService>().pushNamed(Routes.STATIC_WEB_PAGE_VIEW_SCREEN, arguments: WebPageModel("Privacy Policy", "${BaseResource.BASE_URL}/pages/privacy-policy"));
+                    locator<NavigationService>().pushNamed(Routes.MANAGE_EMERGENCY_CONTACTS_SCREEN);
                   },
                   icon: Icon(Icons.group),
                   label: Text(_translations.text("screens.home.emergency-contacts")),
-                  padding: EdgeInsets.all(4),
-                ),
-                Divider(),
-                FlatButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    locator<NavigationService>().pushNamed(Routes.STATIC_WEB_PAGE_VIEW_SCREEN, arguments: WebPageModel("Privacy Policy", "${BaseResource.BASE_URL}/pages/privacy-policy"));
-                  },
-                  icon: Icon(Icons.verified_user),
-                  label: Text(_translations.text("screens.home.privacy-policy")),
-                  padding: EdgeInsets.all(4),
-                ),
-                FlatButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    locator<NavigationService>().pushNamed(Routes.STATIC_WEB_PAGE_VIEW_SCREEN, arguments: WebPageModel("Terms of Service", "${BaseResource.BASE_URL}/pages/terms-of-service"));
-                  },
-                  icon: Icon(Icons.info_outline),
-                  label: Text(_translations.text("screens.home.terms-of-service")),
                   padding: EdgeInsets.all(4),
                 ),
                 Divider(),
@@ -559,6 +542,43 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                     icon: Icon(Icons.exit_to_app),
                     label: Text(_translations.text("screens.home.log-out")),
                     padding: EdgeInsets.all(4)),
+                Divider(),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      InkWell(
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            _translations.text("screens.home.privacy-policy"),
+                            style: TextStyle(fontSize: 10),
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          locator<NavigationService>().pushNamed(Routes.STATIC_WEB_PAGE_VIEW_SCREEN, arguments: WebPageModel("Privacy Policy", "${BaseResource.BASE_URL}/pages/privacy-policy"));
+                        },
+                      ),
+                      Text(" • "),
+                      InkWell(
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            _translations.text("screens.home.terms-of-service"),
+                            style: TextStyle(fontSize: 10),
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          locator<NavigationService>().pushNamed(Routes.STATIC_WEB_PAGE_VIEW_SCREEN, arguments: WebPageModel("Terms of Service", "${BaseResource.BASE_URL}/pages/terms-of-service"));
+                        },
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -604,11 +624,11 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
   }
 
   void _logOutOfApplication() async {
-    await SharedPreferenceUtil.clear();
     await FireBaseHandler.unsubscribeFromAllTopics();
     await ReceivedDistressSignalRepository.clear();
     await ReceivedSafeWalkRepository.clear();
     await BackgroundLocationUpdate.stopLocationTracking();
+    await SharedPreferenceUtil.clear();
     locator<NavigationService>().pushNamedAndRemoveUntil(Routes.INTRODUCTION_SCREEN);
   }
 }

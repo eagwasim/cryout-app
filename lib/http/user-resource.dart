@@ -8,8 +8,6 @@ import 'package:http/http.dart';
 
 class UserResource {
   static const String UPDATE_USER_PROFILE = "/api/v1/users";
-  static const String UPDATE_USER_SAMARITAN_MODE = "/samaritan/mode";
-  static const String UPDATE_USER_SAMARITAN_LOCATION = "/samaritan/location";
   static const String REPORT_USER = "/report";
 
   static Future<Response> updateUser(BuildContext context, Map<String, dynamic> body) async {
@@ -28,38 +26,6 @@ class UserResource {
     return response;
   }
 
-  static Future<Response> updateSamaritanMode(BuildContext context, Map<String, dynamic> body) async {
-    String token = await SharedPreferenceUtil.getToken();
-
-    Map<String, String> headers = Map.from(BaseResource.HEADERS);
-    headers["Authorization"] = "Bearer " + token;
-
-    Response response = await post(BaseResource.BASE_URL + UPDATE_USER_PROFILE + UPDATE_USER_SAMARITAN_MODE, headers: headers, body: jsonEncode(body));
-
-    if (response.statusCode == 401) {
-      if (await AccessResource.refreshToken(context)) {
-        return updateSamaritanMode(context, body);
-      }
-    }
-    return response;
-  }
-
-  static Future<Response> updateSamaritanLocation(BuildContext context, Map<String, dynamic> body) async {
-    String token = await SharedPreferenceUtil.getToken();
-
-    Map<String, String> headers = Map.from(BaseResource.HEADERS);
-    headers["Authorization"] = "Bearer " + token;
-
-    Response response = await post(BaseResource.BASE_URL + UPDATE_USER_PROFILE + UPDATE_USER_SAMARITAN_LOCATION, headers: headers, body: jsonEncode(body));
-
-    if (response.statusCode == 401) {
-      if (await AccessResource.refreshToken(context)) {
-        return updateSamaritanMode(context, body);
-      }
-    }
-    return response;
-  }
-
   static Future<Response> reportUser(BuildContext context, Map<String, dynamic> body) async {
     String token = await SharedPreferenceUtil.getToken();
 
@@ -70,9 +36,26 @@ class UserResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return updateSamaritanMode(context, body);
+        return reportUser(context, body);
       }
     }
+    return response;
+  }
+
+  static Future<Response> checkPhoneNumber(BuildContext context, String phoneNumber) async {
+    String token = await SharedPreferenceUtil.getToken();
+
+    Map<String, String> headers = Map.from(BaseResource.HEADERS);
+    headers["Authorization"] = "Bearer " + token;
+
+    Response response = await get(BaseResource.BASE_URL + UPDATE_USER_PROFILE + "/check/phone-number/" + phoneNumber, headers: headers);
+
+    if (response.statusCode == 401) {
+      if (await AccessResource.refreshToken(context)) {
+        return checkPhoneNumber(context, phoneNumber);
+      }
+    }
+
     return response;
   }
 }

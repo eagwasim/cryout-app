@@ -110,15 +110,9 @@ class _UserProfileUpdateScreenState extends State {
                       ],
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
                       child: TextField(
                         decoration: new InputDecoration(
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Theme.of(context).accentColor, width: 1.0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey, width: 1.0),
-                          ),
                           hintText: _translations.text("screens.name-update.hints.first-name"),
                         ),
                         autofocus: true,
@@ -130,15 +124,9 @@ class _UserProfileUpdateScreenState extends State {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
                       child: TextField(
                         decoration: new InputDecoration(
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Theme.of(context).accentColor, width: 1.0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey, width: 1.0),
-                          ),
                           hintText: _translations.text("screens.name-update.hints.last-name"),
                         ),
                         autofocus: true,
@@ -150,15 +138,9 @@ class _UserProfileUpdateScreenState extends State {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
                       child: TextField(
                         decoration: new InputDecoration(
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Theme.of(context).accentColor, width: 1.0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey, width: 1.0),
-                          ),
                           hintText: _translations.text("screens.name-update.hints.email"),
                         ),
                         autofocus: true,
@@ -175,6 +157,7 @@ class _UserProfileUpdateScreenState extends State {
                           children: <Widget>[
                             Radio(
                               value: GenderConstant.FEMALE,
+                              activeColor: Theme.of(context).accentColor,
                               groupValue: _gender,
                               onChanged: (GenderConstant value) {
                                 setState(() {
@@ -193,6 +176,7 @@ class _UserProfileUpdateScreenState extends State {
                             Radio(
                               value: GenderConstant.MALE,
                               groupValue: _gender,
+                              activeColor: Theme.of(context).accentColor,
                               onChanged: (GenderConstant value) {
                                 setState(() {
                                   _gender = value;
@@ -210,6 +194,7 @@ class _UserProfileUpdateScreenState extends State {
                             Radio(
                               value: GenderConstant.NON_BINARY,
                               groupValue: _gender,
+                              activeColor: Theme.of(context).accentColor,
                               onChanged: (GenderConstant value) {
                                 setState(() {
                                   _gender = value;
@@ -225,7 +210,7 @@ class _UserProfileUpdateScreenState extends State {
                       ],
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
                       child: InkWell(
                         onTap: () {
                           launchDatePicker();
@@ -233,12 +218,6 @@ class _UserProfileUpdateScreenState extends State {
                         child: TextField(
                           enabled: false,
                           decoration: new InputDecoration(
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Theme.of(context).accentColor, width: 1.0),
-                            ),
-                            disabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.grey, width: 1.0),
-                            ),
                             hintText: _translations.text("screens.name-update.hints.date-of-birth"),
                           ),
                           autofocus: true,
@@ -277,9 +256,9 @@ class _UserProfileUpdateScreenState extends State {
                                   _processing = true;
                                 });
 
-                                _user.firstName = _firstName.trim();
-                                _user.lastName = _lastName.trim();
-                                _user.emailAddress = _emailAddress.trim();
+                                _user.firstName = _firstName.trim().capitalize();
+                                _user.lastName = _lastName.trim().capitalize();
+                                _user.emailAddress = _emailAddress.trim().toLowerCase();
                                 _user.dateOfBirth = _dateOfBirth;
                                 _user.gender = _gender.toShortString();
 
@@ -331,5 +310,11 @@ class _UserProfileUpdateScreenState extends State {
         _dateOfBirth = formatter.format(datePick);
       });
     }
+  }
+}
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${this.substring(1)}";
   }
 }
