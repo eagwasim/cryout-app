@@ -7,8 +7,8 @@ import 'package:cryout_app/models/chat-message.dart';
 import 'package:cryout_app/models/distress-call.dart';
 import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
+import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/notification-handler.dart';
-import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/translations.dart';
@@ -269,8 +269,11 @@ class _VictimDistressChannelScreenState extends State {
     Response response = await DistressResource.closeDistressCall(context, _distressCall.id);
 
     if (response.statusCode == 200) {
-      DatabaseReference _userPreferenceDatabaseReference = database.reference().child('users').reference().child("${_user.id}").reference().child("preferences").reference();
-      _userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).remove();
+      /*  DatabaseReference _userPreferenceDatabaseReference = database.reference().child('users').reference().child("${_user.id}").reference().child("preferences").reference();
+      _userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).remove();*/
+
+      SharedPreferenceUtil.setCurrentDistressCall(null);
+
       DatabaseReference _messageDBRef = database.reference().child('distress_channel').reference().child("${_distressCall.id}").reference().child("messages").reference();
 
       ChatMessage chatMessage = ChatMessage(
@@ -281,9 +284,9 @@ class _VictimDistressChannelScreenState extends State {
       );
 
       _messageDBRef.push().set(chatMessage.toJSON());
-      FireBaseHandler.subscribeToDistressChannelTopic("${_distressCall.id}");
+      FireBaseHandler.unSubscribeToDistressChannelTopic("${_distressCall.id}");
 
-      Navigator.of(context).pop(true);
+      locator<NavigationService>().pop(result: true);
     } else {
       setState(() {
         _isDismissingDistressCall = false;

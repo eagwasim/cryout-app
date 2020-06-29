@@ -159,7 +159,13 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                           ),
                         ),
                         onTap: () {
-                          locator<NavigationService>().pushNamed(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN, arguments: _currentDistressCall);
+                          locator<NavigationService>().pushNamed(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN, arguments: _currentDistressCall).then((value){
+                            if(value != null && value){
+                              setState(() {
+                                _currentDistressCall = null;
+                              });
+                            }
+                          });
                         },
                       ),
                     )),
@@ -390,10 +396,18 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
 
   void _setUp() async {
     if (_user == null) {
-      _user = await SharedPreferenceUtil.currentUser();
+      User user = await SharedPreferenceUtil.currentUser();
 
-      setState(() {});
+      setState(() {
+        _user = user;
+      });
     }
+
+    DistressCall distressCall = await SharedPreferenceUtil.getCurrentDistressCall();
+
+    setState(() {
+      _currentDistressCall = distressCall;
+    });
 
     if (_userPreferenceDatabaseReference == null) {
       _userPreferenceDatabaseReference = database.reference().child('users').reference().child("${_user.id}").reference().child("preferences").reference();
@@ -402,9 +416,6 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
 
     var dbSS = await _userPreferenceDatabaseReference.child(PreferenceConstants.SAMARITAN_MODE_ENABLED).once();
     _samaritan = dbSS == null || dbSS.value == null ? false : dbSS.value;
-
-    dbSS = await _userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).once();
-    _currentDistressCall = (dbSS == null || dbSS.value == null) ? null : DistressCall.fromJSON(dbSS.value);
 
     if (_preferenceListeners.isEmpty) {
       _preferenceListeners.add(_userPreferenceDatabaseReference.child(PreferenceConstants.SAMARITAN_MODE_ENABLED).onChildChanged.listen((event) {
@@ -415,18 +426,6 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
       _preferenceListeners.add(_userPreferenceDatabaseReference.child(PreferenceConstants.SAMARITAN_MODE_ENABLED).onChildRemoved.listen((event) {
         setState(() {
           _samaritan = false;
-        });
-      }));
-
-      _preferenceListeners.add(_userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).onChildChanged.listen((event) {
-        setState(() {
-          _currentDistressCall = event.snapshot.value;
-        });
-      }));
-
-      _preferenceListeners.add(_userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).onChildRemoved.listen((event) {
-        setState(() {
-          _currentDistressCall = null;
         });
       }));
     }

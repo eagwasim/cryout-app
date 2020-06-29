@@ -18,6 +18,8 @@ class Routes {
   static const STATIC_WEB_PAGE_VIEW_SCREEN = "/static-web-page-screen";
   static const MANAGE_EMERGENCY_CONTACTS_SCREEN = "/manage-emergency-contacts";
   static const START_SAFE_WALK_SCREEN = "/start-safe-walk-screen";
+  static const SAFE_WALK_WALKER_SCREEN = "/safe-walk-walker-screen";
+  static const SAFE_WALK_WATCHER_SCREEN = "/safe-walk-watcher-screen";
 
   static Future<String> initialRoute() async {
     User user = await SharedPreferenceUtil.currentUser();

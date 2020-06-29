@@ -2,17 +2,13 @@ import 'dart:convert';
 
 import 'package:cryout_app/http/base-resource.dart';
 import 'package:cryout_app/http/distress-resource.dart';
-import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/distress-call.dart';
-import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
-import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:cryout_app/utils/widget-utils.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
@@ -132,10 +128,12 @@ class _DistressCategorySelectionScreenState extends State {
 
     DistressCall distressCall = DistressCall.fromJSON(responseData);
 
-    User _user = await SharedPreferenceUtil.currentUser();
+/*    User _user = await SharedPreferenceUtil.currentUser();
 
     DatabaseReference _userPreferenceDatabaseReference = database.reference().child('users').reference().child("${_user.id}").reference().child("preferences").reference();
-    await _userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).set(distressCall.toJson());
+    await _userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).set(distressCall.toJson());*/
+
+    SharedPreferenceUtil.setCurrentDistressCall(distressCall);
 
     setState(() {
       _processing = false;

@@ -7,7 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
 
 class SafeWalkResource{
-  static const String _SAFE_WALK_BASE_ENDPOINT = "/api/v1/distress/signals";
+  static const String _SAFE_WALK_BASE_ENDPOINT = "/api/v1/safe/walk";
 
   static Future<Response> sendSafeWalk(BuildContext context, Map<String, dynamic> body) async {
     String token = await SharedPreferenceUtil.getToken();

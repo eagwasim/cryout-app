@@ -7,6 +7,7 @@ import 'package:cryout_app/screens/introduction-screen.dart';
 import 'package:cryout_app/screens/phone-confirmation-screen.dart';
 import 'package:cryout_app/screens/phone-verification-screen.dart';
 import 'package:cryout_app/screens/received-distress-signal-list-screen.dart';
+import 'package:cryout_app/screens/safe-walk-walker-screen.dart';
 import 'package:cryout_app/screens/safewalk-creation-screen.dart';
 import 'package:cryout_app/screens/samaritan-distress-channel-screen.dart';
 import 'package:cryout_app/screens/splash-screen.dart';
@@ -33,6 +34,10 @@ class NavigationService {
 
   Future<dynamic> pushNamed(String routeName, {dynamic arguments}) {
     return navigatorKey.currentState.pushNamed(routeName, arguments: arguments);
+  }
+
+  void pop({dynamic result}) {
+    navigatorKey.currentState.pop(result);
   }
 
   Future<dynamic> popAndPushNamed(String routeName, {dynamic arguments}) {
@@ -92,8 +97,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(builder: (context) => StaticPageScreen(webPageModel: argument));
     case Routes.MANAGE_EMERGENCY_CONTACTS_SCREEN:
       return MaterialPageRoute(builder: (context) => EmergencyContactsManagementScreen());
-    case Routes.START_SAFE_WALK_SCREEN :
+    case Routes.START_SAFE_WALK_SCREEN:
       return MaterialPageRoute(builder: (context) => SafeWalkCreationScreen());
+    case Routes.SAFE_WALK_WALKER_SCREEN:
+      return MaterialPageRoute(builder: (context) => SafeWalkWalkerScreen());
     default:
       return MaterialPageRoute(builder: (context) => SplashScreen());
   }

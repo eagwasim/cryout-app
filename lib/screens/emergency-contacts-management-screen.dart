@@ -1,9 +1,7 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:contact_picker/contact_picker.dart';
 import 'package:cryout_app/http/user-resource.dart';
-import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/emergency-contact.dart';
 import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';

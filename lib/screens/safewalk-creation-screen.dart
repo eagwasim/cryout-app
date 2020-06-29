@@ -1,10 +1,19 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:cryout_app/http/safe-walk-resource.dart';
 import 'package:cryout_app/models/emergency-contact.dart';
+import 'package:cryout_app/models/safe-walk.dart';
+import 'package:cryout_app/utils/background_location_update.dart';
+import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/routes.dart';
+import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:cryout_app/utils/widget-utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart';
 import 'package:location/location.dart';
 
 class SafeWalkCreationScreen extends StatefulWidget {
@@ -18,6 +27,8 @@ class _SafeWalkCreationScreenState extends State {
   Set<EmergencyContact> _selectedPhoneNumbers = {};
 
   String _destination = "";
+
+  bool _isProcessing = false;
 
   TextEditingController _destinationController;
   Translations _translations;
@@ -96,27 +107,29 @@ class _SafeWalkCreationScreenState extends State {
           ],
         ),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
-        child: RaisedButton.icon(
-          elevation: 4,
-          onPressed: () {
-            _beginSafeWalk();
-          },
-          icon: Icon(
-            Icons.directions_walk,
-            color: Colors.white,
-          ),
-          label: Text(
-            _translations.text("screens.safe-walk-creation.action"),
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Colors.white),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30.0),
-          ),
-          padding: EdgeInsets.all(16),
-        ),
-      ),
+      floatingActionButton: _isProcessing
+          ? CircularProgressIndicator()
+          : Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: RaisedButton.icon(
+                elevation: 4,
+                onPressed: () {
+                  _beginSafeWalk();
+                },
+                icon: Icon(
+                  Icons.directions_walk,
+                  color: Colors.white,
+                ),
+                label: Text(
+                  _translations.text("screens.safe-walk-creation.action"),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Colors.white),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+                padding: EdgeInsets.all(16),
+              ),
+            ),
     );
   }
 
@@ -159,7 +172,7 @@ class _SafeWalkCreationScreenState extends State {
       return;
     }
 
-    if(_selectedPhoneNumbers.isEmpty){
+    if (_selectedPhoneNumbers.isEmpty) {
       WidgetUtils.showAlertDialog(context, _translations.text("screens.safe-walk-creation.error.contacts.title"), _translations.text("screens.safe-walk-creation.error.contacts.message"));
       return;
     }
@@ -182,6 +195,29 @@ class _SafeWalkCreationScreenState extends State {
       }
     }
 
+    setState(() {
+      _isProcessing = true;
+    });
 
+    Response response = await SafeWalkResource.sendSafeWalk(context, {"destination": _destination, "emergencyContacts": _selectedPhoneNumbers.map((e) => e.phoneNumber).toList()});
+
+    if (response.statusCode != HttpStatus.created) {
+      WidgetUtils.showAlertDialog(context, _translations.text("screens.common.error.general.title"), _translations.text("screens.common.error.general.message"));
+      return;
+    }
+
+    SafeWalk safeWalk = SafeWalk(id: jsonDecode(response.body)['data']['safeWalkId'], destination: _destination);
+
+    await SharedPreferenceUtil.setSafeWalk(safeWalk);
+
+    setState(() {
+      _isProcessing = false;
+    });
+
+    FireBaseHandler.subscribeSafeWalkChannelTopic("${safeWalk.id}");
+
+    BackgroundLocationUpdate.startLocationTracking();
+
+    locator<NavigationService>().popAndPushNamed(Routes.SAFE_WALK_WALKER_SCREEN, arguments: safeWalk);
   }
 }

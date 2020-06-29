@@ -14,6 +14,7 @@ class SharedPreferenceUtil {
   static const _CURRENT_DISTRESS_CALL = "CURRENT_DISTRESS_CALL";
   static const _CACHED_RECIEVED_DISTRESS_CALL = "CACHED_DISTRESS_CALL_";
   static const _TOPICS = "REGISTERED_TOPICS_KEY";
+  static const _CURRENT_SAFE_WALK = "_CURRENT_SAFE_WALK";
 
   static Future<User> currentUser() async {
     final prefs = await SharedPreferences.getInstance();
@@ -103,6 +104,25 @@ class SharedPreferenceUtil {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove(_CURRENT_USER_KEY);
     prefs.remove(_USER_AUTHENTICATION_TOKEN);
+  }
+
+  static Future<void> setSafeWalk(SafeWalk safeWalk) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (safeWalk == null) {
+      prefs.remove(_CURRENT_SAFE_WALK);
+    } else {
+      prefs.setString(_CURRENT_SAFE_WALK, jsonEncode(safeWalk.toJson()));
+    }
+  }
+
+  static Future<SafeWalk> getCurrentSafeWalk() async {
+    final prefs = await SharedPreferences.getInstance();
+    String dc = prefs.getString(_CURRENT_SAFE_WALK);
+
+    if (dc == null) {
+      return null;
+    }
+    return SafeWalk.fromJSON(jsonDecode(dc));
   }
 
   static Future<void> setCurrentDistressCall(DistressCall distressCall) async {

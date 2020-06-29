@@ -28,7 +28,7 @@ class EmergencyContactRepository {
     final db = await DatabaseProvider.dbp.database;
 
     List<Map<String, dynamic>> result = await db.rawQuery("select * from emergency_contacts order by id desc");
-    print(result);
+
     if (result.isEmpty) {
       return [];
     }

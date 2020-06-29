@@ -1,13 +1,18 @@
 import 'package:cryout_app/http/samaritan-resource.dart';
+import 'package:cryout_app/models/user.dart';
+import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_background_geolocation/flutter_background_geolocation.dart' as bg;
 
 class BackgroundLocationUpdate {
   static setUpLocationTracking(BuildContext _buildContext) {
     // Fired whenever a location is recorded
-    bg.BackgroundGeolocation.onLocation((bg.Location location) {
+    bg.BackgroundGeolocation.onLocation((bg.Location location) async {
       print('[location] - $location');
       SamaritanResource.updateSamaritanLocation(_buildContext, {'lat': location.coords.latitude, 'lon': location.coords.longitude});
+
+      User _user = await SharedPreferenceUtil.currentUser();
+
     });
 
     // Fired whenever the state of location-services changes.  Always fired at boot
