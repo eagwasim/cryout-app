@@ -4,9 +4,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cryout_app/http/base-resource.dart';
 import 'package:cryout_app/http/samaritan-resource.dart';
 import 'package:cryout_app/main.dart';
-import 'package:cryout_app/models/distress-call.dart';
+import 'package:cryout_app/models/distress-signal.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
 import 'package:cryout_app/models/recieved-safe-walk.dart';
+import 'package:cryout_app/models/safe-walk.dart';
 import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/screens/static-page-screen.dart';
 import 'package:cryout_app/utils/background_location_update.dart';
@@ -36,7 +37,8 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
 
   Translations _translations;
 
-  DistressCall _currentDistressCall;
+  DistressSignal _currentDistressCall;
+  SafeWalk _safeWalk;
 
   DatabaseReference _userPreferenceDatabaseReference;
   List<StreamSubscription<Event>> _preferenceListeners = [];
@@ -87,7 +89,9 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
           ),
           IconButton(
             icon: Icon(Icons.directions_walk, color: Colors.grey),
-            onPressed: () {},
+            onPressed: () {
+              locator<NavigationService>().navigateTo(Routes.RECEIVED_SAFE_WALK_LIST_SCREEN);
+            },
           ),
           IconButton(
             icon: ClipRRect(
@@ -95,8 +99,6 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
               child: CachedNetworkImage(
                 fit: BoxFit.cover,
                 imageUrl: _user == null ? "https://via.placeholder.com/44x44?text=|" : _user.profilePhoto,
-                fadeOutDuration: const Duration(seconds: 1),
-                fadeInDuration: const Duration(seconds: 1),
                 height: 28,
                 width: 28,
               ),
@@ -159,8 +161,8 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                           ),
                         ),
                         onTap: () {
-                          locator<NavigationService>().pushNamed(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN, arguments: _currentDistressCall).then((value){
-                            if(value != null && value){
+                          locator<NavigationService>().pushNamed(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN, arguments: _currentDistressCall).then((value) {
+                            if (value != null && value) {
                               setState(() {
                                 _currentDistressCall = null;
                               });
@@ -169,85 +171,126 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                         },
                       ),
                     )),
-            _currentDistressCall == null
+            _safeWalk == null
+                ? SizedBox.shrink()
+                : Padding(
+                    padding: const EdgeInsets.only(left: 16.0, bottom: 8, right: 16),
+                    child: Text(
+                      _translations.text("screens.home.active-safe-walk"),
+                      style: Theme.of(context).textTheme.caption,
+                    ),
+                  ),
+            _safeWalk == null
+                ? SizedBox.shrink()
+                : Padding(
+                    padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: InkWell(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 16.0, right: 8, top: 8, bottom: 8),
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Text(
+                                  _translations.text("screens.common.to") + ": " + _safeWalk.destination.toLowerCase(),
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                              WidgetUtils.glowingIconFor(context, Icons.directions_walk, Colors.blueAccent)
+                            ],
+                          ),
+                        ),
+                        onTap: () {
+                          locator<NavigationService>().pushNamed(Routes.SAFE_WALK_WALKER_SCREEN, arguments: _safeWalk).then((value) {
+                            _setUp();
+                          });
+                        },
+                      ),
+                    )),
+            _safeWalk == null && _currentDistressCall == null
                 ? SizedBox.shrink()
                 : Padding(
                     padding: const EdgeInsets.only(left: 20.0, bottom: 8, right: 20.0),
                     child: Divider(),
                   ),
-            Padding(
-              padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
-              child: Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        child: Image.asset(
-                          _user.getWalkingImageAsset(),
-                          height: 90,
-                          width: 90,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.white70,
-                          ),
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
-                          color: Colors.white,
-                        ),
+            _safeWalk != null
+                ? SizedBox.shrink()
+                : Padding(
+                    padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                    child: Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 8),
-                                  child: Text(
-                                    _translations.text("screens.home.safe-walk"),
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              FlatButton(
-                                onPressed: () {
-                                  locator<NavigationService>().pushNamed(Routes.START_SAFE_WALK_SCREEN).then((value) => {_setUp()});
-                                },
-                                child: Text(
-                                  _translations.text("screens.home.safe-walk.start"),
-                                  style: TextStyle(color: Theme.of(context).accentColor),
-                                ),
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                padding: const EdgeInsets.only(right: 0, left: 0, bottom: 0, top: 0),
-                              )
-                            ],
-                          ),
-                          Divider(),
                           Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: Text(
-                              _translations.text("screens.home.safe-walk.detail"),
-                              style: Theme.of(context).textTheme.caption,
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              child: Image.asset(
+                                _user.getWalkingImageAsset(),
+                                height: 90,
+                                width: 90,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.white70,
+                                ),
+                                borderRadius: BorderRadius.all(Radius.circular(8)),
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                Row(
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(right: 8),
+                                        child: Text(
+                                          _translations.text("screens.home.safe-walk"),
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    FlatButton(
+                                      onPressed: () {
+                                        locator<NavigationService>().pushNamed(Routes.START_SAFE_WALK_SCREEN).then((value) => {_setUp()});
+                                      },
+                                      child: Text(
+                                        _translations.text("screens.home.safe-walk.start"),
+                                        style: TextStyle(color: Theme.of(context).accentColor),
+                                      ),
+                                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      padding: const EdgeInsets.only(right: 0, left: 0, bottom: 0, top: 0),
+                                    )
+                                  ],
+                                ),
+                                Divider(),
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 8.0),
+                                  child: Text(
+                                    _translations.text("screens.home.safe-walk.detail"),
+                                    style: Theme.of(context).textTheme.caption,
+                                  ),
+                                )
+                              ],
                             ),
                           )
                         ],
                       ),
-                    )
-                  ],
-                ),
-              ),
-            ),
+                    ),
+                  ),
             Padding(
               padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
               child: Card(
@@ -384,12 +427,15 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
     _updateLocationTrackingStatus();
   }
 
-  void _updateLocationTrackingStatus() {
+  void _updateLocationTrackingStatus() async {
     if (_samaritan != null && _samaritan) {
-      BackgroundLocationUpdate.startLocationTracking();
       FireBaseHandler.subscribeToSamaritanTopic(_user.id);
+
+      BackgroundLocationUpdate.startLocationTracking();
     } else if (_samaritan != null && !_samaritan) {
-      BackgroundLocationUpdate.stopLocationTracking();
+      if (!await SharedPreferenceUtil.isSafeWalking()) {
+        BackgroundLocationUpdate.stopLocationTracking();
+      }
       FireBaseHandler.unSubscribeToSamaritanTopic(_user.id);
     }
   }
@@ -403,10 +449,12 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
       });
     }
 
-    DistressCall distressCall = await SharedPreferenceUtil.getCurrentDistressCall();
+    DistressSignal distressCall = await SharedPreferenceUtil.getCurrentDistressCall();
+    SafeWalk safeWalk = await SharedPreferenceUtil.getCurrentSafeWalk();
 
     setState(() {
       _currentDistressCall = distressCall;
+      _safeWalk = safeWalk;
     });
 
     if (_userPreferenceDatabaseReference == null) {

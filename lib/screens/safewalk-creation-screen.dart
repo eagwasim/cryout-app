@@ -218,6 +218,8 @@ class _SafeWalkCreationScreenState extends State {
 
     BackgroundLocationUpdate.startLocationTracking();
 
+    SharedPreferenceUtil.startedSafeWalk();
+
     locator<NavigationService>().popAndPushNamed(Routes.SAFE_WALK_WALKER_SCREEN, arguments: safeWalk);
   }
 }

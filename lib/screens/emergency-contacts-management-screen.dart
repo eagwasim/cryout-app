@@ -28,6 +28,7 @@ class _EmergencyContactsManagementScreenState extends State {
   TextEditingController _fullNameController;
   TextEditingController _phoneNumberController;
 
+
   bool _savingPhoneNumber = false;
   bool _setUpComplete = false;
 

@@ -1,9 +1,12 @@
 import 'dart:convert';
 
-import 'package:cryout_app/models/distress-call.dart';
+import 'package:cryout_app/main.dart';
+import 'package:cryout_app/models/distress-signal.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
+import 'package:cryout_app/models/recieved-safe-walk.dart';
 import 'package:cryout_app/models/safe-walk.dart';
 import 'package:cryout_app/models/user.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferenceUtil {
@@ -12,9 +15,11 @@ class SharedPreferenceUtil {
   static const _CURRENT_PHONE_NUMBER_FOR_VERIFICATION = "CURRENT_PHONE_NUMBER_FOR_VERIFICATION";
   static const _USER_AUTHENTICATION_TOKEN = "USER_AUTHENTICATION_TOKEN";
   static const _CURRENT_DISTRESS_CALL = "CURRENT_DISTRESS_CALL";
-  static const _CACHED_RECIEVED_DISTRESS_CALL = "CACHED_DISTRESS_CALL_";
+  static const _CACHED_RECEIVED_DISTRESS_CALL = "CACHED_DISTRESS_CALL_";
+  static const _CACHED_RECEIVED_SAFE_WALK = "CACHED_SAFE_WALK_";
   static const _TOPICS = "REGISTERED_TOPICS_KEY";
   static const _CURRENT_SAFE_WALK = "_CURRENT_SAFE_WALK";
+  static const _IS_SAFE_WALKING = "IS_SAFE_WALKING";
 
   static Future<User> currentUser() async {
     final prefs = await SharedPreferences.getInstance();
@@ -107,41 +112,54 @@ class SharedPreferenceUtil {
   }
 
   static Future<void> setSafeWalk(SafeWalk safeWalk) async {
-    final prefs = await SharedPreferences.getInstance();
+    User user = await currentUser();
+
+    DatabaseReference _dbPreference = database.reference().child('users').reference().child("${user.id}").reference().child("preferences").reference();
     if (safeWalk == null) {
-      prefs.remove(_CURRENT_SAFE_WALK);
+      _dbPreference.child(_CURRENT_SAFE_WALK).remove();
     } else {
-      prefs.setString(_CURRENT_SAFE_WALK, jsonEncode(safeWalk.toJson()));
+      _dbPreference.child(_CURRENT_SAFE_WALK).set(safeWalk.toJson());
     }
   }
 
   static Future<SafeWalk> getCurrentSafeWalk() async {
-    final prefs = await SharedPreferences.getInstance();
-    String dc = prefs.getString(_CURRENT_SAFE_WALK);
+    User user = await currentUser();
 
-    if (dc == null) {
+    DatabaseReference _dbPreference = database.reference().child('users').reference().child("${user.id}").reference().child("preferences").reference();
+    var dbSS = await _dbPreference.child(_CURRENT_SAFE_WALK).once();
+    dynamic sw = dbSS == null || dbSS.value == null ? null : dbSS.value;
+
+    if (sw == null) {
       return null;
     }
-    return SafeWalk.fromJSON(jsonDecode(dc));
+
+    return SafeWalk.fromJSON(sw);
   }
 
-  static Future<void> setCurrentDistressCall(DistressCall distressCall) async {
-    final prefs = await SharedPreferences.getInstance();
+  static Future<void> setCurrentDistressCall(DistressSignal distressCall) async {
+    User user = await currentUser();
+
+    DatabaseReference _dbPreference = database.reference().child('users').reference().child("${user.id}").reference().child("preferences").reference();
+
     if (distressCall == null) {
-      prefs.remove(_CURRENT_DISTRESS_CALL);
+      _dbPreference.child(_CURRENT_DISTRESS_CALL).remove();
     } else {
-      prefs.setString(_CURRENT_DISTRESS_CALL, jsonEncode(distressCall.toJson()));
+      _dbPreference.child(_CURRENT_DISTRESS_CALL).set(distressCall.toJson());
     }
   }
 
-  static Future<DistressCall> getCurrentDistressCall() async {
-    final prefs = await SharedPreferences.getInstance();
-    String dc = prefs.getString(_CURRENT_DISTRESS_CALL);
+  static Future<DistressSignal> getCurrentDistressCall() async {
+    User user = await currentUser();
 
-    if (dc == null) {
+    DatabaseReference _dbPreference = database.reference().child('users').reference().child("${user.id}").reference().child("preferences").reference();
+    var dbSS = await _dbPreference.child(_CURRENT_DISTRESS_CALL).once();
+    dynamic sw = dbSS == null || dbSS.value == null ? null : dbSS.value;
+
+    if (sw == null) {
       return null;
     }
-    return DistressCall.fromJSON(jsonDecode(dc));
+
+    return DistressSignal.fromJSON(sw);
   }
 
   static Future<void> clear() async {
@@ -151,7 +169,7 @@ class SharedPreferenceUtil {
 
   static Future<ReceivedDistressSignal> getCachedDistressCall(String distressCallId) async {
     final prefs = await SharedPreferences.getInstance();
-    String dc = prefs.getString("$_CACHED_RECIEVED_DISTRESS_CALL.$distressCallId");
+    String dc = prefs.getString("$_CACHED_RECEIVED_DISTRESS_CALL.$distressCallId");
 
     if (dc == null) {
       return null;
@@ -162,23 +180,23 @@ class SharedPreferenceUtil {
 
   static Future<void> saveCachedDistressCall(ReceivedDistressSignal receivedDistressSignal) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("$_CACHED_RECIEVED_DISTRESS_CALL.${receivedDistressSignal.distressId}", jsonEncode(receivedDistressSignal.toJSON()));
+    await prefs.setString("$_CACHED_RECEIVED_DISTRESS_CALL.${receivedDistressSignal.distressId}", jsonEncode(receivedDistressSignal.toJSON()));
   }
 
-  static Future<DistressCall> getCachedSafeWalkCall(String id) async {
+  static Future<ReceivedSafeWalk> getCachedSafeWalkCall(String id) async {
     final prefs = await SharedPreferences.getInstance();
-    String dc = prefs.getString("$_CACHED_RECIEVED_DISTRESS_CALL.$id");
+    String dc = prefs.getString("$_CACHED_RECEIVED_SAFE_WALK.$id");
 
     if (dc == null) {
       return null;
     }
 
-    return DistressCall.fromJSON(jsonDecode(dc));
+    return ReceivedSafeWalk.fromJSON(jsonDecode(dc));
   }
 
-  static Future<void> saveCachedSafeWalkCall(String id, SafeWalk safeWalk) async {
+  static Future<void> saveCachedSafeWalkCall(ReceivedSafeWalk safeWalk) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("$_CACHED_RECIEVED_DISTRESS_CALL.$id", jsonEncode(safeWalk.toJson()));
+    await prefs.setString("$_CACHED_RECEIVED_SAFE_WALK.${safeWalk.safeWalkId}", jsonEncode(safeWalk.toJSON()));
   }
 
   static Future<void> addToRegisteredTopic(String topicId) async {
@@ -215,4 +233,35 @@ class SharedPreferenceUtil {
     return topicList;
   }
 
+  static void startedSafeWalk() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_IS_SAFE_WALKING, true);
+  }
+
+  static void endSafeWalk() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_IS_SAFE_WALKING);
+  }
+
+  static Future<bool> isSafeWalking() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool isSafeWalking = prefs.getBool(_IS_SAFE_WALKING);
+    return isSafeWalking == null ? false : isSafeWalking;
+  }
+
+  static Future<void> updateUserLastKnownLocation(double lat, double lon) async {
+    User user = await currentUser();
+    DatabaseReference _dbPreference = database.reference().child('locations').reference().child("${user.id}").reference();
+    await _dbPreference.set({"lat": lat, "lon": lon});
+  }
+
+  static Future<dynamic> getUserLastKnownLocation(String userId) async {
+    DatabaseReference _dbPreference = database.reference().child('locations').reference().child("$userId").reference();
+    DataSnapshot snapshot = await _dbPreference.once();
+    if (snapshot == null || snapshot.value == null) {
+      return null;
+    }
+
+    return snapshot.value;
+  }
 }

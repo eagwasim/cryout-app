@@ -1,10 +1,10 @@
-class DistressCall {
+class DistressSignal {
   int id;
   String details;
   double lat;
   double lon;
 
-  DistressCall({this.id, this.details, this.lat, this.lon});
+  DistressSignal({this.id, this.details, this.lat, this.lon});
 
   Map<String, dynamic> toJson() {
     return {
@@ -15,8 +15,8 @@ class DistressCall {
     };
   }
 
-  static DistressCall fromJSON(dynamic json) {
-    return DistressCall(
+  static DistressSignal fromJSON(dynamic json) {
+    return DistressSignal(
       id: json["id"],
       details: json["details"],
       lat: json["lat"],

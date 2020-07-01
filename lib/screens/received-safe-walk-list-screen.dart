@@ -5,14 +5,17 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cryout_app/http/samaritan-resource.dart';
 import 'package:cryout_app/main.dart';
+import 'package:cryout_app/models/chat-message.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
 import 'package:cryout_app/models/recieved-safe-walk.dart';
+import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/translations.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_admob/flutter_native_admob.dart';
@@ -33,7 +36,7 @@ class _ReceivedSafeWalkListScreenState extends State {
   static final String testAdUnitId = Platform.isAndroid ? 'ca-app-pub-3940256099942544/2247696110' : 'ca-app-pub-3940256099942544/3986624511';
 
   NativeAdmobController _nativeAdController = NativeAdmobController();
-  RefreshController _refreshController = RefreshController(initialRefresh: true);
+  RefreshController _refreshController = RefreshController(initialRefresh: false);
   Translations _translations;
   StreamSubscription _subscription;
 
@@ -49,6 +52,7 @@ class _ReceivedSafeWalkListScreenState extends State {
     super.initState();
     _subscription = _nativeAdController.stateChanged.listen(_onStateChanged);
     ReceivedDistressSignalRepository.markAllAsOpened();
+    initialLoad();
   }
 
   @override
@@ -84,7 +88,7 @@ class _ReceivedSafeWalkListScreenState extends State {
               iconTheme: Theme.of(context).iconTheme,
               elevation: 0,
               brightness: Theme.of(context).brightness,
-              title: Text(_translations.text("screens.distress.signals.title"), style: TextStyle(color: Theme.of(context).textTheme.headline1.color)),
+              title: Text(_translations.text("screens.safe-walk.signals.title"), style: TextStyle(color: Theme.of(context).textTheme.headline1.color)),
               actions: <Widget>[
                 _isLoading
                     ? Center(
@@ -229,7 +233,7 @@ class _ReceivedSafeWalkListScreenState extends State {
                             padding: const EdgeInsets.only(right: 0.0, left: 8.0, top: 0, bottom: 4),
                             child: Row(
                               children: <Widget>[
-                                Expanded(child: Text(receivedSafeWalkSignal.userFirstName + " " + receivedSafeWalkSignal.userFirstName, style: TextStyle(fontSize: 18))),
+                                Expanded(child: Text(receivedSafeWalkSignal.userFirstName + " " + receivedSafeWalkSignal.userLastName, style: TextStyle(fontSize: 18))),
                               ],
                             ),
                           ),
@@ -258,7 +262,7 @@ class _ReceivedSafeWalkListScreenState extends State {
             )),
       ),
       onDismissed: (direction) {
-        _ignoreSafeWalkSignal(index, receivedSafeWalkSignal);
+        _ignoreSafeWalk(index, receivedSafeWalkSignal);
       },
     );
   }
@@ -277,14 +281,14 @@ class _ReceivedSafeWalkListScreenState extends State {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Image.asset(
-                    "assets/images/singing_bird.png",
+                    "assets/images/no_safe_walk.png",
                     height: 200,
                   ),
                 ),
               ],
             ),
             Text(
-              _translations.text("screens.distress.signals.empty"),
+              _translations.text("screens.safe-walk.signals.empty"),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.display2.color.withOpacity(0.8)),
               textAlign: TextAlign.center,
               maxLines: 4,
@@ -297,15 +301,31 @@ class _ReceivedSafeWalkListScreenState extends State {
 
   void _checkOutSafeWalkSignal(ReceivedSafeWalk receivedSafeWalk) async {
     FireBaseHandler.subscribeSafeWalkChannelTopic(receivedSafeWalk.safeWalkId);
-    locator<NavigationService>().pushNamed(Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN, arguments: receivedSafeWalk.safeWalkId);
+
+    if (!await SharedPreferenceUtil.getBool("safe-walk.logged." + receivedSafeWalk.safeWalkId, false)) {
+      User user = await SharedPreferenceUtil.currentUser();
+      DatabaseReference reference = database.reference().child('safe_walk_channel').reference().child("${receivedSafeWalk.safeWalkId}").reference().child("messages").reference();
+
+      ChatMessage chatMessage = ChatMessage(
+        body: user.shortName() + " ${_translations.text("screens.common.messages.joined")}",
+        dateCreated: DateTime.now(),
+        displayType: "n",
+      );
+
+      reference.push().set(chatMessage.toJSON());
+
+      await SharedPreferenceUtil.setBool("safe-walk.logged." + receivedSafeWalk.safeWalkId, true);
+    }
+
+    locator<NavigationService>().pushNamed(Routes.SAFE_WALK_WATCHER_SCREEN, arguments: receivedSafeWalk.safeWalkId);
   }
 
-  void _ignoreSafeWalkSignal(int index, ReceivedSafeWalk receivedSafeWalk) async {
+  void _ignoreSafeWalk(int index, ReceivedSafeWalk receivedSafeWalk) async {
     setState(() {
       _receivedSafeWalkList.removeAt(index);
     });
 
-    Response response = await SamaritanResource.dismissDistressSignals(context, receivedSafeWalk.safeWalkId);
+    Response response = await SamaritanResource.dismissSafeWalk(context, receivedSafeWalk.safeWalkId);
 
     if (response.statusCode != 200) {
       setState(() {
@@ -315,14 +335,21 @@ class _ReceivedSafeWalkListScreenState extends State {
     }
 
     FireBaseHandler.unSubscribeToSafeWalkChannelTopic(receivedSafeWalk.safeWalkId);
+
     SharedPreferenceUtil.setBool(PreferenceConstants.SAFE_WALK_CHANNEL_MUTED + receivedSafeWalk.safeWalkId, null);
 
-    if (!await SharedPreferenceUtil.getBool("safe-walk.logged.count." + receivedSafeWalk.safeWalkId, false)) {
-      var _distressChannelStatRef = database.reference().child('safe_walk_channel').reference().child("${receivedSafeWalk.safeWalkId}").reference().child("stats").reference();
-      var dbSS = await _distressChannelStatRef.child("samaritan_count").once();
-      var _samaritanCount = dbSS == null || dbSS.value == null ? 0 : dbSS.value as int;
-      _distressChannelStatRef.child("samaritan_count").set(_samaritanCount - 1);
-      SharedPreferenceUtil.setBool("safe-walk.logged.count." + receivedSafeWalk.safeWalkId, false);
+    if (!await SharedPreferenceUtil.getBool("safe-walk.logged." + receivedSafeWalk.safeWalkId, false)) {
+      User user = await SharedPreferenceUtil.currentUser();
+      DatabaseReference reference = database.reference().child('safe_walk_channel').reference().child("${receivedSafeWalk.safeWalkId}").reference().child("messages").reference();
+
+      ChatMessage chatMessage = ChatMessage(
+        body: user.shortName() + " ${_translations.text("screens.common.messages.left")}",
+        dateCreated: DateTime.now(),
+        displayType: "n",
+      );
+
+      await reference.push().set(chatMessage.toJSON());
+      await SharedPreferenceUtil.setBool("safe-walk.logged." + receivedSafeWalk.safeWalkId, false);
     }
 
     await ReceivedSafeWalkRepository.delete(receivedSafeWalk);
@@ -347,13 +374,34 @@ class _ReceivedSafeWalkListScreenState extends State {
     }
   }
 
+  Future<void> initialLoad() async {
+    Response response = await SamaritanResource.getUserReceivedSafeWalks(context, _currentCursor);
+
+    if (response.statusCode == 200) {
+      dynamic data = jsonDecode(response.body)['data'];
+      List<ReceivedSafeWalk> signalsFromServer = (data['data'] as List<dynamic>).map((e) => ReceivedSafeWalk.fromJSON(e)).toList();
+
+      await ReceivedSafeWalkRepository.clear();
+      _receivedSafeWalkList.clear();
+
+      for (int i = 0; i < signalsFromServer.length; i++) {
+        await ReceivedSafeWalkRepository.save(signalsFromServer.elementAt(i));
+      }
+
+      setState(() {
+        _receivedSafeWalkList.addAll(signalsFromServer);
+      });
+    }
+  }
+
   Future<void> _loadFromServer() async {
     if (_refreshController.isRefresh) {
       _currentCursor = null;
     }
 
-    Response response = await SamaritanResource.getUserReceivedDistressSignals(context, _currentCursor);
+    Response response = await SamaritanResource.getUserReceivedSafeWalks(context, _currentCursor);
 
+    print(response.statusCode);
     if (response.statusCode != 200) {
       if (_refreshController.isRefresh) {
         _refreshController.refreshFailed();
@@ -372,13 +420,16 @@ class _ReceivedSafeWalkListScreenState extends State {
     if (_refreshController.isRefresh) {
       await ReceivedSafeWalkRepository.clear();
       _receivedSafeWalkList.clear();
-      setState(() {
-        _receivedSafeWalkList.addAll(signalsFromServer);
-      });
-      signalsFromServer.forEach((element) => ReceivedSafeWalkRepository.save(element));
-    } else {
-      _receivedSafeWalkList.addAll(signalsFromServer);
     }
+
+    for (int i = 0; i < signalsFromServer.length; i++) {
+      await ReceivedSafeWalkRepository.save(signalsFromServer.elementAt(i));
+    }
+
+    setState(() {
+      _receivedSafeWalkList.addAll(signalsFromServer);
+    });
+
     _refreshController.refreshCompleted();
 
     return signalsFromServer;

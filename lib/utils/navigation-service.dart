@@ -1,13 +1,15 @@
-import 'package:cryout_app/models/distress-call.dart';
+import 'package:cryout_app/models/distress-signal.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
-import 'package:cryout_app/screens/base-screen.dart';
 import 'package:cryout_app/screens/distress-category-selection-screen.dart';
 import 'package:cryout_app/screens/emergency-contacts-management-screen.dart';
+import 'package:cryout_app/screens/home-screen.dart';
 import 'package:cryout_app/screens/introduction-screen.dart';
 import 'package:cryout_app/screens/phone-confirmation-screen.dart';
 import 'package:cryout_app/screens/phone-verification-screen.dart';
 import 'package:cryout_app/screens/received-distress-signal-list-screen.dart';
+import 'package:cryout_app/screens/received-safe-walk-list-screen.dart';
 import 'package:cryout_app/screens/safe-walk-walker-screen.dart';
+import 'package:cryout_app/screens/safe-walk-watcher-screen.dart';
 import 'package:cryout_app/screens/safewalk-creation-screen.dart';
 import 'package:cryout_app/screens/samaritan-distress-channel-screen.dart';
 import 'package:cryout_app/screens/splash-screen.dart';
@@ -67,8 +69,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case Routes.INTRODUCTION_SCREEN:
       return MaterialPageRoute(builder: (context) => AppIntroductionScreen());
-    case Routes.BASE_SCREEN:
-      return MaterialPageRoute(builder: (context) => BaseScreen());
+    case Routes.HOME_SCREEN:
+      return MaterialPageRoute(builder: (context) => HomeScreen());
     case Routes.SPLASH_SCREEN:
       return MaterialPageRoute(builder: (context) => SplashScreen());
     case Routes.PHONE_VERIFICATION_SCREEN:
@@ -82,7 +84,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case Routes.DISTRESS_CATEGORY_SELECTION_SCREEN:
       return MaterialPageRoute(builder: (context) => DistressCategorySelectionScreen());
     case Routes.VICTIM_DISTRESS_CHANNEL_SCREEN:
-      var argument = settings.arguments as DistressCall;
+      var argument = settings.arguments as DistressSignal;
       return MaterialPageRoute(builder: (context) => VictimDistressChannelScreen(distressCall: argument));
     case Routes.RECEIVED_DISTRESS_SIGNAL_SCREEN:
       return MaterialPageRoute(builder: (context) => ReceivedDistressSignalListScreen());
@@ -101,6 +103,11 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(builder: (context) => SafeWalkCreationScreen());
     case Routes.SAFE_WALK_WALKER_SCREEN:
       return MaterialPageRoute(builder: (context) => SafeWalkWalkerScreen());
+    case Routes.RECEIVED_SAFE_WALK_LIST_SCREEN:
+      return MaterialPageRoute(builder: (context) => ReceivedSafeWalkListScreen());
+    case Routes.SAFE_WALK_WATCHER_SCREEN:
+      var argument = settings.arguments as String;
+      return MaterialPageRoute(builder: (context) => SafeWalkWatcherScreen(safeWalkID: argument));
     default:
       return MaterialPageRoute(builder: (context) => SplashScreen());
   }

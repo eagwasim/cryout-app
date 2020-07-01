@@ -5,9 +5,11 @@ import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/chat-message.dart';
 import 'package:cryout_app/models/safe-walk.dart';
 import 'package:cryout_app/models/user.dart';
+import 'package:cryout_app/utils/background_location_update.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/notification-handler.dart';
+import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/translations.dart';
@@ -19,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:location/location.dart';
 import 'package:uuid/uuid.dart';
 
 class SafeWalkWalkerScreen extends StatefulWidget {
@@ -136,7 +139,7 @@ class _SafeWalkWalkerScreenState extends State {
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide.none,
                               ),
-                              hintText: _translations.text("screens.samaritan-distress-channel-screen.send-message"),
+                              hintText: _translations.text("screens.safe-walk-creation.hints.chat"),
                             ),
                             autofocus: false,
                             controller: _chatInputTextController,
@@ -180,6 +183,11 @@ class _SafeWalkWalkerScreenState extends State {
     _user = await SharedPreferenceUtil.currentUser();
     _currentSafeWalk = await SharedPreferenceUtil.getCurrentSafeWalk();
 
+    if (_currentSafeWalk == null) {
+      locator<NavigationService>().pop(result: true);
+      return;
+    }
+
     _messageDBRef = database.reference().child('safe_walk').reference().child("${_currentSafeWalk.id}").reference().child("messages").reference();
     _messageDBRef.keepSynced(true);
 
@@ -188,7 +196,13 @@ class _SafeWalkWalkerScreenState extends State {
     });
 
     NotificationHandler.subscribeRoute("${Routes.SAFE_WALK_WALKER_SCREEN}${_currentSafeWalk.id}");
+    location.changeSettings(accuracy: LocationAccuracy.navigation, distanceFilter: 0, interval: 1000);
+    location.onLocationChanged.listen((LocationData currentLocation) {
+      SharedPreferenceUtil.updateUserLastKnownLocation(currentLocation.latitude, currentLocation.longitude);
+    });
   }
+
+  Location location = new Location();
 
   void _sendMessage(String message) {
     ChatMessage chatMessage = ChatMessage(
@@ -231,8 +245,8 @@ class _SafeWalkWalkerScreenState extends State {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          title: new Text(_translations.text("screens.victim-distress-channel-screen.resolve")),
-          content: new Text(_translations.text("screens.victim-distress-channel-screen.resolve.message")),
+          title: new Text(_translations.text("screens.safe-walk-creation.close.dialog.title")),
+          content: new Text(_translations.text("screens.safe-walk-creation.close.dialog.message")),
           actions: <Widget>[
             // usually buttons at the bottom of the dialog
             new FlatButton(
@@ -243,11 +257,11 @@ class _SafeWalkWalkerScreenState extends State {
             ),
             new FlatButton(
               child: new Text(
-                _translations.text("screens.victim-distress-channel-screen.resolve"),
+                _translations.text("screens.common.end"),
                 style: TextStyle(color: Colors.green),
               ),
               onPressed: () {
-                _closeDistressCall();
+                _endSafeWalk();
                 Navigator.of(context).pop();
               },
             ),
@@ -257,7 +271,7 @@ class _SafeWalkWalkerScreenState extends State {
     );
   }
 
-  void _closeDistressCall() async {
+  void _endSafeWalk() async {
     setState(() {
       _isDismissingSafeWalk = true;
     });
@@ -265,20 +279,30 @@ class _SafeWalkWalkerScreenState extends State {
     Response response = await SafeWalkResource.closeSafeWalk(context, _currentSafeWalk.id);
 
     if (response.statusCode == 200) {
-
       SharedPreferenceUtil.setSafeWalk(null);
 
       DatabaseReference _messageDBRef = database.reference().child('safe_walk').reference().child("${_currentSafeWalk.id}").reference().child("messages").reference();
 
       ChatMessage chatMessage = ChatMessage(
-        body: "${_user.shortName()} ${_translations.text("screens.victim-distress-channel-screen.left.the.chat")}",
+        body: "${_user.shortName()} ${_translations.text("screens.safe-walk.walker-screen.left.the.chat")}",
         userId: _user.id,
         dateCreated: DateTime.now(),
         displayType: "n",
       );
 
       _messageDBRef.push().set(chatMessage.toJSON());
+
       FireBaseHandler.unSubscribeToDistressChannelTopic("${_currentSafeWalk.id}");
+
+      SharedPreferenceUtil.endSafeWalk();
+      DatabaseReference _userPreferenceDatabaseReference = database.reference().child('users').reference().child("${_user.id}").reference().child("preferences").reference();
+      DataSnapshot dbSS = await _userPreferenceDatabaseReference.child(PreferenceConstants.SAMARITAN_MODE_ENABLED).once();
+
+      bool _samaritan = dbSS == null || dbSS.value == null ? false : dbSS.value;
+
+      if (!_samaritan) {
+        BackgroundLocationUpdate.stopLocationTracking();
+      }
 
       locator<NavigationService>().pop(result: true);
     } else {

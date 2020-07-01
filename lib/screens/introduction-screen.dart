@@ -20,22 +20,22 @@ class _AppIntroductionScreenState extends State {
     if (pages == null) {
       pages = [
         PageViewModel(
-          image: _fromImage("assets/images/connected.png"),
+          image: _fromImage("assets/images/intro_stage_one.png"),
           title: Translations.of(context).text('screens.introduction.page.one.title'),
           body: Translations.of(context).text('screens.introduction.page.one.message'),
         ),
         PageViewModel(
-          image: _fromImage("assets/images/man_shield.png"),
+          image: _fromImage("assets/images/intro_stage_two.png"),
           title: Translations.of(context).text('screens.introduction.page.two.title'),
           body: Translations.of(context).text('screens.introduction.page.two.message'),
         ),
         PageViewModel(
-          image: _fromImage("assets/images/protected.png"),
+          image: _fromImage("assets/images/intro_stage_three.png"),
           title: Translations.of(context).text('screens.introduction.page.three.title'),
           body: Translations.of(context).text('screens.introduction.page.three.message'),
         ),
         PageViewModel(
-          image: _fromImage("assets/images/standout.png"),
+          image: _fromImage("assets/images/intro_stage_four.png"),
           title: Translations.of(context).text('screens.introduction.page.four.title'),
           body: Translations.of(context).text('screens.introduction.page.four.message'),
         ),

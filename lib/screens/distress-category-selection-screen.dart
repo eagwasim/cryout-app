@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:cryout_app/http/base-resource.dart';
 import 'package:cryout_app/http/distress-resource.dart';
-import 'package:cryout_app/models/distress-call.dart';
+import 'package:cryout_app/models/distress-signal.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/routes.dart';
@@ -126,7 +126,7 @@ class _DistressCategorySelectionScreenState extends State {
 
     Map<String, dynamic> responseData = jsonDecode(response.body)["data"];
 
-    DistressCall distressCall = DistressCall.fromJSON(responseData);
+    DistressSignal distressCall = DistressSignal.fromJSON(responseData);
 
 /*    User _user = await SharedPreferenceUtil.currentUser();
 

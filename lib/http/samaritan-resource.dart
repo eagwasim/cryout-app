@@ -87,4 +87,50 @@ class SamaritanResource {
     }
     return response;
   }
+
+
+  static Future<Response> getUserReceivedSafeWalks(BuildContext context, String cursor) async {
+    String token = await SharedPreferenceUtil.getToken();
+    Map<String, String> headers = Map.from(BaseResource.HEADERS);
+    headers["Authorization"] = "Bearer " + token;
+
+    Response response = await get(BaseResource.BASE_URL + _RESOURCE_URL + "/safe/walks${cursor == null ? '' : '?cursor=' + cursor}", headers: headers);
+
+    if (response.statusCode == 401) {
+      if (await AccessResource.refreshToken(context)) {
+        return getUserReceivedSafeWalks(context, cursor);
+      }
+    }
+    return response;
+  }
+
+  static Future<Response> getUserReceivedSafeWalk(BuildContext context, String id) async {
+    String token = await SharedPreferenceUtil.getToken();
+    Map<String, String> headers = Map.from(BaseResource.HEADERS);
+    headers["Authorization"] = "Bearer " + token;
+
+    Response response = await get(BaseResource.BASE_URL + _RESOURCE_URL + "/safe/walks/$id", headers: headers);
+
+    if (response.statusCode == 401) {
+      if (await AccessResource.refreshToken(context)) {
+        return getUserReceivedSafeWalk(context, id);
+      }
+    }
+    return response;
+  }
+
+  static Future<Response> dismissSafeWalk(BuildContext context, String id) async {
+    String token = await SharedPreferenceUtil.getToken();
+    Map<String, String> headers = Map.from(BaseResource.HEADERS);
+    headers["Authorization"] = "Bearer " + token;
+
+    Response response = await delete(BaseResource.BASE_URL + _RESOURCE_URL + "/safe/walks/$id", headers: headers);
+
+    if (response.statusCode == 401) {
+      if (await AccessResource.refreshToken(context)) {
+        return dismissDistressSignals(context, id);
+      }
+    }
+    return response;
+  }
 }

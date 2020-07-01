@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:cryout_app/http/distress-resource.dart';
 import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/chat-message.dart';
-import 'package:cryout_app/models/distress-call.dart';
+import 'package:cryout_app/models/distress-signal.dart';
 import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
@@ -23,7 +23,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 class VictimDistressChannelScreen extends StatefulWidget {
-  final DistressCall distressCall;
+  final DistressSignal distressCall;
 
   const VictimDistressChannelScreen({Key key, this.distressCall}) : super(key: key);
 
@@ -34,7 +34,7 @@ class VictimDistressChannelScreen extends StatefulWidget {
 }
 
 class _VictimDistressChannelScreenState extends State {
-  DistressCall _distressCall;
+  DistressSignal _distressCall;
   TextEditingController _chatInputTextController;
   Translations _translations;
   String _currentChatMessage = "";
@@ -71,19 +71,7 @@ class _VictimDistressChannelScreenState extends State {
             backgroundColor: Theme.of(context).backgroundColor,
             appBar: AppBar(
               backgroundColor: Colors.red,
-              title: Column(
-                children: <Widget>[
-                  Text(_translations.text("choices.distress.categories.${_distressCall.details}")),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4.0),
-                    child: Text(
-                      "",
-                      style: TextStyle(fontSize: 10, color: Colors.grey),
-                    ),
-                  )
-                ],
-                crossAxisAlignment: CrossAxisAlignment.start,
-              ),
+              title: Text(_translations.text("choices.distress.categories.${_distressCall.details}")),
               elevation: 0,
               centerTitle: false,
               brightness: Brightness.dark,
@@ -182,6 +170,10 @@ class _VictimDistressChannelScreenState extends State {
   }
 
   void _setUp() async {
+    if(_distressCall == null){
+      locator<NavigationService>().pop(result: true);
+      return;
+    }
     _user = await SharedPreferenceUtil.currentUser();
 
     _messageDBRef = database.reference().child('distress_channel').reference().child("${_distressCall.id}").reference().child("messages").reference();

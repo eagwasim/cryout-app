@@ -4,7 +4,6 @@ import 'package:cryout_app/utils/shared-preference-util.dart';
 class Routes {
   static const INTRODUCTION_SCREEN = '/introduction-screen';
   static const HOME_SCREEN = '/home-screen';
-  static const BASE_SCREEN = '/base-screen';
   static const PHONE_CONFIRMATION_SCREEN = '/phone-confirmation-screen';
   static const PHONE_VERIFICATION_SCREEN = '/phone-verification-screen';
   static const SPLASH_SCREEN = '/splash-screen';
@@ -20,6 +19,7 @@ class Routes {
   static const START_SAFE_WALK_SCREEN = "/start-safe-walk-screen";
   static const SAFE_WALK_WALKER_SCREEN = "/safe-walk-walker-screen";
   static const SAFE_WALK_WATCHER_SCREEN = "/safe-walk-watcher-screen";
+  static const RECEIVED_SAFE_WALK_LIST_SCREEN = "/received-safe-walk-list-screen";
 
   static Future<String> initialRoute() async {
     User user = await SharedPreferenceUtil.currentUser();
@@ -31,7 +31,7 @@ class Routes {
     } else if (user.profilePhoto == "") {
       return USER_PROFILE_PHOTO_UPDATE_SCREEN;
     } else {
-      return BASE_SCREEN;
+      return HOME_SCREEN;
     }
   }
 }

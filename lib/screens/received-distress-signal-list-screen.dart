@@ -35,7 +35,7 @@ class _ReceivedDistressSignalListScreenState extends State {
   static final String testAdUnitId = Platform.isAndroid ? 'ca-app-pub-3940256099942544/2247696110' : 'ca-app-pub-3940256099942544/3986624511';
 
   NativeAdmobController _nativeAdController = NativeAdmobController();
-  RefreshController _refreshController = RefreshController(initialRefresh: true);
+  RefreshController _refreshController = RefreshController(initialRefresh: false);
   Translations _translations;
   StreamSubscription _subscription;
 
@@ -51,6 +51,7 @@ class _ReceivedDistressSignalListScreenState extends State {
     super.initState();
     _subscription = _nativeAdController.stateChanged.listen(_onStateChanged);
     ReceivedDistressSignalRepository.markAllAsOpened();
+    _loadFromServer();
   }
 
   @override

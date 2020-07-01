@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cryout_app/main.dart';
-import 'package:cryout_app/models/distress-call.dart';
+import 'package:cryout_app/models/distress-signal.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
 import 'package:cryout_app/models/recieved-safe-walk.dart';
 import 'package:cryout_app/models/user.dart';
@@ -50,9 +50,67 @@ class NotificationHandler {
         _handleDistressChannelMessage(notificationData, isAppLaunch);
       } else if (notificationData['type'] == NOTIFICATION_TYPE_ACCOUNT_BLOCKED) {
         _handleAccountBlocked(isAppLaunch);
+      } else if (notificationData['type'] == NOTIFICATION_TYPE_SAFE_WALK_START_NOTIFICATION) {
+        _handleNewSafeWalkNotification(notificationData, isAppLaunch);
+      } else if (notificationData['type'] == NOTIFICATION_TYPE_SAFE_WALK_CHANNEL_MESSAGE) {
+        _handleSafeWalkChannelMessage(notificationData, isAppLaunch);
       }
     } catch (e) {
       print(e);
+    }
+  }
+
+  static void _handleSafeWalkChannelMessage(data, bool isAppLaunch) async {
+    User user = await SharedPreferenceUtil.currentUser();
+
+    String senderUserId = data["senderUserId"];
+    String safeWalkChannelId = data["safeWalkChannelId"];
+    String safeWalkUserId = data["safeWalkUserId"];
+    String senderName = data["senderName"];
+    String message = data["message"];
+    String messageType = data["messageType"];
+
+    if (user.id == senderUserId) {
+      return;
+    }
+    // Is Victim Channel
+    if (user.id == safeWalkUserId) {
+      var payload = {"route": Routes.SAFE_WALK_WALKER_SCREEN, "safeWalkID": safeWalkChannelId};
+
+      if (!isAppLaunch || !_notificationChanelSubscription.containsKey(Routes.SAFE_WALK_WALKER_SCREEN + safeWalkChannelId)) {
+        if (messageType == 'text') {
+          _showMessageNotification(senderName, message, payload);
+        } else if (messageType == 'img') {
+          _showMessageNotificationWithImage(senderName, "Image", message, payload);
+        }
+      } else {
+        _handleSafeWalkWalkerMessageNotificationClick(payload);
+      }
+    } else {
+      var payload = {"route": Routes.SAFE_WALK_WATCHER_SCREEN, "safeWalkID": safeWalkChannelId};
+
+      if (!isAppLaunch || !_notificationChanelSubscription.containsKey(Routes.SAFE_WALK_WATCHER_SCREEN + safeWalkChannelId)) {
+        if (messageType == 'text') {
+          _showMessageNotification(senderName, message, payload);
+        } else if (messageType == 'img') {
+          _showMessageNotificationWithImage(senderName, "Image", message, payload);
+        }
+      } else {
+        _handleSafeWalkWatcherMessageNotificationClick(payload);
+      }
+    }
+  }
+
+  static void _handleNewSafeWalkNotification(notificationData, bool isAppLaunch) {
+    if (!isAppLaunch) {
+      var payload = {"route": Routes.RECEIVED_SAFE_WALK_LIST_SCREEN};
+      _showDistressSignalNotification(
+        notificationData['fullName'],
+        'Watch me on the go. Dest: ${notificationData['destination']}',
+        payload,
+      );
+    } else {
+      _handleSafeWalkNotificationClick();
     }
   }
 
@@ -153,6 +211,12 @@ class NotificationHandler {
       _handleVictimDistressSignalMessageNotificationClick(payloadData);
     } else if (payloadData['route'] == Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN) {
       _handleSamaritanDistressSignalMessageNotificationClick(payloadData);
+    } else if (payloadData['route'] == Routes.RECEIVED_SAFE_WALK_LIST_SCREEN) {
+      _handleSafeWalkNotificationClick();
+    } else if (payloadData['route'] == Routes.SAFE_WALK_WALKER_SCREEN) {
+      _handleSafeWalkWalkerMessageNotificationClick(payloadData);
+    } else if (payloadData['route'] == Routes.SAFE_WALK_WATCHER_SCREEN) {
+      _handleSafeWalkWatcherMessageNotificationClick(payloadData);
     }
   }
 
@@ -162,7 +226,7 @@ class NotificationHandler {
     var userPreferenceDatabaseReference = database.reference().child('users').reference().child("${user.id}").reference().child("preferences").reference();
     var dbSS = await userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).once();
 
-    var currentDistressCall = (dbSS == null || dbSS.value == null) ? null : DistressCall.fromJSON(dbSS.value);
+    var currentDistressCall = (dbSS == null || dbSS.value == null) ? null : DistressSignal.fromJSON(dbSS.value);
 
     // Not the current distress call so skip notification
     if (currentDistressCall == null || "${currentDistressCall.id}" != data['distressChannelId']) {
@@ -175,8 +239,20 @@ class NotificationHandler {
     locator<NavigationService>().pushNamed(Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN, arguments: data["distressChannelId"]);
   }
 
+  static Future<void> _handleSafeWalkWatcherMessageNotificationClick(dynamic data) async {
+    locator<NavigationService>().pushNamed(Routes.SAFE_WALK_WATCHER_SCREEN, arguments: data["safeWalkID"]);
+  }
+
+  static Future<void> _handleSafeWalkWalkerMessageNotificationClick(dynamic data) async {
+    locator<NavigationService>().pushNamed(Routes.SAFE_WALK_WALKER_SCREEN);
+  }
+
   static Future<void> _handleDistressSignalNotificationClick() async {
     locator<NavigationService>().pushNamed(Routes.RECEIVED_DISTRESS_SIGNAL_SCREEN);
+  }
+
+  static Future<void> _handleSafeWalkNotificationClick() async {
+    locator<NavigationService>().pushNamed(Routes.RECEIVED_SAFE_WALK_LIST_SCREEN);
   }
 
   static Future<void> _onDidReceiveLocalNotification(int id, String title, String body, String payload) async {
@@ -290,4 +366,6 @@ class NotificationHandler {
   static const String NOTIFICATION_TYPE_DISTRESS_SIGNAL_ALERT = 'DISTRESS_SIGNAL_ALERT';
   static const String NOTIFICATION_TYPE_DISTRESS_CHANNEL_MESSAGE = 'DISTRESS_CHANNEL_MESSAGE';
   static const String NOTIFICATION_TYPE_ACCOUNT_BLOCKED = 'ACCOUNT_BLOCKED';
+  static const String NOTIFICATION_TYPE_SAFE_WALK_START_NOTIFICATION = 'SAFE_WALK_START_NOTIFICATION';
+  static const String NOTIFICATION_TYPE_SAFE_WALK_CHANNEL_MESSAGE = 'SAFE_WALK_CHANNEL_MESSAGE';
 }

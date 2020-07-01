@@ -1,4 +1,5 @@
 import 'package:cryout_app/utils/database-provider.dart';
+import 'package:cryout_app/utils/etc-utils.dart';
 import 'package:sqflite/sqflite.dart';
 
 class ReceivedSafeWalk {
@@ -33,7 +34,7 @@ class ReceivedSafeWalk {
       id: json["id"],
       userId: json["userId"],
       destination: json["destination"],
-      dateCreated: json["dateCreated"],
+      dateCreated: EtcUtils.dateTimeFrom(json["dateCreated"]),
       userPhoto: json["userPhoto"],
       safeWalkId: json["safeWalkId"],
       userLastName: json["userLastName"],

@@ -116,4 +116,5 @@ class FireBaseHandler {
       _firebaseMessaging.unsubscribeFromTopic(element);
     });
   }
+
 }

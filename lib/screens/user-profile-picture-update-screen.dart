@@ -210,7 +210,7 @@ class _ProfilePictureUpdateScreenState extends State {
 
       await SharedPreferenceUtil.saveUser(_user);
 
-      locator<NavigationService>().pushNamedAndRemoveUntil(Routes.BASE_SCREEN);
+      locator<NavigationService>().pushNamedAndRemoveUntil(Routes.HOME_SCREEN);
     } else {
       print("Saving Failed ${response.statusCode}");
       setState(() {
