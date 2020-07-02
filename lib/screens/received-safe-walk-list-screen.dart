@@ -365,7 +365,7 @@ class _ReceivedSafeWalkListScreenState extends State {
 
       case AdLoadState.loadCompleted:
         setState(() {
-          _addHeight = 100;
+          _addHeight = 124;
         });
         break;
 

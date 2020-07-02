@@ -104,7 +104,7 @@ class _PhoneVerificationScreenState extends State {
                             shape: RoundedRectangleBorder(
                               borderRadius: new BorderRadius.circular(25.0),
                             ),
-                            child: Text(_translations.text("screens.common.continue")),
+                            child: Text(_translations.text("screens.common.continue"), style: TextStyle(color: Colors.white),),
                             onPressed: () async {
                               if (!_isValid) {
                                 return;

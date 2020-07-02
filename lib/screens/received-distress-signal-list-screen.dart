@@ -135,7 +135,7 @@ class _ReceivedDistressSignalListScreenState extends State {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.only(top: 0, bottom: 4, left: 8.0, right: 8),
                         child: NativeAdmob(
                           // Your ad unit id
                           adUnitID: Platform.isIOS ? FireBaseHandler.IOS_NATIVE_AD_UNIT_ID : FireBaseHandler.ANDROID_NATIVE_AD_UNIT_ID,
@@ -366,7 +366,7 @@ class _ReceivedDistressSignalListScreenState extends State {
 
       case AdLoadState.loadCompleted:
         setState(() {
-          _addHeight = 100;
+          _addHeight = 124;
         });
         break;
 
