@@ -23,6 +23,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
+import 'package:package_info/package_info.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -42,6 +43,8 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
 
   DatabaseReference _userPreferenceDatabaseReference;
   List<StreamSubscription<Event>> _preferenceListeners = [];
+
+  PackageInfo _packageInfo;
 
   @override
   void initState() {
@@ -449,6 +452,8 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
       });
     }
 
+    _packageInfo = await PackageInfo.fromPlatform();
+
     DistressSignal distressCall = await SharedPreferenceUtil.getCurrentDistressCall();
     SafeWalk safeWalk = await SharedPreferenceUtil.getCurrentSafeWalk();
 
@@ -623,6 +628,14 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                           locator<NavigationService>().pushNamed(Routes.STATIC_WEB_PAGE_VIEW_SCREEN, arguments: WebPageModel("Terms of Service", "${BaseResource.BASE_URL}/pages/terms-of-service"));
                         },
                       ),
+                      Text(" • "),
+                      Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Text(
+                          _packageInfo.version,
+                          style: TextStyle(fontSize: 10),
+                        ),
+                      )
                     ],
                   ),
                 ),

@@ -366,7 +366,7 @@ class _ReceivedDistressSignalListScreenState extends State {
 
       case AdLoadState.loadCompleted:
         setState(() {
-          _addHeight = 124;
+          _addHeight = 100;
         });
         break;
 

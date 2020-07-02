@@ -140,5 +140,7 @@
   "screens.safe-walk.watcher.distress.call.error.location.message": "Can't send distress call, user hasn't posted any location updates. Please contact the authorities",
   "screens.safe-walk.watcher.distress.call.error.conflict.title": "Active distress signal",
   "screens.safe-walk.watcher.distress.call.error.conflict.message": "You already have an active distress signal",
-  "screens.safe-walk.walker-screen.left.the.chat": "Arrived their destination. If you still suspect something weired, please report to the appropriate authority"
+  "screens.safe-walk.walker-screen.left.the.chat": "Arrived their destination. If you still suspect something weired, please report to the appropriate authority",
+  "screens.phone-verification.error.message": "Invalid phone number",
+  "screens.emergency-contacts.empty.message": "You have no emergency contacts"
 }

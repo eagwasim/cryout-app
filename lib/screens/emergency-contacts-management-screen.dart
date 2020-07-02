@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:contact_picker/contact_picker.dart';
+import 'package:contact_picker/contact_picker.dart' as cp;
 import 'package:cryout_app/http/user-resource.dart';
 import 'package:cryout_app/models/emergency-contact.dart';
 import 'package:cryout_app/models/user.dart';
@@ -10,6 +10,7 @@ import 'package:cryout_app/utils/widget-utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 class EmergencyContactsManagementScreen extends StatefulWidget {
   @override
@@ -23,16 +24,13 @@ class _EmergencyContactsManagementScreenState extends State {
   String _internationalizedPhoneNumber = "";
   String _fullName = "";
 
-  final ContactPicker _contactPicker = new ContactPicker();
+  final cp.ContactPicker _contactPicker = new cp.ContactPicker();
 
   TextEditingController _fullNameController;
   TextEditingController _phoneNumberController;
 
-
   bool _savingPhoneNumber = false;
   bool _setUpComplete = false;
-
-  List<EmergencyContact> _emergencyContacts = [];
 
   User _user;
 
@@ -129,11 +127,16 @@ class _EmergencyContactsManagementScreenState extends State {
                                       Expanded(
                                         child: FlatButton.icon(
                                           onPressed: () async {
-                                            Contact contact = await _contactPicker.selectContact();
+                                            cp.Contact contact = await _contactPicker.selectContact();
+
                                             if (contact != null) {
+                                              if (contact.phoneNumber.number.startsWith("+")) {
+                                                _internationalizedPhoneNumber = contact.phoneNumber.number;
+                                              } else {
+                                                _internationalizedPhoneNumber = await _formatPhoneNumber(contact.phoneNumber.number);
+                                              }
                                               setState(() {
                                                 _fullName = contact.fullName;
-                                                _internationalizedPhoneNumber = contact.phoneNumber.number.replaceAll(new RegExp("[^\+0-9]"), "");
                                               });
                                             }
                                           },
@@ -148,8 +151,8 @@ class _EmergencyContactsManagementScreenState extends State {
                                       ),
                                       Expanded(
                                         child: FlatButton.icon(
-                                          onPressed: () {
-                                            _internationalizedPhoneNumber = _internationalizedPhoneNumber.replaceAll(new RegExp("[^\+0-9]"), "");
+                                          onPressed: () async {
+                                            _internationalizedPhoneNumber = await _formatPhoneNumber(_internationalizedPhoneNumber.replaceAll(new RegExp("[^\+0-9]"), ""));
 
                                             if (_internationalizedPhoneNumber.trim() == "" || _fullName.trim() == "") {
                                               return;
@@ -192,6 +195,9 @@ class _EmergencyContactsManagementScreenState extends State {
                       child: FutureBuilder<List<EmergencyContact>>(
                     future: EmergencyContactRepository.all(),
                     builder: (context, snapshot) {
+                      if (!snapshot.hasData || snapshot.data.length == 0) {
+                        return _getNoItemsView();
+                      }
                       return ListView.builder(itemCount: snapshot.data.length, itemBuilder: (context, index) => _getEmergencyContactView(snapshot.data[index]));
                     },
                   )),
@@ -201,11 +207,57 @@ class _EmergencyContactsManagementScreenState extends State {
           );
   }
 
+  Widget _getNoItemsView() {
+    return SingleChildScrollView(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 16, top: 40),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Image.asset(
+                      "assets/images/no_emergency_contacts.png",
+                      height: 200,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                _translations.text("screens.emergency-contacts.empty.message"),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyText2.color.withOpacity(0.8)),
+                textAlign: TextAlign.center,
+                maxLines: 4,
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<String> _formatPhoneNumber(String number) async {
+    if (number.trim() == "") {
+      return "";
+    }
+    PhoneNumber loggedInUserPhoneNumber = await PhoneNumber.getRegionInfoFromPhoneNumber(_user.phoneNumber);
+    PhoneNumber pn = await PhoneNumber.getRegionInfoFromPhoneNumber(number, loggedInUserPhoneNumber.isoCode);
+    return pn.phoneNumber;
+  }
+
   Widget _getEmergencyContactView(EmergencyContact emergencyContact) {
     return Dismissible(
       key: Key("${emergencyContact.id}"),
       onDismissed: (direction) {
         EmergencyContactRepository.delete(emergencyContact);
+        Future.delayed(Duration(milliseconds: 300), () {
+          setState(() {});
+        });
       },
       child: Padding(
         padding: const EdgeInsets.only(left: 16.0, right: 16),

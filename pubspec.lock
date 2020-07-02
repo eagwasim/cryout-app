@@ -155,6 +155,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.0"
+  equatable:
+    dependency: transitive
+    description:
+      name: equatable
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.0"
   file:
     dependency: transitive
     description:
@@ -364,15 +371,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.0"
-  international_phone_input:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "4f228d835a749fbb638cdeb83f7ffb57e4e0882a"
-      url: "git://github.com/niinyarko/flutter-international-phone-input"
-    source: git
-    version: "1.0.4"
   intl:
     dependency: "direct main"
     description:
@@ -380,6 +378,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.16.1"
+  intl_phone_number_input:
+    dependency: "direct main"
+    description:
+      name: intl_phone_number_input
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.6+2"
   intl_translation:
     dependency: "direct main"
     description:
@@ -402,7 +407,7 @@ packages:
     source: hosted
     version: "0.6.1+1"
   libphonenumber:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: libphonenumber
       url: "https://pub.dartlang.org"

@@ -8,7 +8,7 @@ import 'package:cryout_app/utils/widget-utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
-import 'package:international_phone_input/international_phone_input.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:libphonenumber/libphonenumber.dart';
 
 class PhoneVerificationScreen extends StatefulWidget {
@@ -22,20 +22,11 @@ class _PhoneVerificationScreenState extends State {
   bool _isProcessing = false;
   bool _isValid = false;
   String _internationalizedPhoneNumber = "";
-  String _isoCode = "+234";
-  String _phoneNUmber;
+  String initialCountry = 'NG';
+  PhoneNumber number = PhoneNumber(isoCode: 'NG');
+  final TextEditingController _controller = TextEditingController();
 
   Translations _translations;
-
-  void onPhoneNumberChange(String phoneNumber, String internationalizedPhoneNumber, String isoCode, String dialCode) async {
-    _isValid = await PhoneNumberUtil.isValidPhoneNumber(phoneNumber: phoneNumber, isoCode: isoCode);
-
-    setState(() {
-      _internationalizedPhoneNumber = internationalizedPhoneNumber;
-      _isoCode = isoCode;
-      _phoneNUmber = phoneNumber;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,10 +72,21 @@ class _PhoneVerificationScreenState extends State {
             ),
             Padding(
               padding: const EdgeInsets.only(left: 16, right: 16, top: 6),
-              child: InternationalPhoneInput(
-                onPhoneNumberChange: onPhoneNumberChange,
-                initialPhoneNumber: _phoneNUmber,
-                initialSelection: _isoCode,
+              child: InternationalPhoneNumberInput(
+                onInputChanged: (PhoneNumber number) {
+                  _internationalizedPhoneNumber = number.phoneNumber;
+                },
+                onInputValidated: (bool value) {
+                  _isValid = value;
+                },
+                ignoreBlank: false,
+                autoValidate: true,
+                errorMessage: _translations.text("screens.phone-verification.error.message"),
+                selectorTextStyle: Theme.of(context).textTheme.bodyText1,
+                initialValue: number,
+                textFieldController: _controller,
+                selectorType: PhoneInputSelectorType.DIALOG,
+                inputBorder: UnderlineInputBorder(),
               ),
             ),
             Expanded(
@@ -104,7 +106,10 @@ class _PhoneVerificationScreenState extends State {
                             shape: RoundedRectangleBorder(
                               borderRadius: new BorderRadius.circular(25.0),
                             ),
-                            child: Text(_translations.text("screens.common.continue"), style: TextStyle(color: Colors.white),),
+                            child: Text(
+                              _translations.text("screens.common.continue"),
+                              style: TextStyle(color: Colors.white),
+                            ),
                             onPressed: () async {
                               if (!_isValid) {
                                 return;

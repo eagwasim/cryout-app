@@ -76,7 +76,7 @@ class _SafeWalkCreationScreenState extends State {
               children: <Widget>[
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 16.0, bottom: 16),
+                    padding: const EdgeInsets.only(left: 16.0, bottom: 16, top: 8),
                     child: Text(
                       _translations.text("screens.safe-walk-creation.select-contacts"),
                       style: Theme.of(context).textTheme.caption,
@@ -88,7 +88,7 @@ class _SafeWalkCreationScreenState extends State {
                     locator<NavigationService>().pushNamed(Routes.MANAGE_EMERGENCY_CONTACTS_SCREEN).then((value) => setState(() {}));
                   },
                   child: Padding(
-                    padding: const EdgeInsets.only(right: 16.0, top: 8, bottom: 8, left: 16),
+                    padding: const EdgeInsets.only(right: 16.0, top: 0, bottom: 8, left: 16),
                     child: Text(
                       _translations.text("screens.safe-walk-creation.manage"),
                       style: TextStyle(fontWeight: Theme.of(context).textTheme.caption.fontWeight, fontSize: Theme.of(context).textTheme.caption.fontSize, color: Theme.of(context).accentColor),
@@ -101,6 +101,9 @@ class _SafeWalkCreationScreenState extends State {
                 child: FutureBuilder<List<EmergencyContact>>(
               future: EmergencyContactRepository.all(),
               builder: (context, snapshot) {
+                if(!snapshot.hasData || snapshot.data.length == 0){
+                  return _getNoItemsView();
+                }
                 return ListView.builder(itemCount: snapshot.data.length, itemBuilder: (context, index) => _getEmergencyContactView(snapshot.data[index]));
               },
             )),
@@ -222,4 +225,39 @@ class _SafeWalkCreationScreenState extends State {
 
     locator<NavigationService>().popAndPushNamed(Routes.SAFE_WALK_WALKER_SCREEN, arguments: safeWalk);
   }
+  Widget _getNoItemsView() {
+    return SingleChildScrollView(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 16, top: 60.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Image.asset(
+                      "assets/images/no_emergency_contacts.png",
+                      height: 200,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                _translations.text("screens.emergency-contacts.empty.message"),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyText2.color.withOpacity(0.8)),
+                textAlign: TextAlign.center,
+                maxLines: 4,
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
 }
