@@ -50,8 +50,7 @@ class _ReceivedDistressSignalListScreenState extends State {
   void initState() {
     super.initState();
     _subscription = _nativeAdController.stateChanged.listen(_onStateChanged);
-    ReceivedDistressSignalRepository.markAllAsOpened();
-    _loadFromServer();
+    initLoad();
   }
 
   @override
@@ -400,10 +399,12 @@ class _ReceivedDistressSignalListScreenState extends State {
     if (_refreshController.isRefresh) {
       await ReceivedDistressSignalRepository.clear();
       _receivedDistressSignals.clear();
+      for (int i = 0; i < signalsFromServer.length; i++) {
+        await ReceivedDistressSignalRepository.save(signalsFromServer.elementAt(i));
+      }
       setState(() {
         _receivedDistressSignals.addAll(signalsFromServer);
       });
-      signalsFromServer.forEach((element) => ReceivedDistressSignalRepository.save(element));
     } else {
       _receivedDistressSignals.addAll(signalsFromServer);
     }
@@ -428,5 +429,23 @@ class _ReceivedDistressSignalListScreenState extends State {
     setState(() {
       _receivedDistressSignals = _ds;
     });
+  }
+
+  void initLoad() async {
+    Response response = await SamaritanResource.getUserReceivedDistressSignals(context, _currentCursor);
+    if (response.statusCode == 200) {
+      dynamic data = jsonDecode(response.body)['data'];
+      List<ReceivedDistressSignal> signalsFromServer = (data['data'] as List<dynamic>).map((e) => ReceivedDistressSignal.fromJSON(e)).toList();
+      await ReceivedDistressSignalRepository.clear();
+      _receivedDistressSignals.clear();
+
+      for (int i = 0; i < signalsFromServer.length; i++) {
+        await ReceivedDistressSignalRepository.save(signalsFromServer.elementAt(i));
+      }
+
+      setState(() {
+        _receivedDistressSignals.addAll(signalsFromServer);
+      });
+    }
   }
 }

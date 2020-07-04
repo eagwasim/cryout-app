@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:cryout_app/http/safe-walk-resource.dart';
 import 'package:cryout_app/models/emergency-contact.dart';
 import 'package:cryout_app/models/safe-walk.dart';
-import 'package:cryout_app/utils/background_location_update.dart';
+import 'package:cryout_app/utils/background-location-update.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/routes.dart';

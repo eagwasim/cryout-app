@@ -9,6 +9,7 @@ import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:cryout_app/utils/widget-utils.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
@@ -129,6 +130,7 @@ class _PhoneConfirmationScreenState extends State {
 
                 String token = responseData["token"];
                 String refreshToken = responseData["refreshToken"];
+                String notificationToken = responseData["notificationToken"];
 
                 Map<String, dynamic> userData = responseData["user"];
                 List<dynamic> userPreferencesResponse = responseData["preferences"];
@@ -138,6 +140,12 @@ class _PhoneConfirmationScreenState extends State {
                 await SharedPreferenceUtil.saveUser(user);
                 await SharedPreferenceUtil.saveToken(token);
                 await SharedPreferenceUtil.saveRefreshToken(refreshToken);
+
+                final FirebaseAuth _auth = FirebaseAuth.instance;
+
+                AuthResult result = await _auth.signInWithCustomToken(token: notificationToken);
+
+                print(result.user.uid);
 
                 if (userPreferencesResponse.isNotEmpty) {
                   for (int index = 0; index < userPreferencesResponse.length; index++) {

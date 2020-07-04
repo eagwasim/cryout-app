@@ -70,4 +70,5 @@ class SafeWalkResource{
     return response;
   }
 
+
 }

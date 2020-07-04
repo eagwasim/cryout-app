@@ -3,9 +3,10 @@ import 'dart:convert';
 import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/distress-signal.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
-import 'package:cryout_app/models/recieved-safe-walk.dart';
+import 'package:cryout_app/models/received-safe-walk.dart';
 import 'package:cryout_app/models/safe-walk.dart';
 import 'package:cryout_app/models/user.dart';
+import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,11 +15,9 @@ class SharedPreferenceUtil {
   static const _USER_REFRESH_TOKEN = "USER_REFRESH_TOKEN";
   static const _CURRENT_PHONE_NUMBER_FOR_VERIFICATION = "CURRENT_PHONE_NUMBER_FOR_VERIFICATION";
   static const _USER_AUTHENTICATION_TOKEN = "USER_AUTHENTICATION_TOKEN";
-  static const _CURRENT_DISTRESS_CALL = "CURRENT_DISTRESS_CALL";
   static const _CACHED_RECEIVED_DISTRESS_CALL = "CACHED_DISTRESS_CALL_";
   static const _CACHED_RECEIVED_SAFE_WALK = "CACHED_SAFE_WALK_";
   static const _TOPICS = "REGISTERED_TOPICS_KEY";
-  static const _CURRENT_SAFE_WALK = "_CURRENT_SAFE_WALK";
   static const _IS_SAFE_WALKING = "IS_SAFE_WALKING";
 
   static Future<User> currentUser() async {
@@ -116,9 +115,9 @@ class SharedPreferenceUtil {
 
     DatabaseReference _dbPreference = database.reference().child('users').reference().child("${user.id}").reference().child("preferences").reference();
     if (safeWalk == null) {
-      _dbPreference.child(_CURRENT_SAFE_WALK).remove();
+      _dbPreference.child(PreferenceConstants.CURRENT_SAFE_WALK).remove();
     } else {
-      _dbPreference.child(_CURRENT_SAFE_WALK).set(safeWalk.toJson());
+      _dbPreference.child(PreferenceConstants.CURRENT_SAFE_WALK).set(safeWalk.toJson());
     }
   }
 
@@ -126,7 +125,7 @@ class SharedPreferenceUtil {
     User user = await currentUser();
 
     DatabaseReference _dbPreference = database.reference().child('users').reference().child("${user.id}").reference().child("preferences").reference();
-    var dbSS = await _dbPreference.child(_CURRENT_SAFE_WALK).once();
+    var dbSS = await _dbPreference.child(PreferenceConstants.CURRENT_SAFE_WALK).once();
     dynamic sw = dbSS == null || dbSS.value == null ? null : dbSS.value;
 
     if (sw == null) {
@@ -142,9 +141,9 @@ class SharedPreferenceUtil {
     DatabaseReference _dbPreference = database.reference().child('users').reference().child("${user.id}").reference().child("preferences").reference();
 
     if (distressCall == null) {
-      _dbPreference.child(_CURRENT_DISTRESS_CALL).remove();
+      _dbPreference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).remove();
     } else {
-      _dbPreference.child(_CURRENT_DISTRESS_CALL).set(distressCall.toJson());
+      _dbPreference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).set(distressCall.toJson());
     }
   }
 
@@ -152,7 +151,7 @@ class SharedPreferenceUtil {
     User user = await currentUser();
 
     DatabaseReference _dbPreference = database.reference().child('users').reference().child("${user.id}").reference().child("preferences").reference();
-    var dbSS = await _dbPreference.child(_CURRENT_DISTRESS_CALL).once();
+    var dbSS = await _dbPreference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).once();
     dynamic sw = dbSS == null || dbSS.value == null ? null : dbSS.value;
 
     if (sw == null) {
@@ -249,19 +248,8 @@ class SharedPreferenceUtil {
     return isSafeWalking == null ? false : isSafeWalking;
   }
 
-  static Future<void> updateUserLastKnownLocation(double lat, double lon) async {
-    User user = await currentUser();
-    DatabaseReference _dbPreference = database.reference().child('locations').reference().child("${user.id}").reference();
+  static Future<void> updateUserLastKnownSafeWalkLocation(String safeWalkId, double lat, double lon) async {
+    DatabaseReference _dbPreference = database.reference().child('safe_walk_locations').reference().child("$safeWalkId").reference();
     await _dbPreference.set({"lat": lat, "lon": lon});
-  }
-
-  static Future<dynamic> getUserLastKnownLocation(String userId) async {
-    DatabaseReference _dbPreference = database.reference().child('locations').reference().child("$userId").reference();
-    DataSnapshot snapshot = await _dbPreference.once();
-    if (snapshot == null || snapshot.value == null) {
-      return null;
-    }
-
-    return snapshot.value;
   }
 }

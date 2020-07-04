@@ -37,6 +37,7 @@ class _DistressCategorySelectionScreenState extends State {
     super.initState();
     _categories.sort();
     _categories.add("other-emergencies");
+    _location.getLocation().then((value) => {_locationData = value});
   }
 
   @override
@@ -109,11 +110,11 @@ class _DistressCategorySelectionScreenState extends State {
       }
     }
 
-    _locationData = await _location.getLocation();
+    if (_locationData == null) {
+      _locationData = await _location.getLocation();
+    }
 
     Response response = await DistressResource.sendDistressCall(context, {"lat": "${_locationData.latitude}", "lon": "${_locationData.longitude}", "details": selection});
-
-    print("RESPONSE ${response.statusCode}");
 
     if (response.statusCode != BaseResource.STATUS_CREATED) {
       setState(() {
@@ -127,11 +128,6 @@ class _DistressCategorySelectionScreenState extends State {
     Map<String, dynamic> responseData = jsonDecode(response.body)["data"];
 
     DistressSignal distressCall = DistressSignal.fromJSON(responseData);
-
-/*    User _user = await SharedPreferenceUtil.currentUser();
-
-    DatabaseReference _userPreferenceDatabaseReference = database.reference().child('users').reference().child("${_user.id}").reference().child("preferences").reference();
-    await _userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).set(distressCall.toJson());*/
 
     SharedPreferenceUtil.setCurrentDistressCall(distressCall);
 

@@ -9,7 +9,7 @@ import 'package:cryout_app/http/samaritan-resource.dart';
 import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/chat-message.dart';
 import 'package:cryout_app/models/distress-signal.dart';
-import 'package:cryout_app/models/recieved-safe-walk.dart';
+import 'package:cryout_app/models/received-safe-walk.dart';
 import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
@@ -200,10 +200,17 @@ class _SafeWalkWatcherScreenState extends State {
 
     _userImageMarker = await BitmapDescriptor.fromAssetImage(ImageConfiguration(size: Size(100, 100)), Platform.isIOS ? 'assets/images/user_marker.png' : 'assets/images/user_marker_android.png');
 
-    DatabaseReference dbRef = database.reference().child('locations').reference().child("${_receivedSafeWalk.userId}").reference();
+    DatabaseReference dbRef = database.reference().child('safe_walk_locations').reference().child("${_receivedSafeWalk.safeWalkId}").reference();
     dbRef.keepSynced(true);
-    _messageDBRef = database.reference().child('safe_walk').reference().child("${_receivedSafeWalk.safeWalkId}").reference().child("messages").reference();
+    _messageDBRef = database.reference().child('safe_walk_channel').reference().child("${_receivedSafeWalk.safeWalkId}").reference().child("messages").reference();
     _messageDBRef.keepSynced(true);
+
+    DataSnapshot snapshot = await dbRef.once();
+
+    if (snapshot != null && snapshot.value != null) {
+      _currentLocation = LatLng(snapshot.value['lat'], snapshot.value['lon']);
+      updatePinOnMap();
+    }
 
     _locationUpdateSubscription.add(dbRef.onValue.listen((event) {
       dynamic value = event.snapshot.value;
@@ -415,7 +422,6 @@ class _SafeWalkWatcherScreenState extends State {
   }
 
   void _sendDistressCall() async {
-
     if (_currentLocation == null) {
       WidgetUtils.showAlertDialog(
           context, _translations.text("screens.safe-walk.watcher.distress.call.error.location.title"), _translations.text("screens.safe-walk.watcher.distress.call.error.location.message"));
@@ -424,9 +430,9 @@ class _SafeWalkWatcherScreenState extends State {
 
     DistressSignal distressCall = await SharedPreferenceUtil.getCurrentDistressCall();
 
-    if(distressCall != null){
+    if (distressCall != null) {
       WidgetUtils.showAlertDialog(
-          context, _translations.text( "screens.safe-walk.watcher.distress.call.error.conflict.title"), _translations.text( "screens.safe-walk.watcher.distress.call.error.conflict.message"));
+          context, _translations.text("screens.safe-walk.watcher.distress.call.error.conflict.title"), _translations.text("screens.safe-walk.watcher.distress.call.error.conflict.message"));
       return;
     }
     setState(() {
@@ -446,7 +452,7 @@ class _SafeWalkWatcherScreenState extends State {
 
     Map<String, dynamic> responseData = jsonDecode(response.body)["data"];
 
-     distressCall = DistressSignal.fromJSON(responseData);
+    distressCall = DistressSignal.fromJSON(responseData);
 
     SharedPreferenceUtil.setCurrentDistressCall(distressCall);
 

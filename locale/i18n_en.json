@@ -105,6 +105,8 @@
   "screens.victim-distress-channel-screen.resolve": "Resolve",
   "screens.victim-distress-channel-screen.resolve.message": "If you are out of distress please proceed with resolving it. Users on the channel will be notified that the distress has been resolved.",
   "screens.victim-distress-channel-screen.left.the.chat": "left the channel. Distress resolved. If you still suspect something weired, please report to the appropriate authority",
+  "screens.victim-distress-channel-screen.resolved.title": "Distress resolved.",
+  "screens.victim-distress-channel-screen.resolved.message": "flagged the distress signal as resolved",
   "screens.emergency-contacts.title": "Emergency contacts",
   "screens.emergency-contacts.pick-from-contacts": "Choose",
   "screens.emergency-contacts.save-contact": "Save contact",
@@ -141,6 +143,10 @@
   "screens.safe-walk.watcher.distress.call.error.conflict.title": "Active distress signal",
   "screens.safe-walk.watcher.distress.call.error.conflict.message": "You already have an active distress signal",
   "screens.safe-walk.walker-screen.left.the.chat": "Arrived their destination. If you still suspect something weired, please report to the appropriate authority",
+  "screens.safe-walk.walker-screen.ended.title": "Arrived!",
+  "screens.safe-walk.walker-screen.ended.message": "has arrived their destination. Safe walk ended",
+  "screens.safe-walk.walker-screen.battery.low.title": "Battery low!",
+  "screens.safe-walk.walker-screen.battery.low.message": "'s battery is low and their phone may die soon",
   "screens.phone-verification.error.message": "Invalid phone number",
   "screens.emergency-contacts.empty.message": "You have no emergency contacts"
 }

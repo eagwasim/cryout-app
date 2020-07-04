@@ -6,6 +6,7 @@ import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/chat-message.dart';
 import 'package:cryout_app/models/distress-signal.dart';
 import 'package:cryout_app/models/user.dart';
+import 'package:cryout_app/utils/battery-monitor.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/notification-handler.dart';
@@ -50,10 +51,19 @@ class _VictimDistressChannelScreenState extends State {
 
   User _user;
 
+  DeviceInformationService _deviceInformationService = DeviceInformationService();
+
   @override
   void dispose() {
     NotificationHandler.unsubscribeRoute("${Routes.VICTIM_DISTRESS_CHANNEL_SCREEN}${_distressCall.id}");
+    _deviceInformationService.stopBroadcast();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    _deviceInformationService.broadcastBatteryLevel();
+    super.initState();
   }
 
   @override
@@ -169,11 +179,14 @@ class _VictimDistressChannelScreenState extends State {
           );
   }
 
+  int lastBatteryLevel;
+
   void _setUp() async {
-    if(_distressCall == null){
+    if (_distressCall == null) {
       locator<NavigationService>().pop(result: true);
       return;
     }
+
     _user = await SharedPreferenceUtil.currentUser();
 
     _messageDBRef = database.reference().child('distress_channel').reference().child("${_distressCall.id}").reference().child("messages").reference();
@@ -184,6 +197,31 @@ class _VictimDistressChannelScreenState extends State {
     });
 
     NotificationHandler.subscribeRoute("${Routes.VICTIM_DISTRESS_CHANNEL_SCREEN}${_distressCall.id}");
+
+    _deviceInformationService.batteryLevel.listen((event) async {
+      int currentBatteryLevel = event.batteryLevel;
+
+      if (lastBatteryLevel == null) {
+        lastBatteryLevel = currentBatteryLevel;
+      }
+
+      // Is charging
+      if (lastBatteryLevel < currentBatteryLevel) {
+        if (currentBatteryLevel > 20) {
+          SharedPreferenceUtil.setBool("distress-signal-channel.${_distressCall.id}.low-battery-notified", false);
+        }
+        return;
+      }
+
+      lastBatteryLevel = currentBatteryLevel;
+
+      if (currentBatteryLevel < 20) {
+        if (!await SharedPreferenceUtil.getBool("distress-signal-channel.${_distressCall.id}.low-battery-notified", false)) {
+          SharedPreferenceUtil.setBool("distress-signal-channel.${_distressCall.id}.low-battery-notified", true);
+          _sendLowBatteryNotification();
+        }
+      }
+    });
   }
 
   void _sendMessage(String message) {
@@ -261,9 +299,6 @@ class _VictimDistressChannelScreenState extends State {
     Response response = await DistressResource.closeDistressCall(context, _distressCall.id);
 
     if (response.statusCode == 200) {
-      /*  DatabaseReference _userPreferenceDatabaseReference = database.reference().child('users').reference().child("${_user.id}").reference().child("preferences").reference();
-      _userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).remove();*/
-
       SharedPreferenceUtil.setCurrentDistressCall(null);
 
       DatabaseReference _messageDBRef = database.reference().child('distress_channel').reference().child("${_distressCall.id}").reference().child("messages").reference();
@@ -277,6 +312,18 @@ class _VictimDistressChannelScreenState extends State {
 
       _messageDBRef.push().set(chatMessage.toJSON());
       FireBaseHandler.unSubscribeToDistressChannelTopic("${_distressCall.id}");
+
+      DistressResource.notifyDistressChannelOfMessage(
+        context,
+        "${_distressCall.id}",
+        {
+          "senderUserId": _user.id,
+          "senderName": _translations.text("screens.victim-distress-channel-screen.resolved.title"),
+          "message": "${_user.shortName()} ${_translations.text("screens.victim-distress-channel-screen.resolved.message")}",
+          "distressUserId": _user.id,
+          "messageType": "text",
+        },
+      );
 
       locator<NavigationService>().pop(result: true);
     } else {
@@ -341,5 +388,19 @@ class _VictimDistressChannelScreenState extends State {
       });
       WidgetUtils.showAlertDialog(context, _translations.text("screens.common.error.general.title"), _translations.text("screens.common.error.upload.image.message"));
     }
+  }
+
+  void _sendLowBatteryNotification() async {
+    await DistressResource.notifyDistressChannelOfMessage(
+      context,
+      "${_distressCall.id}",
+      {
+        "senderUserId": _user.id,
+        "senderName": _translations.text("screens.safe-walk.walker-screen.battery.low.title"),
+        "message": "${_user.shortName()}${_translations.text("screens.safe-walk.walker-screen.battery.low.message")}",
+        "distressUserId": _user.id,
+        "messageType": "text",
+      },
+    );
   }
 }

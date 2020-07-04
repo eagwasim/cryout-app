@@ -5,7 +5,8 @@ import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/chat-message.dart';
 import 'package:cryout_app/models/safe-walk.dart';
 import 'package:cryout_app/models/user.dart';
-import 'package:cryout_app/utils/background_location_update.dart';
+import 'package:cryout_app/utils/background-location-update.dart';
+import 'package:cryout_app/utils/battery-monitor.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/notification-handler.dart';
@@ -46,11 +47,16 @@ class _SafeWalkWalkerScreenState extends State {
 
   User _user;
 
+  DeviceInformationService _deviceInformationService = DeviceInformationService();
+
   @override
   void dispose() {
     if (_currentSafeWalk != null) {
       NotificationHandler.unsubscribeRoute("${Routes.SAFE_WALK_WALKER_SCREEN}${_currentSafeWalk.id}");
     }
+
+    _deviceInformationService.stopBroadcast();
+
     super.dispose();
   }
 
@@ -179,6 +185,8 @@ class _SafeWalkWalkerScreenState extends State {
           );
   }
 
+  int lastBatteryLevel;
+
   void _setUp() async {
     _user = await SharedPreferenceUtil.currentUser();
     _currentSafeWalk = await SharedPreferenceUtil.getCurrentSafeWalk();
@@ -188,17 +196,42 @@ class _SafeWalkWalkerScreenState extends State {
       return;
     }
 
-    _messageDBRef = database.reference().child('safe_walk').reference().child("${_currentSafeWalk.id}").reference().child("messages").reference();
+    _messageDBRef = database.reference().child('safe_walk_channel').reference().child("${_currentSafeWalk.id}").reference().child("messages").reference();
     _messageDBRef.keepSynced(true);
+
+    _deviceInformationService.batteryLevel.listen((event) async {
+      int currentBatteryLevel = event.batteryLevel;
+      print(currentBatteryLevel);
+      if (lastBatteryLevel == null) {
+        lastBatteryLevel = currentBatteryLevel;
+      }
+
+      // Is charging
+      if (lastBatteryLevel < currentBatteryLevel) {
+        if (currentBatteryLevel > 20) {
+          SharedPreferenceUtil.setBool("safe-walk-channel.${_currentSafeWalk.id}.low-battery-notified", false);
+        }
+        return;
+      }
+
+      lastBatteryLevel = currentBatteryLevel;
+
+      if (currentBatteryLevel < 20) {
+        if (!await SharedPreferenceUtil.getBool("safe-walk-channel.${_currentSafeWalk.id}.low-battery-notified", false)) {
+          SharedPreferenceUtil.setBool("safe-walk-channel.${_currentSafeWalk.id}.low-battery-notified", true);
+          _sendLowBatteryNotification();
+        }
+      }
+    });
 
     setState(() {
       _setUpComplete = true;
     });
 
     NotificationHandler.subscribeRoute("${Routes.SAFE_WALK_WALKER_SCREEN}${_currentSafeWalk.id}");
-    location.changeSettings(accuracy: LocationAccuracy.navigation, distanceFilter: 0, interval: 1000);
+    location.changeSettings(accuracy: LocationAccuracy.navigation, distanceFilter: 0, interval: 2000);
     location.onLocationChanged.listen((LocationData currentLocation) {
-      SharedPreferenceUtil.updateUserLastKnownLocation(currentLocation.latitude, currentLocation.longitude);
+      SharedPreferenceUtil.updateUserLastKnownSafeWalkLocation("${_currentSafeWalk.id}", currentLocation.latitude, currentLocation.longitude);
     });
   }
 
@@ -281,7 +314,7 @@ class _SafeWalkWalkerScreenState extends State {
     if (response.statusCode == 200) {
       SharedPreferenceUtil.setSafeWalk(null);
 
-      DatabaseReference _messageDBRef = database.reference().child('safe_walk').reference().child("${_currentSafeWalk.id}").reference().child("messages").reference();
+      DatabaseReference _messageDBRef = database.reference().child('safe_walk_channel').reference().child("${_currentSafeWalk.id}").reference().child("messages").reference();
 
       ChatMessage chatMessage = ChatMessage(
         body: "${_user.shortName()} ${_translations.text("screens.safe-walk.walker-screen.left.the.chat")}",
@@ -295,6 +328,7 @@ class _SafeWalkWalkerScreenState extends State {
       FireBaseHandler.unSubscribeToDistressChannelTopic("${_currentSafeWalk.id}");
 
       SharedPreferenceUtil.endSafeWalk();
+
       DatabaseReference _userPreferenceDatabaseReference = database.reference().child('users').reference().child("${_user.id}").reference().child("preferences").reference();
       DataSnapshot dbSS = await _userPreferenceDatabaseReference.child(PreferenceConstants.SAMARITAN_MODE_ENABLED).once();
 
@@ -303,6 +337,18 @@ class _SafeWalkWalkerScreenState extends State {
       if (!_samaritan) {
         BackgroundLocationUpdate.stopLocationTracking();
       }
+
+      SafeWalkResource.notifySafeWalkChannelOfMessage(
+        context,
+        "${_currentSafeWalk.id}",
+        {
+          "senderUserId": _user.id,
+          "senderName": "${_translations.text("screens.safe-walk.walker-screen.ended.title")}",
+          "message": "${_user.fullName()} ${_translations.text("screens.safe-walk.walker-screen.ended.message")}",
+          "safeWalkUserId": _user.id,
+          "messageType": "text"
+        },
+      );
 
       locator<NavigationService>().pop(result: true);
     } else {
@@ -367,5 +413,25 @@ class _SafeWalkWalkerScreenState extends State {
       });
       WidgetUtils.showAlertDialog(context, _translations.text("screens.common.error.general.title"), _translations.text("screens.common.error.upload.image.message"));
     }
+  }
+
+  void _sendLowBatteryNotification() async {
+    await SafeWalkResource.notifySafeWalkChannelOfMessage(
+      context,
+      "${_currentSafeWalk.id}",
+      {
+        "senderUserId": _user.id,
+        "senderName": "${_translations.text("screens.safe-walk.walker-screen.battery.low.title")}",
+        "message": "${_user.fullName()}${_translations.text("screens.safe-walk.walker-screen.battery.low.message")}",
+        "safeWalkUserId": _user.id,
+        "messageType": "text"
+      },
+    );
+  }
+
+  @override
+  void initState() {
+    _deviceInformationService.broadcastBatteryLevel();
+    super.initState();
   }
 }

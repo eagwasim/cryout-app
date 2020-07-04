@@ -88,7 +88,6 @@ class SamaritanResource {
     return response;
   }
 
-
   static Future<Response> getUserReceivedSafeWalks(BuildContext context, String cursor) async {
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
@@ -133,4 +132,35 @@ class SamaritanResource {
     }
     return response;
   }
+
+  static Future<Response> activeSafeWalksCount(BuildContext context) async {
+    String token = await SharedPreferenceUtil.getToken();
+    Map<String, String> headers = Map.from(BaseResource.HEADERS);
+    headers["Authorization"] = "Bearer " + token;
+
+    Response response = await get(BaseResource.BASE_URL + _RESOURCE_URL + "/safe/walks/active/count", headers: headers);
+
+    if (response.statusCode == 401) {
+      if (await AccessResource.refreshToken(context)) {
+        return activeSafeWalksCount(context);
+      }
+    }
+    return response;
+  }
+
+  static Future<Response> activeDistressCallsCount(BuildContext context) async {
+    String token = await SharedPreferenceUtil.getToken();
+    Map<String, String> headers = Map.from(BaseResource.HEADERS);
+    headers["Authorization"] = "Bearer " + token;
+
+    Response response = await get(BaseResource.BASE_URL + _RESOURCE_URL + "/distress/signals/active/count", headers: headers);
+
+    if (response.statusCode == 401) {
+      if (await AccessResource.refreshToken(context)) {
+        return activeSafeWalksCount(context);
+      }
+    }
+    return response;
+  }
+
 }

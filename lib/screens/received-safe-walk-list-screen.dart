@@ -6,8 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cryout_app/http/samaritan-resource.dart';
 import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/chat-message.dart';
-import 'package:cryout_app/models/received-distress-signal.dart';
-import 'package:cryout_app/models/recieved-safe-walk.dart';
+import 'package:cryout_app/models/received-safe-walk.dart';
 import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
@@ -33,7 +32,6 @@ class ReceivedSafeWalkListScreen extends StatefulWidget {
 }
 
 class _ReceivedSafeWalkListScreenState extends State {
-  static final String testAdUnitId = Platform.isAndroid ? 'ca-app-pub-3940256099942544/2247696110' : 'ca-app-pub-3940256099942544/3986624511';
 
   NativeAdmobController _nativeAdController = NativeAdmobController();
   RefreshController _refreshController = RefreshController(initialRefresh: false);
@@ -51,7 +49,6 @@ class _ReceivedSafeWalkListScreenState extends State {
   void initState() {
     super.initState();
     _subscription = _nativeAdController.stateChanged.listen(_onStateChanged);
-    ReceivedDistressSignalRepository.markAllAsOpened();
     initialLoad();
   }
 

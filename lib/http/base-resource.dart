@@ -1,9 +1,8 @@
-
-
 class BaseResource {
   static const Map<String, String> HEADERS = {"Content-type": "application/json"};
-  static const BASE_URL = "https://cry-out.ew.r.appspot.com";
 
+  //static const BASE_URL = "https://cry-out.ew.r.appspot.com";
+  static const BASE_URL = "https://cryout.app";
   static const int STATUS_OK = 200;
   static const int STATUS_CREATED = 201;
   static const int STATUS_CONFLICT = 409;

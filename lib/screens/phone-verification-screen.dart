@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
-import 'package:libphonenumber/libphonenumber.dart';
 
 class PhoneVerificationScreen extends StatefulWidget {
   @override

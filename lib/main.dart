@@ -1,5 +1,5 @@
 import 'package:cryout_app/application.dart';
-import 'package:cryout_app/utils/background_location_update.dart';
+import 'package:cryout_app/utils/background-location-update.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/notification-handler.dart';
@@ -51,6 +51,7 @@ class _MyAppState<MyApp> extends State {
   Widget build(BuildContext context) {
     //SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
     // Setup location Tracking
+
     BackgroundLocationUpdate.setUpLocationTracking(context);
 
     return MaterialApp(

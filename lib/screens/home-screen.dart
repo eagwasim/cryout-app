@@ -6,18 +6,20 @@ import 'package:cryout_app/http/samaritan-resource.dart';
 import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/distress-signal.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
-import 'package:cryout_app/models/recieved-safe-walk.dart';
+import 'package:cryout_app/models/received-safe-walk.dart';
 import 'package:cryout_app/models/safe-walk.dart';
 import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/screens/static-page-screen.dart';
-import 'package:cryout_app/utils/background_location_update.dart';
+import 'package:cryout_app/utils/background-location-update.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
+import 'package:cryout_app/utils/notification-monitor.dart';
 import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:cryout_app/utils/widget-utils.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -46,10 +48,16 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
 
   PackageInfo _packageInfo;
 
+  int _activeDistressCallCount = 0;
+  int _activeSamaritanWalkCount = 0;
+
+  WebNotificationService _webNotificationService;
+
   @override
   void initState() {
     super.initState();
     FireBaseHandler.requestPermission();
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
@@ -58,7 +66,14 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
     _preferenceListeners.forEach((element) {
       element.cancel();
     });
+
+    if (_webNotificationService != null && _webNotificationService.isBroadcast()) {
+      _webNotificationService.stopBroadcast();
+    }
+
     _preferenceListeners = [];
+
+    WidgetsBinding.instance.removeObserver(this);
   }
 
   @override
@@ -85,13 +100,13 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
         brightness: Theme.of(context).brightness,
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.rss_feed, color: Colors.grey),
+            icon: Icon(Icons.wifi_tethering, color: _activeDistressCallCount == 0 ? Colors.grey : Colors.deepOrange),
             onPressed: () {
               locator<NavigationService>().navigateTo(Routes.RECEIVED_DISTRESS_SIGNAL_SCREEN);
             },
           ),
           IconButton(
-            icon: Icon(Icons.directions_walk, color: Colors.grey),
+            icon: Icon(Icons.directions_walk, color: _activeSamaritanWalkCount == 0 ? Colors.grey : Colors.blueAccent),
             onPressed: () {
               locator<NavigationService>().navigateTo(Routes.RECEIVED_SAFE_WALK_LIST_SCREEN);
             },
@@ -164,13 +179,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                           ),
                         ),
                         onTap: () {
-                          locator<NavigationService>().pushNamed(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN, arguments: _currentDistressCall).then((value) {
-                            if (value != null && value) {
-                              setState(() {
-                                _currentDistressCall = null;
-                              });
-                            }
-                          });
+                          locator<NavigationService>().pushNamed(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN, arguments: _currentDistressCall);
                         },
                       ),
                     )),
@@ -207,9 +216,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                           ),
                         ),
                         onTap: () {
-                          locator<NavigationService>().pushNamed(Routes.SAFE_WALK_WALKER_SCREEN, arguments: _safeWalk).then((value) {
-                            _setUp();
-                          });
+                          locator<NavigationService>().pushNamed(Routes.SAFE_WALK_WALKER_SCREEN, arguments: _safeWalk);
                         },
                       ),
                     )),
@@ -268,7 +275,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                                     ),
                                     FlatButton(
                                       onPressed: () {
-                                        locator<NavigationService>().pushNamed(Routes.START_SAFE_WALK_SCREEN).then((value) => {_setUp()});
+                                        locator<NavigationService>().pushNamed(Routes.START_SAFE_WALK_SCREEN);
                                       },
                                       child: Text(
                                         _translations.text("screens.home.safe-walk.start"),
@@ -390,7 +397,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
               child: RaisedButton.icon(
                 elevation: 4,
                 onPressed: () {
-                  locator<NavigationService>().pushNamed(Routes.DISTRESS_CATEGORY_SELECTION_SCREEN).then((value) => {_setUp()});
+                  locator<NavigationService>().pushNamed(Routes.DISTRESS_CATEGORY_SELECTION_SCREEN);
                 },
                 icon: Icon(
                   Icons.error_outline,
@@ -444,6 +451,18 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
   }
 
   void _setUp() async {
+    if (_webNotificationService == null) {
+      _webNotificationService = WebNotificationService(context);
+
+      _webNotificationService.startBroadCast();
+      _webNotificationService.counts.listen((event) {
+        setState(() {
+          _activeSamaritanWalkCount = event.activeSafeWalkCount;
+          _activeDistressCallCount = event.activeDistressCallCount;
+        });
+      });
+    }
+
     if (_user == null) {
       User user = await SharedPreferenceUtil.currentUser();
 
@@ -452,7 +471,9 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
       });
     }
 
-    _packageInfo = await PackageInfo.fromPlatform();
+    if (_packageInfo == null) {
+      _packageInfo = await PackageInfo.fromPlatform();
+    }
 
     DistressSignal distressCall = await SharedPreferenceUtil.getCurrentDistressCall();
     SafeWalk safeWalk = await SharedPreferenceUtil.getCurrentSafeWalk();
@@ -481,10 +502,19 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
           _samaritan = false;
         });
       }));
+      _preferenceListeners.add(_userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).onChildRemoved.listen((event) {
+        setState(() {
+          _currentDistressCall = null;
+        });
+      }));
+      _preferenceListeners.add(_userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_SAFE_WALK).onChildRemoved.listen((event) {
+        setState(() {
+          _safeWalk = null;
+        });
+      }));
     }
 
     setState(() {});
-
     _updateLocationTrackingStatus();
   }
 
@@ -492,11 +522,23 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed) {
       // user returned to our app
-
+      if (_webNotificationService != null) {
+        _webNotificationService.startBroadCast();
+      }
     } else if (state == AppLifecycleState.inactive) {
+      if (_webNotificationService != null) {
+        _webNotificationService.stopBroadcast();
+      }
       // app is inactive
     } else if (state == AppLifecycleState.paused) {
       // user is about quit our app temporally
+      if (_webNotificationService != null) {
+        _webNotificationService.stopBroadcast();
+      }
+    } else if (state == AppLifecycleState.detached) {
+      if (_webNotificationService != null) {
+        _webNotificationService.stopBroadcast();
+      }
     }
   }
 
@@ -689,6 +731,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
     await ReceivedSafeWalkRepository.clear();
     await BackgroundLocationUpdate.stopLocationTracking();
     await SharedPreferenceUtil.clear();
-    locator<NavigationService>().pushNamedAndRemoveUntil(Routes.INTRODUCTION_SCREEN);
+    await FirebaseAuth.instance.signOut();
+    locator<NavigationService>().pushNamedAndRemoveUntil(Routes.PHONE_VERIFICATION_SCREEN);
   }
 }

@@ -39,12 +39,8 @@ class _ProfilePictureUpdateScreenState extends State {
         compressFormat: ImageCompressFormat.jpg,
         androidUiSettings: AndroidUiSettings(
             toolbarTitle: 'Crop',
-            toolbarColor: Theme
-                .of(context)
-                .accentColor,
-            toolbarWidgetColor: Theme
-                .of(context)
-                .dividerColor,
+            toolbarColor: Theme.of(context).accentColor,
+            toolbarWidgetColor: Theme.of(context).dividerColor,
             initAspectRatio: CropAspectRatioPreset.original,
             lockAspectRatio: false),
         iosUiSettings: IOSUiSettings(
@@ -76,20 +72,12 @@ class _ProfilePictureUpdateScreenState extends State {
     user.then((value) => _user = value);
 
     return Scaffold(
-      backgroundColor: Theme
-          .of(context)
-          .backgroundColor,
+      backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
-        backgroundColor: Theme
-            .of(context)
-            .backgroundColor,
+        backgroundColor: Theme.of(context).backgroundColor,
         elevation: 0,
-        brightness: Theme
-            .of(context)
-            .brightness,
-        iconTheme: Theme
-            .of(context)
-            .iconTheme,
+        brightness: Theme.of(context).brightness,
+        iconTheme: Theme.of(context).iconTheme,
       ),
       body: SafeArea(
         child: Column(
@@ -103,14 +91,14 @@ class _ProfilePictureUpdateScreenState extends State {
                 InkWell(
                   child: _imageFile == null
                       ? _circularImage(Icon(
-                    Icons.image,
-                    size: 250,
-                    color: Colors.blueAccent,
-                  ))
+                          Icons.image,
+                          size: 250,
+                          color: Colors.blueAccent,
+                        ))
                       : _circularImage(Image.file(
-                    _imageFile,
-                    height: 200,
-                  )),
+                          _imageFile,
+                          height: 200,
+                        )),
                   onTap: () {
                     _pickImage(context, ImageSource.gallery);
                   },
@@ -122,13 +110,13 @@ class _ProfilePictureUpdateScreenState extends State {
               children: <Widget>[
                 Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16, top: 16),
-                      child: Text(
-                        Translations.of(context).text("screens.profile-photo-update.subtitle"),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    )),
+                  padding: const EdgeInsets.only(left: 16.0, right: 16, top: 16),
+                  child: Text(
+                    Translations.of(context).text("screens.profile-photo-update.subtitle"),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 15),
+                  ),
+                )),
               ],
             ),
             Expanded(
@@ -145,7 +133,10 @@ class _ProfilePictureUpdateScreenState extends State {
                       shape: RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(25.0),
                       ),
-                      child: Text(_translations.text("screens.common.done")),
+                      child: Text(
+                        _translations.text("screens.common.done"),
+                        style: TextStyle(color: Colors.white),
+                      ),
                       onPressed: () async {
                         if (_imageFile == null) {
                           return;
