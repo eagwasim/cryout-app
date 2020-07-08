@@ -57,6 +57,7 @@ class DistressResource {
   }
 
   static Future<Response> notifyDistressChannelOfMessage(BuildContext context, String id, dynamic data) async {
+
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
     headers["Authorization"] = "Bearer " + token;

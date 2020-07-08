@@ -18,7 +18,7 @@ final Set<JavascriptChannel> jsChannels = [
   JavascriptChannel(
       name: 'Print',
       onMessageReceived: (JavascriptMessage message) {
-        print(message.message);
+
       }),
 ].toSet();
 

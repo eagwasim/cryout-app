@@ -52,7 +52,7 @@ class _SafeWalkWalkerScreenState extends State {
   @override
   void dispose() {
     if (_currentSafeWalk != null) {
-      NotificationHandler.unsubscribeRoute("${Routes.SAFE_WALK_WALKER_SCREEN}${_currentSafeWalk.id}");
+      NotificationHandler.turnOnNotificationForRoute("${Routes.SAFE_WALK_WALKER_SCREEN}${_currentSafeWalk.id}");
     }
 
     _deviceInformationService.stopBroadcast();
@@ -88,7 +88,7 @@ class _SafeWalkWalkerScreenState extends State {
                 ],
                 crossAxisAlignment: CrossAxisAlignment.start,
               ),
-              elevation: 0,
+              elevation: 4,
               centerTitle: false,
               brightness: Brightness.dark,
               actions: <Widget>[
@@ -135,46 +135,86 @@ class _SafeWalkWalkerScreenState extends State {
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8.0, right: 8.0),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         Expanded(
-                          child: TextField(
-                            decoration: new InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide.none,
+                          child: Padding(
+                            padding: WidgetUtils.chatInputPadding(),
+                            child: TextField(
+                              decoration: new InputDecoration(
+                                contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+                                enabledBorder: OutlineInputBorder(
+                                    borderRadius: const BorderRadius.all(
+                                      const Radius.circular(40.0),
+                                    ),
+                                    borderSide: BorderSide(color: Colors.blueGrey[600])),
+                                focusedBorder: OutlineInputBorder(
+                                    borderRadius: const BorderRadius.all(
+                                      const Radius.circular(40.0),
+                                    ),
+                                    borderSide: BorderSide(color: Colors.blueGrey[600])),
+                                hintText: _translations.text("screens.safe-walk-creation.hints.chat"),
                               ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide.none,
-                              ),
-                              hintText: _translations.text("screens.safe-walk-creation.hints.chat"),
+                              autofocus: false,
+                              controller: _chatInputTextController,
+                              keyboardType: TextInputType.text,
+                              style: TextStyle(fontSize: 15),
+                              maxLines: 4,
+                              minLines: 1,
+                              onChanged: (newValue) {
+                                _currentChatMessage = newValue;
+                              },
                             ),
-                            autofocus: false,
-                            controller: _chatInputTextController,
-                            keyboardType: TextInputType.text,
-                            style: TextStyle(fontSize: 15),
-                            onChanged: (newValue) {
-                              _currentChatMessage = newValue;
-                            },
                           ),
                         ),
                         _isUploadingImage
-                            ? Container(width: 24, height: 24, child: CircularProgressIndicator())
-                            : IconButton(
-                                icon: Icon(
-                                  Icons.image,
-                                  color: Colors.green,
+                            ? SizedBox.shrink()
+                            : Padding(
+                                padding: WidgetUtils.chatInputPadding(),
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.image,
+                                    color: Colors.blueGrey[600],
+                                  ),
+                                  onPressed: () {
+                                    _pickImage(context, ImageSource.gallery);
+                                  },
                                 ),
-                                onPressed: () {
-                                  _pickImage(context, ImageSource.gallery);
-                                },
                               ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.send,
-                            color: Colors.blue,
+                        _isUploadingImage
+                            ? Container(
+                                width: 24,
+                                height: 24,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 1,
+                                  ),
+                                ),
+                              )
+                            : Padding(
+                                padding: WidgetUtils.chatInputPadding(),
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.photo_camera,
+                                    color: Colors.blueGrey[600],
+                                  ),
+                                  onPressed: () {
+                                    _pickImage(context, ImageSource.camera);
+                                  },
+                                ),
+                              ),
+                        Padding(
+                          padding: WidgetUtils.chatInputPadding(),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.send,
+                              color: Colors.blue,
+                            ),
+                            onPressed: () {
+                              _sendMessage(_currentChatMessage);
+                            },
                           ),
-                          onPressed: () {
-                            _sendMessage(_currentChatMessage);
-                          },
                         )
                       ],
                     ),
@@ -201,7 +241,7 @@ class _SafeWalkWalkerScreenState extends State {
 
     _deviceInformationService.batteryLevel.listen((event) async {
       int currentBatteryLevel = event.batteryLevel;
-      print(currentBatteryLevel);
+
       if (lastBatteryLevel == null) {
         lastBatteryLevel = currentBatteryLevel;
       }
@@ -228,7 +268,7 @@ class _SafeWalkWalkerScreenState extends State {
       _setUpComplete = true;
     });
 
-    NotificationHandler.subscribeRoute("${Routes.SAFE_WALK_WALKER_SCREEN}${_currentSafeWalk.id}");
+    NotificationHandler.turnOffNotificationForRoute("${Routes.SAFE_WALK_WALKER_SCREEN}${_currentSafeWalk.id}");
     location.changeSettings(accuracy: LocationAccuracy.navigation, distanceFilter: 0, interval: 2000);
     location.onLocationChanged.listen((LocationData currentLocation) {
       SharedPreferenceUtil.updateUserLastKnownSafeWalkLocation("${_currentSafeWalk.id}", currentLocation.latitude, currentLocation.longitude);
@@ -325,7 +365,7 @@ class _SafeWalkWalkerScreenState extends State {
 
       _messageDBRef.push().set(chatMessage.toJSON());
 
-      FireBaseHandler.unSubscribeToDistressChannelTopic("${_currentSafeWalk.id}");
+      FireBaseHandler.unSubscribeToSafeWalkChannelTopic("${_currentSafeWalk.id}");
 
       SharedPreferenceUtil.endSafeWalk();
 
@@ -407,7 +447,6 @@ class _SafeWalkWalkerScreenState extends State {
         WidgetUtils.showAlertDialog(context, _translations.text("screens.common.error.general.title"), _translations.text("screens.common.error.upload.image.message"));
       }
     } on Exception catch (e) {
-      print(e);
       setState(() {
         _isUploadingImage = false;
       });
@@ -432,6 +471,7 @@ class _SafeWalkWalkerScreenState extends State {
   @override
   void initState() {
     _deviceInformationService.broadcastBatteryLevel();
+
     super.initState();
   }
 }

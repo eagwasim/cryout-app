@@ -275,7 +275,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                                     ),
                                     FlatButton(
                                       onPressed: () {
-                                        locator<NavigationService>().pushNamed(Routes.START_SAFE_WALK_SCREEN);
+                                        locator<NavigationService>().pushNamed(Routes.START_SAFE_WALK_SCREEN).then((value) => _setUp());
                                       },
                                       child: Text(
                                         _translations.text("screens.home.safe-walk.start"),
@@ -397,7 +397,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
               child: RaisedButton.icon(
                 elevation: 4,
                 onPressed: () {
-                  locator<NavigationService>().pushNamed(Routes.DISTRESS_CATEGORY_SELECTION_SCREEN);
+                  locator<NavigationService>().pushNamed(Routes.DISTRESS_CATEGORY_SELECTION_SCREEN).then((value) => _setUp());
                 },
                 icon: Icon(
                   Icons.error_outline,
@@ -440,7 +440,6 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
   void _updateLocationTrackingStatus() async {
     if (_samaritan != null && _samaritan) {
       FireBaseHandler.subscribeToSamaritanTopic(_user.id);
-
       BackgroundLocationUpdate.startLocationTracking();
     } else if (_samaritan != null && !_samaritan) {
       if (!await SharedPreferenceUtil.isSafeWalking()) {
@@ -507,9 +506,29 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
           _currentDistressCall = null;
         });
       }));
+      _preferenceListeners.add(_userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).onChildAdded.listen((event) {
+        setState(() {
+          _currentDistressCall = DistressSignal.fromJSON(event.snapshot.value);
+        });
+      }));
+      _preferenceListeners.add(_userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_DISTRESS_SIGNAL).onChildChanged.listen((event) {
+        setState(() {
+          _currentDistressCall = DistressSignal.fromJSON(event.snapshot.value);
+        });
+      }));
       _preferenceListeners.add(_userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_SAFE_WALK).onChildRemoved.listen((event) {
         setState(() {
           _safeWalk = null;
+        });
+      }));
+      _preferenceListeners.add(_userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_SAFE_WALK).onChildAdded.listen((event) {
+        setState(() {
+          _safeWalk = SafeWalk.fromJSON(event.snapshot.value);
+        });
+      }));
+      _preferenceListeners.add(_userPreferenceDatabaseReference.child(PreferenceConstants.CURRENT_SAFE_WALK).onChildChanged.listen((event) {
+        setState(() {
+          _safeWalk = SafeWalk.fromJSON(event.snapshot.value);
         });
       }));
     }

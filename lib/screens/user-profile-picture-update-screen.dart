@@ -183,7 +183,7 @@ class _ProfilePictureUpdateScreenState extends State {
         WidgetUtils.showAlertDialog(context, _translations.text("common.error.unknown.title"), _translations.text("common.error.unknown.message"));
       }
     } on Exception catch (e) {
-      print(e);
+
       setState(() {
         _isProcessing = false;
       });
@@ -203,7 +203,7 @@ class _ProfilePictureUpdateScreenState extends State {
 
       locator<NavigationService>().pushNamedAndRemoveUntil(Routes.HOME_SCREEN);
     } else {
-      print("Saving Failed ${response.statusCode}");
+
       setState(() {
         _isProcessing = false;
       });

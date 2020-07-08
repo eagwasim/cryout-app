@@ -398,7 +398,6 @@ class _ReceivedSafeWalkListScreenState extends State {
 
     Response response = await SamaritanResource.getUserReceivedSafeWalks(context, _currentCursor);
 
-    print(response.statusCode);
     if (response.statusCode != 200) {
       if (_refreshController.isRefresh) {
         _refreshController.refreshFailed();

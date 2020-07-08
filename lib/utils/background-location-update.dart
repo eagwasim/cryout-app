@@ -28,7 +28,6 @@ class BackgroundLocationUpdate {
 
     // Fired whenever the state of location-services changes.  Always fired at boot
     bg.BackgroundGeolocation.onProviderChange((bg.ProviderChangeEvent event) {
-      print('[providerchange] - $event');
     });
 
     ////
@@ -37,7 +36,7 @@ class BackgroundLocationUpdate {
     bg.BackgroundGeolocation.ready(
       bg.Config(
         desiredAccuracy: bg.Config.DESIRED_ACCURACY_NAVIGATION,
-        distanceFilter: 1,
+        distanceFilter: 5,
         stopOnTerminate: false,
         startOnBoot: true,
         debug: false,
@@ -47,7 +46,7 @@ class BackgroundLocationUpdate {
           smallIcon: "drawable/ic_stat_alarm_1",
           color: "#00b0ff",
           title: "Cry Out",
-          text: "Cry Out is active, tap to open",
+          text: "Cry Out is active",
           priority: 0,
           channelName: "cry-out-background-channel",
         ),

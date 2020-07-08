@@ -24,6 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
+import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 
 class SafeWalkWatcherScreen extends StatefulWidget {
   final String safeWalkID;
@@ -77,8 +78,14 @@ class _SafeWalkWatcherScreenState extends State {
       });
       _locationUpdateSubscription.clear();
     }
-    NotificationHandler.unsubscribeRoute("${Routes.SAFE_WALK_WATCHER_SCREEN}$_safeWalkID");
+    NotificationHandler.turnOnNotificationForRoute("${Routes.SAFE_WALK_WATCHER_SCREEN}$_safeWalkID");
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    NotificationHandler.turnOnNotificationForRoute("${Routes.SAFE_WALK_WATCHER_SCREEN}$_safeWalkID");
   }
 
   static double lat = 52.3429908;
@@ -120,6 +127,14 @@ class _SafeWalkWatcherScreenState extends State {
               _showSendDistressCallDialog();
             },
           ),
+          _receivedSafeWalk.userPhoneNumber == null || _receivedSafeWalk.userPhoneNumber == ""
+              ? SizedBox.shrink()
+              : IconButton(
+                  icon: Icon(Icons.call),
+                  onPressed: () {
+                    UrlLauncher.launch("tel://${_receivedSafeWalk.userPhoneNumber}");
+                  },
+                ),
           IconButton(
             icon: Icon(Icons.message),
             onPressed: () {
@@ -221,14 +236,6 @@ class _SafeWalkWatcherScreenState extends State {
       updatePinOnMap();
     }));
 
-    _locationUpdateSubscription.add(dbRef.onChildChanged.listen((event) {
-      dynamic value = event.snapshot.value;
-      if (value == null) {
-        return;
-      }
-      _currentLocation = LatLng(value['lat'], value['lon']);
-      updatePinOnMap();
-    }));
     setState(() {
       _setUpComplete = true;
     });
@@ -266,6 +273,8 @@ class _SafeWalkWatcherScreenState extends State {
   }
 
   void _messageWindow() async {
+    NotificationHandler.turnOffNotificationForRoute("${Routes.SAFE_WALK_WATCHER_SCREEN}$_safeWalkID");
+
     double height = MediaQuery.of(context).size.height * 0.6;
 
     _persistentBottomSheetController = _scaffoldKey.currentState.showBottomSheet(
@@ -283,7 +292,10 @@ class _SafeWalkWatcherScreenState extends State {
                   ),
                   leading: IconButton(
                     icon: Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () {
+                      NotificationHandler.turnOnNotificationForRoute("${Routes.SAFE_WALK_WATCHER_SCREEN}$_safeWalkID");
+                      Navigator.of(context).pop();
+                    },
                   ),
                   backgroundColor: Theme.of(context).backgroundColor,
                   iconTheme: Theme.of(context).iconTheme,
@@ -317,35 +329,49 @@ class _SafeWalkWatcherScreenState extends State {
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8.0, right: 8.0),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         Expanded(
-                          child: TextField(
-                            decoration: new InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide.none,
+                          child: Padding(
+                            padding: WidgetUtils.chatInputPadding(),
+                            child: TextField(
+                              decoration: new InputDecoration(
+                                contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+                                enabledBorder: OutlineInputBorder(
+                                    borderRadius: const BorderRadius.all(
+                                      const Radius.circular(40.0),
+                                    ),
+                                    borderSide: BorderSide(color: Colors.blueGrey[600])),
+                                focusedBorder: OutlineInputBorder(
+                                    borderRadius: const BorderRadius.all(
+                                      const Radius.circular(40.0),
+                                    ),
+                                    borderSide: BorderSide(color: Colors.blueGrey[600])),
+                                hintText: _translations.text("screens.safe-walk-creation.hints.chat"),
                               ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide.none,
-                              ),
-                              hintText: _translations.text("screens.safe-walk-creation.hints.chat"),
+                              autofocus: false,
+                              controller: _chatInputTextController,
+                              keyboardType: TextInputType.text,
+                              style: TextStyle(fontSize: 15),
+                              minLines: 1,
+                              maxLines: 4,
+                              onChanged: (newValue) {
+                                _currentChatMessage = newValue;
+                              },
                             ),
-                            autofocus: false,
-                            controller: _chatInputTextController,
-                            keyboardType: TextInputType.text,
-                            style: TextStyle(fontSize: 15),
-                            onChanged: (newValue) {
-                              _currentChatMessage = newValue;
-                            },
                           ),
                         ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.send,
-                            color: Colors.blue,
+                        Padding(
+                          padding: WidgetUtils.chatInputPadding(),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.send,
+                              color: Colors.blue,
+                            ),
+                            onPressed: () {
+                              _sendMessage(_currentChatMessage);
+                            },
                           ),
-                          onPressed: () {
-                            _sendMessage(_currentChatMessage);
-                          },
                         )
                       ],
                     ),

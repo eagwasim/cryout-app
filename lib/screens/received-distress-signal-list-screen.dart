@@ -435,6 +435,7 @@ class _ReceivedDistressSignalListScreenState extends State {
     Response response = await SamaritanResource.getUserReceivedDistressSignals(context, _currentCursor);
     if (response.statusCode == 200) {
       dynamic data = jsonDecode(response.body)['data'];
+
       List<ReceivedDistressSignal> signalsFromServer = (data['data'] as List<dynamic>).map((e) => ReceivedDistressSignal.fromJSON(e)).toList();
       await ReceivedDistressSignalRepository.clear();
       _receivedDistressSignals.clear();

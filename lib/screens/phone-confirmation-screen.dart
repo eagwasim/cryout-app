@@ -95,11 +95,10 @@ class _PhoneConfirmationScreenState extends State {
 
                 Response resp = await AccessResource.phoneNumberConfirmation({"phoneNumber": phoneNumber, "code": text});
 
-                setState(() {
-                  _isProcessing = false;
-                });
-
                 if (resp.statusCode == HttpStatus.badRequest) {
+                  setState(() {
+                    _isProcessing = false;
+                  });
                   WidgetUtils.showAlertDialog(
                     context,
                     _translations.text("screens.phone.confirmation.error.invalid_code.title"),
@@ -109,6 +108,9 @@ class _PhoneConfirmationScreenState extends State {
                 }
 
                 if (resp.statusCode == HttpStatus.forbidden) {
+                  setState(() {
+                    _isProcessing = false;
+                  });
                   WidgetUtils.showAlertDialog(
                     context,
                     'Account suspended!',
@@ -118,6 +120,9 @@ class _PhoneConfirmationScreenState extends State {
                 }
 
                 if (resp.statusCode != HttpStatus.ok) {
+                  setState(() {
+                    _isProcessing = false;
+                  });
                   WidgetUtils.showAlertDialog(
                     context,
                     _translations.text("common.error.unknown.title"),
@@ -143,15 +148,18 @@ class _PhoneConfirmationScreenState extends State {
 
                 final FirebaseAuth _auth = FirebaseAuth.instance;
 
-                AuthResult result = await _auth.signInWithCustomToken(token: notificationToken);
 
-                print(result.user.uid);
+                AuthResult result = await _auth.signInWithCustomToken(token: notificationToken);
 
                 if (userPreferencesResponse.isNotEmpty) {
                   for (int index = 0; index < userPreferencesResponse.length; index++) {
                     await SharedPreferenceUtil.setString(userPreferencesResponse[index]["name"], userPreferencesResponse[index]["value"]);
                   }
                 }
+
+                setState(() {
+                  _isProcessing = false;
+                });
 
                 FireBaseHandler.subscribeToUserTopic(user.id);
 

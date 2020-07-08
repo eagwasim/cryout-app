@@ -34,14 +34,22 @@ class DatabaseProvider {
       onCreate: (db, version) {
         // Run the CREATE TABLE statement on the database.
         db.execute(
-            "CREATE TABLE received_distress_signals (id INTEGER PRIMARY KEY, age TEXT, detail TEXT, dateCreated INTEGER, opened INTEGER, distressId TEXT, firstName TEXT, lastName TEXT, gender TEXT, phone TEXT, photo TEXT, userId TEXT, distance TEXT, location TEXT);");
+            "CREATE TABLE received_distress_signals (id INTEGER PRIMARY KEY, age TEXT, detail TEXT, dateCreated INTEGER, opened INTEGER, distressId TEXT, firstName TEXT, lastName TEXT, gender TEXT, phone TEXT, photo TEXT, userId TEXT, distance TEXT, location TEXT, status TEXT);");
         db.execute(
-            "CREATE TABLE received_safe_walks (id INTEGER PRIMARY KEY, safeWalkId TEXT, userId TEXT, destination TEXT, userFirstName TEXT, userLastName TEXT, userPhoto TEXT, dateCreated INTEGER, opened INTEGER);");
+            "CREATE TABLE received_safe_walks (id INTEGER PRIMARY KEY, safeWalkId TEXT, userId TEXT, destination TEXT, userFirstName TEXT, userLastName TEXT, userPhoto TEXT, dateCreated INTEGER, opened INTEGER, userPhoneNumber TEXT, status TEXT);");
         db.execute("CREATE TABLE emergency_contacts (id INTEGER PRIMARY KEY, fullName TEXT, phoneNumber TEXT);");
+      },
+
+      onUpgrade: (db, oldVersion, newVersion) {
+        if (newVersion == 2 && oldVersion == 1) {
+          db.execute("ALTER TABLE received_safe_walks ADD userPhoneNumber TEXT;");
+          db.execute("ALTER TABLE received_safe_walks ADD status TEXT;");
+          db.execute("ALTER TABLE received_distress_signals ADD status TEXT;");
+        }
       },
       // Set the version. This executes the onCreate function and provides a
       // path to perform database upgrades and downgrades.
-      version: 1,
+      version: 2,
     );
   }
 }

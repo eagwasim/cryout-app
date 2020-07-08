@@ -38,7 +38,7 @@ class WebNotificationService {
       Response response = await SamaritanResource.activeSafeWalksCount(_buildContext);
 
       if (response.statusCode != 200) {
-        await Future.delayed(Duration(seconds: 8));
+        await Future.delayed(Duration(seconds: 10));
         continue;
       }
 
@@ -47,7 +47,7 @@ class WebNotificationService {
       response = await SamaritanResource.activeDistressCallsCount(_buildContext);
 
       if (response.statusCode != 200) {
-        await Future.delayed(Duration(seconds: 8));
+        await Future.delayed(Duration(seconds: 10));
         continue;
       }
 
@@ -55,7 +55,7 @@ class WebNotificationService {
 
       _controller.add(NotificationInfo(activeDistressCallCount, activeSafeWalksCount));
 
-      await Future.delayed(Duration(seconds: 8));
+      await Future.delayed(Duration(seconds: 10));
     }
   }
 }

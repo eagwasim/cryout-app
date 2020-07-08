@@ -15,6 +15,7 @@ class ReceivedDistressSignal {
   String userId;
   String distance;
   String location;
+  String status;
 
   int dateCreated;
   int opened;
@@ -34,6 +35,7 @@ class ReceivedDistressSignal {
     this.distance,
     this.location,
     this.opened,
+    this.status,
   });
 
   Map<String, dynamic> toJSON() {
@@ -52,6 +54,7 @@ class ReceivedDistressSignal {
       "distance": distance,
       "location": location,
       "opened": opened,
+      "status": status
     };
   }
 
@@ -71,6 +74,7 @@ class ReceivedDistressSignal {
       distance: json["distance"],
       location: json["location"],
       opened: json["opened"] ?? 0,
+      status: json["status"] ?? null,
     );
   }
 }
@@ -80,7 +84,7 @@ class ReceivedDistressSignalRepository {
     final db = await DatabaseProvider.dbp.database;
 
     List<Map<String, dynamic>> result = await db.rawQuery("select * from received_distress_signals order by dateCreated desc");
-    print(result);
+
     if (result.isEmpty) {
       return [];
     }

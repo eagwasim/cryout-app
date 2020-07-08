@@ -41,6 +41,9 @@ class NotificationHandler {
 
       // Return is notification type isn't specified
       if (notificationData == null || !notificationData.containsKey('type')) {
+        if (data['notification'] != null && !isAppLaunch) {
+          _showGenericNotification(data['notification']['title'], data['notification']['body']);
+        }
         return;
       }
 
@@ -56,7 +59,6 @@ class NotificationHandler {
         _handleSafeWalkChannelMessage(notificationData, isAppLaunch);
       }
     } catch (e) {
-      print(e);
     }
   }
 
@@ -77,26 +79,30 @@ class NotificationHandler {
     if (user.id == safeWalkUserId) {
       var payload = {"route": Routes.SAFE_WALK_WALKER_SCREEN, "safeWalkID": safeWalkChannelId};
 
-      if (!isAppLaunch || !_notificationChanelSubscription.containsKey(Routes.SAFE_WALK_WALKER_SCREEN + safeWalkChannelId)) {
+      if (!isAppLaunch && !_notificationChanelSubscription.containsKey(Routes.SAFE_WALK_WALKER_SCREEN + safeWalkChannelId)) {
         if (messageType == 'text') {
           _showMessageNotification(senderName, message, payload);
         } else if (messageType == 'img') {
           _showMessageNotificationWithImage(senderName, "Image", message, payload);
         }
       } else {
-        _handleSafeWalkWalkerMessageNotificationClick(payload);
+        if (isAppLaunch) {
+          _handleSafeWalkWalkerMessageNotificationClick(payload);
+        }
       }
     } else {
       var payload = {"route": Routes.SAFE_WALK_WATCHER_SCREEN, "safeWalkID": safeWalkChannelId};
 
-      if (!isAppLaunch || !_notificationChanelSubscription.containsKey(Routes.SAFE_WALK_WATCHER_SCREEN + safeWalkChannelId)) {
+      if (!isAppLaunch && !_notificationChanelSubscription.containsKey(Routes.SAFE_WALK_WATCHER_SCREEN + safeWalkChannelId)) {
         if (messageType == 'text') {
           _showMessageNotification(senderName, message, payload);
         } else if (messageType == 'img') {
           _showMessageNotificationWithImage(senderName, "Image", message, payload);
         }
       } else {
-        _handleSafeWalkWatcherMessageNotificationClick(payload);
+        if (isAppLaunch) {
+          _handleSafeWalkWatcherMessageNotificationClick(payload);
+        }
       }
     }
   }
@@ -114,12 +120,14 @@ class NotificationHandler {
     }
   }
 
-  static void subscribeRoute(String route) {
+  static void turnOffNotificationForRoute(String route) {
     _notificationChanelSubscription[route] = true;
   }
 
-  static void unsubscribeRoute(String route) {
-    _notificationChanelSubscription.remove(route);
+  static void turnOnNotificationForRoute(String route) {
+    if (_notificationChanelSubscription.containsKey(route)) {
+      _notificationChanelSubscription.remove(route);
+    }
   }
 
   static void _handleAccountBlocked(bool isAppLaunch) async {
@@ -156,29 +164,34 @@ class NotificationHandler {
     }
 
     // Is Victim Channel
+
     if (user.id == distressUserId) {
       var payload = {"route": Routes.VICTIM_DISTRESS_CHANNEL_SCREEN, "distressChannelId": distressChannelId};
 
-      if (!isAppLaunch || !_notificationChanelSubscription.containsKey(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN + distressChannelId)) {
+      if (!isAppLaunch && !_notificationChanelSubscription.containsKey(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN + distressChannelId)) {
         if (messageType == 'text') {
           _showMessageNotification(senderName, message, payload);
         } else if (messageType == 'img') {
           _showMessageNotificationWithImage(senderName, "Image", message, payload);
         }
       } else {
-        _handleVictimDistressSignalMessageNotificationClick(payload);
+        if (isAppLaunch) {
+          _handleVictimDistressSignalMessageNotificationClick(payload);
+        }
       }
     } else {
       var payload = {"route": Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN, "distressChannelId": distressChannelId};
 
-      if (!isAppLaunch || !_notificationChanelSubscription.containsKey(Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN + distressChannelId)) {
+      if (!isAppLaunch && !_notificationChanelSubscription.containsKey(Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN + distressChannelId)) {
         if (messageType == 'text') {
           _showMessageNotification(senderName, message, payload);
         } else if (messageType == 'img') {
           _showMessageNotificationWithImage(senderName, "Image", message, payload);
         }
       } else {
-        _handleSamaritanDistressSignalMessageNotificationClick(payload);
+        if (isAppLaunch) {
+          _handleSamaritanDistressSignalMessageNotificationClick(payload);
+        }
       }
     }
   }
@@ -256,7 +269,6 @@ class NotificationHandler {
   }
 
   static Future<void> _onDidReceiveLocalNotification(int id, String title, String body, String payload) async {
-    print("ID: $id, Title: $title, body: $body, Payload: $payload");
   }
 
   static Future<void> _showGenericNotification(String title, String body) async {

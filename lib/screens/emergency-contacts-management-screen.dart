@@ -245,6 +245,11 @@ class _EmergencyContactsManagementScreenState extends State {
     if (number.trim() == "") {
       return "";
     }
+
+    if (number.startsWith("+")) {
+      return number;
+    }
+
     PhoneNumber loggedInUserPhoneNumber = await PhoneNumber.getRegionInfoFromPhoneNumber(_user.phoneNumber);
     PhoneNumber pn = await PhoneNumber.getRegionInfoFromPhoneNumber(number, loggedInUserPhoneNumber.isoCode);
     return pn.phoneNumber;

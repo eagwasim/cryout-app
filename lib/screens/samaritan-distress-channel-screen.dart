@@ -61,7 +61,7 @@ class _SamaritanDistressChannelScreenState extends State {
 
   @override
   void initState() {
-    NotificationHandler.subscribeRoute("${Routes.VICTIM_DISTRESS_CHANNEL_SCREEN}$_receivedDistressSignalId");
+    NotificationHandler.turnOffNotificationForRoute("${Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN}$_receivedDistressSignalId");
     super.initState();
   }
 
@@ -167,39 +167,57 @@ class _SamaritanDistressChannelScreenState extends State {
             child: Padding(
               padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 4),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Expanded(
-                    child: TextField(
-                      maxLines: 4,
-                      minLines: 1,
-                      textInputAction: TextInputAction.newline,
-                      decoration: new InputDecoration(
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide.none,
+                    child: Padding(
+                      padding: WidgetUtils.chatInputPadding(),
+                      child: TextField(
+                        maxLines: 4,
+                        minLines: 1,
+                        textInputAction: TextInputAction.newline,
+                        decoration: new InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+                          enabledBorder: OutlineInputBorder(
+                              borderRadius: const BorderRadius.all(
+                                const Radius.circular(40.0),
+                              ),
+                              borderSide: BorderSide(
+                                  color: Colors.blueGrey[600]
+                              )
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                              borderRadius: const BorderRadius.all(
+                                const Radius.circular(40.0),
+                              ),
+                              borderSide: BorderSide(
+                                  color: Colors.blueGrey[600]
+                              )
+                          ),
+                          hintText: _translations.text("screens.samaritan-distress-channel-screen.send-message"),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide.none,
-                        ),
-                        hintText: _translations.text("screens.samaritan-distress-channel-screen.send-message"),
+                        autofocus: false,
+                        controller: _chatInputTextController,
+                        keyboardType: TextInputType.text,
+                        style: TextStyle(fontSize: 15),
+
+                        onChanged: (newValue) {
+                          _currentChatMessage = newValue;
+                        },
                       ),
-                      autofocus: false,
-                      controller: _chatInputTextController,
-                      keyboardType: TextInputType.text,
-                      style: TextStyle(fontSize: 15),
-                      onChanged: (newValue) {
-                        _currentChatMessage = newValue;
-                      },
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.send,
-                      color: Colors.blue[600],
+                  Padding(
+                    padding: WidgetUtils.chatInputPadding(),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.send,
+                        color: Colors.blue[600],
+                      ),
+                      onPressed: () {
+                        _sendMessage(_currentChatMessage);
+                      },
                     ),
-                    onPressed: () {
-                      _sendMessage(_currentChatMessage);
-                    },
                   )
                 ],
               ),
@@ -285,7 +303,7 @@ class _SamaritanDistressChannelScreenState extends State {
   @override
   void dispose() {
     super.dispose();
-    NotificationHandler.unsubscribeRoute("${Routes.VICTIM_DISTRESS_CHANNEL_SCREEN}$_receivedDistressSignalId");
+    NotificationHandler.turnOnNotificationForRoute("${Routes.SAMARITAN_DISTRESS_CHANNEL_SCREEN}$_receivedDistressSignalId");
     if (_samaritanCountListener != null) _samaritanCountListener.cancel();
   }
 

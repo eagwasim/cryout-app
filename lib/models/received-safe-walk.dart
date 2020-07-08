@@ -10,10 +10,12 @@ class ReceivedSafeWalk {
   String userFirstName;
   String userLastName;
   String userPhoto;
+  String userPhoneNumber;
+  String status;
   int dateCreated;
   int opened;
 
-  ReceivedSafeWalk({this.id, this.userId, this.destination, this.dateCreated, this.userFirstName, this.userLastName, this.userPhoto, this.safeWalkId, this.opened});
+  ReceivedSafeWalk({this.id, this.userId, this.destination, this.dateCreated, this.userFirstName, this.userLastName, this.userPhoto, this.safeWalkId, this.opened, this.userPhoneNumber, this.status});
 
   Map<String, dynamic> toJSON() {
     return {
@@ -25,7 +27,9 @@ class ReceivedSafeWalk {
       "userLastName": userLastName,
       "userPhoto": userPhoto,
       "safeWalkId": safeWalkId,
-      "opened": opened
+      "opened": opened,
+      "userPhoneNumber": userPhoneNumber,
+      "status": status
     };
   }
 
@@ -40,6 +44,8 @@ class ReceivedSafeWalk {
       userLastName: json["userLastName"],
       userFirstName: json["userFirstName"],
       opened: json["opened"] ?? 0,
+      status: json["status"] ?? null,
+      userPhoneNumber: json["userPhoneNumber"] ?? null,
     );
   }
 }

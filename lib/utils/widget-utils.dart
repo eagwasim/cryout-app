@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:bubble/bubble.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -516,5 +518,11 @@ class WidgetUtils {
     Toast.show("Sending report...", context, duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
 
     UserResource.reportUser(context, {"userId": userId, "reason": reason});
+  }
+
+  static EdgeInsetsGeometry chatInputPadding(){
+    double top = 8;
+    double bottom = Platform.isIOS ? 24 : 16;
+    return EdgeInsets.only(top: top, bottom: bottom);
   }
 }
