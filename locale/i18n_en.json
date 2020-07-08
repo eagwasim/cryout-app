@@ -150,5 +150,6 @@
   "screens.phone-verification.error.message": "Invalid phone number",
   "screens.emergency-contacts.empty.message": "You have no emergency contacts",
   "screens.phone-verifications.channels.sms": "SMS",
-  "screens.phone-verifications.channels.call": "Call me"
+  "screens.phone-verifications.channels.call": "Call me",
+  "screens.phone-verifications.enter-code": "Enter code"
 }

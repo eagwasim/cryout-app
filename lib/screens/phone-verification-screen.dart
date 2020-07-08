@@ -169,28 +169,36 @@ class _PhoneVerificationScreenState extends State {
     if (!_isValid) {
       return;
     }
+
     setState(() {
       _isProcessing = true;
     });
+
     _internationalizedPhoneNumber = _internationalizedPhoneNumber.replaceAll(new RegExp("[^\+0-9]"), "");
 
-    /*final FirebaseAuth _auth = FirebaseAuth.instance;
+    final FirebaseAuth _auth = FirebaseAuth.instance;
 
     await _auth.verifyPhoneNumber(
-      phoneNumber: null,
+      phoneNumber: _internationalizedPhoneNumber,
       timeout: Duration(seconds: 120),
       verificationCompleted: (AuthCredential auth) {
-
-        _auth.signInWithCredential(auth);
+        _auth.signInWithCredential(auth).then((result) => () {
+          _loginUser(result);
+        }).catchError((e) {
+          _showError(e.message);
+          Navigator.of(context).pop();
+        });
       },
       verificationFailed: (AuthException authException) {
-        print(authException.message);
+        _showError(authException.message);
       },
-      codeSent: null,
+      codeSent: (String verificationId, [int forceResendingToken]) {
+        _verifyOTP(verificationId);
+      },
       codeAutoRetrievalTimeout: null,
     );
-*/
-    Response resp = await AccessResource.phoneNumberVerification({'phoneNumber': _internationalizedPhoneNumber, 'channel': _channel.toShortString()});
+
+/*    Response resp = await AccessResource.phoneNumberVerification({'phoneNumber': _internationalizedPhoneNumber, 'channel': _channel.toShortString()});
 
     if (resp.statusCode != BaseResource.STATUS_OK) {
       setState(() {
@@ -206,7 +214,58 @@ class _PhoneVerificationScreenState extends State {
 
     setState(() {
       _isProcessing = false;
+    });*/
+  }
+
+  TextEditingController _codeController = TextEditingController(text: "");
+
+  void _verifyOTP(String verificationId) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text(_translations.text("screens.phone-verifications.enter-code")),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            TextField(
+              controller: _codeController,
+            ),
+          ],
+        ),
+        actions: <Widget>[
+          FlatButton(
+            child: Text(_translations.text("screens.common.done")),
+            textColor: Colors.white,
+            color: Theme.of(context).accentColor,
+            onPressed: () {
+              FirebaseAuth auth = FirebaseAuth.instance;
+              String smsCode = _codeController.text.trim();
+              AuthCredential _credential = PhoneAuthProvider.getCredential(verificationId: verificationId, smsCode: smsCode);
+              auth.signInWithCredential(_credential)
+                  .then((AuthResult result) {
+                      _loginUser(result);
+                  }).catchError((e) {
+                  Navigator.of(context).pop();
+                  _showError(e.message);
+                },
+              );
+            },
+          )
+        ],
+      ),
+    );
+  }
+
+  void _showError(String message) {
+    WidgetUtils.showAlertDialog(context, "", message);
+    setState(() {
+      _isProcessing = false;
     });
+  }
+
+  void _loginUser(AuthResult authResult){
+
   }
 }
 
