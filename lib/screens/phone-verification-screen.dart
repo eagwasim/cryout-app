@@ -174,22 +174,6 @@ class _PhoneVerificationScreenState extends State {
     });
     _internationalizedPhoneNumber = _internationalizedPhoneNumber.replaceAll(new RegExp("[^\+0-9]"), "");
 
-    /*final FirebaseAuth _auth = FirebaseAuth.instance;
-
-    await _auth.verifyPhoneNumber(
-      phoneNumber: null,
-      timeout: Duration(seconds: 120),
-      verificationCompleted: (AuthCredential auth) {
-
-        _auth.signInWithCredential(auth);
-      },
-      verificationFailed: (AuthException authException) {
-        print(authException.message);
-      },
-      codeSent: null,
-      codeAutoRetrievalTimeout: null,
-    );
-*/
     Response resp = await AccessResource.phoneNumberVerification({'phoneNumber': _internationalizedPhoneNumber, 'channel': _channel.toShortString()});
 
     if (resp.statusCode != BaseResource.STATUS_OK) {

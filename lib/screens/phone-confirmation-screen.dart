@@ -148,8 +148,7 @@ class _PhoneConfirmationScreenState extends State {
 
                 final FirebaseAuth _auth = FirebaseAuth.instance;
 
-
-                AuthResult result = await _auth.signInWithCustomToken(token: notificationToken);
+                await _auth.signInWithCustomToken(token: notificationToken);
 
                 if (userPreferencesResponse.isNotEmpty) {
                   for (int index = 0; index < userPreferencesResponse.length; index++) {
