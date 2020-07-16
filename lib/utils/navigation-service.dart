@@ -4,6 +4,7 @@ import 'package:cryout_app/screens/distress-category-selection-screen.dart';
 import 'package:cryout_app/screens/emergency-contacts-management-screen.dart';
 import 'package:cryout_app/screens/home-screen.dart';
 import 'package:cryout_app/screens/introduction-screen.dart';
+import 'package:cryout_app/screens/phone-confirmation-firebase-screen.dart';
 import 'package:cryout_app/screens/phone-confirmation-screen.dart';
 import 'package:cryout_app/screens/phone-verification-screen.dart';
 import 'package:cryout_app/screens/received-distress-signal-list-screen.dart';
@@ -108,6 +109,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case Routes.SAFE_WALK_WATCHER_SCREEN:
       var argument = settings.arguments as String;
       return MaterialPageRoute(builder: (context) => SafeWalkWatcherScreen(safeWalkID: argument));
+    case Routes.FIREBASE_SMS_CODE_CONFIRMATION_SCREEN:
+      var argument = settings.arguments as String;
+      return MaterialPageRoute(builder: (context) => PhoneConfirmationFirebaseScreen(verificationId: argument));
     default:
       return MaterialPageRoute(builder: (context) => SplashScreen());
   }

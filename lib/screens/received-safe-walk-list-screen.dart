@@ -244,7 +244,7 @@ class _ReceivedSafeWalkListScreenState extends State {
                                   style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
                                 )),
                                 Text(
-                                  receivedSafeWalkSignal.dateCreated == null ? "" : timeago.format(DateTime.fromMillisecondsSinceEpoch(receivedSafeWalkSignal.dateCreated), locale: 'en_short'),
+                                  receivedSafeWalkSignal.dateCreated == null ? "" : timeago.format(DateTime.fromMillisecondsSinceEpoch(receivedSafeWalkSignal.dateCreated), locale: 'en'),
                                   style: TextStyle(fontStyle: FontStyle.italic, fontSize: 10, color: Colors.grey),
                                 ),
                               ],

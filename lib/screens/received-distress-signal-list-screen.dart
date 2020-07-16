@@ -246,7 +246,7 @@ class _ReceivedDistressSignalListScreenState extends State {
                                   style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
                                 )),
                                 Text(
-                                  (receivedDistressSignal.dateCreated == null ? "" : timeago.format(DateTime.fromMillisecondsSinceEpoch(receivedDistressSignal.dateCreated), locale: 'en_short')) +
+                                  (receivedDistressSignal.dateCreated == null ? "" : timeago.format(DateTime.fromMillisecondsSinceEpoch(receivedDistressSignal.dateCreated), locale: 'en')) +
                                       "  ·  " +
                                       (receivedDistressSignal.distance == null ? "" : receivedDistressSignal.distance + "km"),
                                   style: TextStyle(fontStyle: FontStyle.italic, fontSize: 10, color: Colors.grey),

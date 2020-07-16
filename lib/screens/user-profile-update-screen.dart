@@ -9,7 +9,6 @@ import 'package:cryout_app/utils/widget-utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
-import 'package:intl/intl.dart';
 
 class UserProfileUpdateScreen extends StatefulWidget {
   @override
@@ -23,17 +22,11 @@ class _UserProfileUpdateScreenState extends State {
 
   TextEditingController _firstNameController;
   TextEditingController _lastNameController;
-  TextEditingController _emailAddressController;
-  TextEditingController _dateOfBirthController;
 
   GenderConstant _gender = GenderConstant.FEMALE;
 
   String _firstName;
   String _lastName;
-  String _emailAddress;
-  String _dateOfBirth;
-
-  DateTime _selectedDateOfBirth;
 
   bool _processing = false;
 
@@ -44,8 +37,6 @@ class _UserProfileUpdateScreenState extends State {
     super.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
-    _emailAddressController.dispose();
-    _dateOfBirthController.dispose();
   }
 
   @override
@@ -60,13 +51,6 @@ class _UserProfileUpdateScreenState extends State {
       text: _lastName,
     );
 
-    _emailAddressController = new TextEditingController(
-      text: _emailAddress,
-    );
-
-    _dateOfBirthController = new TextEditingController(
-      text: _dateOfBirth,
-    );
 
     if (_user == null) {
       Future<User> userFuture = SharedPreferenceUtil.currentUser();
@@ -76,7 +60,6 @@ class _UserProfileUpdateScreenState extends State {
         setState(() {
           _firstName = _user.firstName;
           _lastName = _user.lastName;
-          _emailAddress = _user.emailAddress;
         });
       });
     }
@@ -134,20 +117,6 @@ class _UserProfileUpdateScreenState extends State {
                         keyboardType: TextInputType.text,
                         onChanged: (newValue) {
                           _lastName = newValue;
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
-                      child: TextField(
-                        decoration: new InputDecoration(
-                          hintText: _translations.text("screens.name-update.hints.email"),
-                        ),
-                        autofocus: true,
-                        controller: _emailAddressController,
-                        keyboardType: TextInputType.text,
-                        onChanged: (newValue) {
-                          _emailAddress = newValue;
                         },
                       ),
                     ),
@@ -209,26 +178,6 @@ class _UserProfileUpdateScreenState extends State {
                         ),
                       ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
-                      child: InkWell(
-                        onTap: () {
-                          launchDatePicker();
-                        },
-                        child: TextField(
-                          enabled: false,
-                          decoration: new InputDecoration(
-                            hintText: _translations.text("screens.name-update.hints.date-of-birth"),
-                          ),
-                          autofocus: true,
-                          controller: _dateOfBirthController,
-                          keyboardType: TextInputType.text,
-                          onChanged: (newValue) {
-                            _dateOfBirth = newValue;
-                          },
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -251,22 +200,18 @@ class _UserProfileUpdateScreenState extends State {
                               style: TextStyle(color: Colors.white),
                             ),
                             onPressed: () async {
-                              if (_firstName.trim() != "" && _lastName.trim() != "" && _emailAddress.trim() != null && _emailAddress.trim().contains("@") && _dateOfBirth != null) {
+                              if (_firstName.trim() != "" && _lastName.trim() != "" ) {
                                 setState(() {
                                   _processing = true;
                                 });
 
                                 _user.firstName = _firstName.trim().capitalize();
                                 _user.lastName = _lastName.trim().capitalize();
-                                _user.emailAddress = _emailAddress.trim().toLowerCase();
-                                _user.dateOfBirth = _dateOfBirth;
                                 _user.gender = _gender.toShortString();
 
                                 Response resp = await UserResource.updateUser(context, {
                                   "firstName": _firstName.trim(),
                                   "lastName": _lastName.trim(),
-                                  "emailAddress": _emailAddress.toLowerCase().trim(),
-                                  "dateOfBirth": _dateOfBirth.toLowerCase().trim(),
                                   "gender": _gender.toShortString(),
                                 });
 
@@ -292,24 +237,6 @@ class _UserProfileUpdateScreenState extends State {
         ),
       ),
     );
-  }
-
-  var formatter = new DateFormat('MM/dd/yyyy');
-
-  void launchDatePicker() async {
-    final datePick = await showDatePicker(
-      context: context,
-      initialDate: _selectedDateOfBirth == null ? new DateTime(DateTime.now().year - 18) : _selectedDateOfBirth,
-      firstDate: new DateTime(DateTime.now().year - 100),
-      lastDate: new DateTime(DateTime.now().year - 9),
-    );
-
-    if (datePick != null) {
-      setState(() {
-        _selectedDateOfBirth = datePick;
-        _dateOfBirth = formatter.format(datePick);
-      });
-    }
   }
 }
 

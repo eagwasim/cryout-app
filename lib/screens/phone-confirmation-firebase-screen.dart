@@ -13,19 +13,26 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
-import 'package:pin_code_text_field/pin_code_text_field.dart';
 
-class PhoneConfirmationScreen extends StatefulWidget {
+class PhoneConfirmationFirebaseScreen extends StatefulWidget {
+  final String verificationId;
+
+  const PhoneConfirmationFirebaseScreen({Key key, this.verificationId}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
-    return _PhoneConfirmationScreenState();
+    return _PhoneConfirmationFirebaseScreenState(this.verificationId);
   }
 }
 
-class _PhoneConfirmationScreenState extends State {
-  TextEditingController controller = TextEditingController(text: "");
+class _PhoneConfirmationFirebaseScreenState extends State {
+  final String _verificationId;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   Translations _translations;
   bool _isProcessing = false;
+  TextEditingController _firebaseSMSCodeController = TextEditingController(text: "");
+
+  _PhoneConfirmationFirebaseScreenState(this._verificationId);
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +48,7 @@ class _PhoneConfirmationScreenState extends State {
         backgroundColor: Theme.of(context).backgroundColor,
         elevation: 0,
         brightness: Theme.of(context).brightness,
+        iconTheme: Theme.of(context).iconTheme,
       ),
       body: SafeArea(
         child: Column(
@@ -59,71 +67,63 @@ class _PhoneConfirmationScreenState extends State {
                 )),
               ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                    child: Padding(
-                  padding: const EdgeInsets.only(left: 16.0, right: 16, top: 16),
-                  child: Text(
-                    Translations.of(context).text("screens.phone.confirmation.message"),
-                    textAlign: TextAlign.start,
-                    style: TextStyle(fontSize: 15),
-                  ),
-                )),
-              ],
-            ),
             Padding(
-              padding: EdgeInsets.all(16),
-            ),
-            PinCodeTextField(
-              autofocus: true,
-              controller: controller,
-              hideCharacter: false,
-              highlight: true,
-              highlightColor: Colors.grey[700],
-              defaultBorderColor: Colors.grey,
-              hasTextBorderColor: Colors.deepOrange,
-              maxLength: 4,
-              onTextChanged: (text) {},
-              onDone: (text) async {
-               _login(text);
-              },
-              wrapAlignment: WrapAlignment.spaceAround,
-              pinBoxDecoration: ProvidedPinBoxDecoration.defaultPinBoxDecoration,
-              pinTextStyle: TextStyle(fontSize: 30.0),
-              pinTextAnimatedSwitcherTransition: ProvidedPinBoxTextAnimation.scalingTransition,
-              pinTextAnimatedSwitcherDuration: Duration(milliseconds: 300),
-              highlightAnimationBeginColor: Colors.black,
-              highlightAnimationEndColor: Colors.white12,
-              keyboardType: TextInputType.number,
+              padding: const EdgeInsets.only(left: 16.0, right: 16, top: 8),
+              child: TextField(
+                decoration: new InputDecoration(
+                  hintText: _translations.text("screens.phone-verifications.enter-code.hint"),
+                ),
+                autofocus: true,
+                controller: _firebaseSMSCodeController,
+              ),
             ),
           ],
         ),
       ),
+      floatingActionButton: _isProcessing
+          ? CircularProgressIndicator()
+          : RaisedButton(
+              shape: RoundedRectangleBorder(
+                borderRadius: new BorderRadius.circular(25.0),
+              ),
+              child: Text(
+                _translations.text("screens.common.continue"),
+                style: TextStyle(color: Colors.white),
+              ),
+              onPressed: () {
+                _preLogin();
+              },
+            ),
     );
   }
 
-  void _login(String text) async {
+  void _preLogin() {
     setState(() {
       _isProcessing = true;
     });
+    String smsCode = _firebaseSMSCodeController.text.trim();
 
-    String phoneNumber = await SharedPreferenceUtil.getPhoneNumberForVerification();
+    AuthCredential _credential = PhoneAuthProvider.getCredential(verificationId: _verificationId, smsCode: smsCode);
+    _auth.signInWithCredential(_credential).then((AuthResult result) {
+      _loginUser(result);
+    }).catchError(
+      (e) {
+        _showError(e.message);
+      },
+    );
+  }
 
-    Response resp = await AccessResource.phoneNumberConfirmation({"phoneNumber": phoneNumber, "code": text});
+  void _showError(String message) {
+    WidgetUtils.showAlertDialog(context, "", message);
+    setState(() {
+      _isProcessing = false;
+    });
+  }
 
-    if (resp.statusCode == HttpStatus.badRequest) {
-      setState(() {
-        _isProcessing = false;
-      });
-      WidgetUtils.showAlertDialog(
-        context,
-        _translations.text("screens.phone.confirmation.error.invalid_code.title"),
-        _translations.text("screens.phone.confirmation.error.invalid_code.message"),
-      );
-      return;
-    }
+  void _loginUser(AuthResult authResult) async {
+    IdTokenResult idTokenResult = await authResult.user.getIdToken(refresh: false);
+
+    Response resp = await AccessResource.loginUserByFirebaseToken({'token': idTokenResult.token});
 
     if (resp.statusCode == HttpStatus.forbidden) {
       setState(() {
@@ -163,9 +163,10 @@ class _PhoneConfirmationScreenState extends State {
     await SharedPreferenceUtil.saveUser(user);
     await SharedPreferenceUtil.saveToken(token);
     await SharedPreferenceUtil.saveRefreshToken(refreshToken);
-
-    final FirebaseAuth _auth = FirebaseAuth.instance;
-
+    // Remove user
+    FirebaseUser firebaseUser = await FirebaseAuth.instance.currentUser();
+    firebaseUser.delete();
+    // Sign them in with our token
     await _auth.signInWithCustomToken(token: notificationToken);
 
     if (userPreferencesResponse.isNotEmpty) {

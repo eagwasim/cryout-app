@@ -36,7 +36,7 @@ class BackgroundLocationUpdate {
     bg.BackgroundGeolocation.ready(
       bg.Config(
         desiredAccuracy: bg.Config.DESIRED_ACCURACY_NAVIGATION,
-        distanceFilter: 5,
+        distanceFilter: 10,
         stopOnTerminate: false,
         startOnBoot: true,
         debug: false,

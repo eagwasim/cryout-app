@@ -7,10 +7,10 @@ import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
 
-
 class AccessResource {
   static const String VERIFY_PHONE_NUMBER_URL = "/api/v1/access/phone/verify";
   static const String CONFIRM_PHONE_NUMBER_URL = "/api/v1/access/phone/confirm";
+  static const String LOGIN_USER_BY_FIREBASE_TOKEN_URL = "/api/v1/access/firebase/login";
 
   static Future<Response> phoneNumberVerification(dynamic body) async {
     return await post(BaseResource.BASE_URL + VERIFY_PHONE_NUMBER_URL, headers: BaseResource.HEADERS, body: jsonEncode(body));
@@ -35,5 +35,9 @@ class AccessResource {
     await SharedPreferenceUtil.saveRefreshToken(respPayLoad["refreshToken"]);
 
     return true;
+  }
+
+  static Future<Response> loginUserByFirebaseToken(dynamic body) async {
+    return await post(BaseResource.BASE_URL + LOGIN_USER_BY_FIREBASE_TOKEN_URL, headers: BaseResource.HEADERS, body: jsonEncode(body));
   }
 }

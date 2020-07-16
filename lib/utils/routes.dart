@@ -20,13 +20,14 @@ class Routes {
   static const SAFE_WALK_WALKER_SCREEN = "/safe-walk-walker-screen";
   static const SAFE_WALK_WATCHER_SCREEN = "/safe-walk-watcher-screen";
   static const RECEIVED_SAFE_WALK_LIST_SCREEN = "/received-safe-walk-list-screen";
+  static const FIREBASE_SMS_CODE_CONFIRMATION_SCREEN = "/firebase-sms-code-confirmation-screen";
 
   static Future<String> initialRoute() async {
     User user = await SharedPreferenceUtil.currentUser();
 
     if (user == null) {
       return INTRODUCTION_SCREEN;
-    } else if (user.firstName == "" || user.lastName == "" || user.emailAddress == "" || user.gender == "") {
+    } else if (user.firstName == "" || user.lastName == "" || user.gender == "") {
       return USER_PROFILE_UPDATE_SCREEN;
     } else if (user.profilePhoto == "") {
       return USER_PROFILE_PHOTO_UPDATE_SCREEN;

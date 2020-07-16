@@ -522,7 +522,7 @@ class WidgetUtils {
 
   static EdgeInsetsGeometry chatInputPadding(){
     double top = 8;
-    double bottom = Platform.isIOS ? 24 : 16;
+    double bottom = Platform.isIOS ? 20 : 16;
     return EdgeInsets.only(top: top, bottom: bottom);
   }
 }

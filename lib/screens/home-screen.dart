@@ -613,18 +613,6 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                               children: <Widget>[
                                 Expanded(
                                     child: Text(
-                                  _user.emailAddress,
-                                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500, fontSize: 14),
-                                )),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
-                            child: Row(
-                              children: <Widget>[
-                                Expanded(
-                                    child: Text(
                                   _translations.text("screens.name-update.hints.gender.${_user.gender.toLowerCase()}").toLowerCase() + " | " + _user.phoneNumber,
                                   style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500, fontSize: 14),
                                 )),
