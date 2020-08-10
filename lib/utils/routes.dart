@@ -3,7 +3,7 @@ import 'package:cryout_app/utils/shared-preference-util.dart';
 
 class Routes {
   static const INTRODUCTION_SCREEN = '/introduction-screen';
-  static const HOME_SCREEN = '/home-screen';
+  static const BASE_SCREEN = '/base-screen';
   static const PHONE_CONFIRMATION_SCREEN = '/phone-confirmation-screen';
   static const PHONE_VERIFICATION_SCREEN = '/phone-verification-screen';
   static const SPLASH_SCREEN = '/splash-screen';
@@ -32,7 +32,7 @@ class Routes {
     } else if (user.profilePhoto == "") {
       return USER_PROFILE_PHOTO_UPDATE_SCREEN;
     } else {
-      return HOME_SCREEN;
+      return BASE_SCREEN;
     }
   }
 }

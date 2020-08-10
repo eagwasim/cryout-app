@@ -21,6 +21,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart';
 import 'package:toast/toast.dart';
 
@@ -213,7 +214,7 @@ class _SamaritanDistressChannelScreenState extends State {
                       padding: WidgetUtils.chatInputPadding(),
                       child: IconButton(
                         icon: Icon(
-                          Icons.send,
+                          FontAwesomeIcons.paperPlane,
                           color: Colors.blue[600],
                         ),
                         onPressed: () {

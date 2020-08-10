@@ -1,5 +1,6 @@
 import 'package:cryout_app/models/distress-signal.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
+import 'package:cryout_app/screens/base-screen.dart';
 import 'package:cryout_app/screens/distress-category-selection-screen.dart';
 import 'package:cryout_app/screens/emergency-contacts-management-screen.dart';
 import 'package:cryout_app/screens/home-screen.dart';
@@ -70,8 +71,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case Routes.INTRODUCTION_SCREEN:
       return MaterialPageRoute(builder: (context) => AppIntroductionScreen());
-    case Routes.HOME_SCREEN:
-      return MaterialPageRoute(builder: (context) => HomeScreen());
+    case Routes.BASE_SCREEN:
+      var argument = settings.arguments ?? 0;
+      return MaterialPageRoute(builder: (context) => BaseScreen(initialScreen: argument));
     case Routes.SPLASH_SCREEN:
       return MaterialPageRoute(builder: (context) => SplashScreen());
     case Routes.PHONE_VERIFICATION_SCREEN:

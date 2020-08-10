@@ -19,6 +19,7 @@ import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
@@ -171,7 +172,7 @@ class _VictimDistressChannelScreenState extends State {
                                   padding: WidgetUtils.chatInputPadding(),
                                   child: IconButton(
                                     icon: Icon(
-                                      Icons.image,
+                                      FontAwesomeIcons.image,
                                       color: Colors.blueGrey[600],
                                     ),
                                     onPressed: () {
@@ -194,7 +195,7 @@ class _VictimDistressChannelScreenState extends State {
                                   padding: WidgetUtils.chatInputPadding(),
                                   child: IconButton(
                                     icon: Icon(
-                                      Icons.photo_camera,
+                                      FontAwesomeIcons.cameraRetro,
                                       color: Colors.blueGrey[600],
                                     ),
                                     onPressed: () {
@@ -206,7 +207,7 @@ class _VictimDistressChannelScreenState extends State {
                             padding: WidgetUtils.chatInputPadding(),
                             child: IconButton(
                               icon: Icon(
-                                Icons.send,
+                                FontAwesomeIcons.paperPlane,
                                 color: Colors.blue,
                               ),
                               onPressed: () {

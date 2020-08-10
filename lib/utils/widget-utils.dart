@@ -549,4 +549,26 @@ class WidgetUtils {
 
     return mySystemTheme;
   }
+
+  static BoxDecoration backgroundDecoration(BuildContext context) {
+    if (Theme.of(context).brightness == Brightness.dark) {
+      return BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter, // 10% of the width, so there are ten blinds.
+          colors: [ Colors.black, Colors.black, Colors.grey[900], Colors.grey[800]], // whitish to gray
+          tileMode: TileMode.clamp, // repeats the gradient over the canvas
+        ),
+      );
+    } else {
+      return BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,// 10% of the width, so there are ten blinds.
+          colors: [ Colors.white, Colors.grey[200]], // whitish to gray
+          tileMode: TileMode.clamp, // repeats the gradient over the canvas
+        ),
+      );
+    }
+  }
 }

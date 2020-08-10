@@ -22,6 +22,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
 import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
@@ -377,7 +378,7 @@ class _SafeWalkWatcherScreenState extends State {
                           padding: WidgetUtils.chatInputPadding(),
                           child: IconButton(
                             icon: Icon(
-                              Icons.send,
+                              FontAwesomeIcons.paperPlane,
                               color: Colors.blue,
                             ),
                             onPressed: () {

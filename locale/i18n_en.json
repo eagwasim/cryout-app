@@ -66,7 +66,7 @@
   "screens.home.safe-walk.detail": "Have your emergency contacts watch you on the map while you are on the go",
   "screens.home.fine-print": "\"The only time we graze pertinence in this void that is reality, is when we engage in acts of kindness, when we show empathy and when we reach out and connect meaningfully with others. We are only relevant as a collective...\"",
   "screens.home.call-to-action": "Send Distress Signal",
-  "screens.home.emergency-contacts": "Manage Emergency Contacts",
+  "screens.home.emergency-contacts": "Emergency Contacts",
   "screens.home.privacy-policy": "Privacy policy",
   "screens.home.terms-of-service": "Terms of service",
   "screens.home.log-out": "Log out",
@@ -120,7 +120,7 @@
   "screens.emergency-contacts.error.phone-number.same-user.title": "Really???",
   "screens.emergency-contacts.error.phone-number.same-user.message": "You are your own emergency contact?? ( ._.)",
   "screens.emergency-contacts.error.contacts.title": "Emergency contacts (swipe to remove): ",
-  "screens.safe-walk-creation.title": "Start safe walk",
+  "screens.safe-walk-creation.title": "Start Safe Walk",
   "screens.safe-walk-creation.action": "Begin!",
   "screens.safe-walk-creation.destination": "Whats your destination?",
   "screens.safe-walk-creation.select-contacts": "Select emergency contacts:",
@@ -152,5 +152,7 @@
   "screens.emergency-contacts.empty.message": "You have no emergency contacts",
   "screens.phone-verifications.channels.sms": "SMS",
   "screens.phone-verifications.channels.call": "Call me",
-  "screens.phone-verifications.enter-code.hint": "SMS code"
+  "screens.phone-verifications.enter-code.hint": "SMS code",
+  "screens.base.nav.home": "Personal Safety",
+  "screens.base.nav.channels": "Safety Channels"
 }

@@ -204,7 +204,7 @@ class _ProfilePictureUpdateScreenState extends State {
 
       await SharedPreferenceUtil.saveUser(_user);
 
-      locator<NavigationService>().pushNamedAndRemoveUntil(Routes.HOME_SCREEN);
+      locator<NavigationService>().pushNamedAndRemoveUntil(Routes.BASE_SCREEN);
     } else {
 
       setState(() {
