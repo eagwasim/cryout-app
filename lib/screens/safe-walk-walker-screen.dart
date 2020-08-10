@@ -71,158 +71,161 @@ class _SafeWalkWalkerScreenState extends State {
 
     return !_setUpComplete
         ? WidgetUtils.getLoaderWidget(context, _translations.text("screens.common.loading"))
-        : Scaffold(
-            backgroundColor: Theme.of(context).backgroundColor,
-            appBar: AppBar(
-              backgroundColor: Colors.blueAccent,
-              title: Column(
+        : AnnotatedRegion(
+      value: WidgetUtils.updateSystemColors(context),
+          child: Scaffold(
+              backgroundColor: Theme.of(context).backgroundColor,
+              appBar: AppBar(
+                backgroundColor: Colors.blueAccent,
+                title: Column(
+                  children: <Widget>[
+                    Text(_translations.text("screens.home.safe-walk")),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Text(
+                        _currentSafeWalk.destination,
+                        style: TextStyle(fontSize: 10, color: Colors.grey),
+                      ),
+                    )
+                  ],
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                ),
+                elevation: 4,
+                centerTitle: false,
+                brightness: Brightness.dark,
+                actions: <Widget>[
+                  _isDismissingSafeWalk
+                      ? Container(
+                          width: 55,
+                          height: 10,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: CircularProgressIndicator(
+                              backgroundColor: Colors.white,
+                            ),
+                          ),
+                        )
+                      : IconButton(
+                          icon: Icon(Icons.close),
+                          onPressed: () {
+                            _showCloseDistressDialog();
+                          },
+                        )
+                ],
+              ),
+              body: Column(
                 children: <Widget>[
-                  Text(_translations.text("screens.home.safe-walk")),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4.0),
-                    child: Text(
-                      _currentSafeWalk.destination,
-                      style: TextStyle(fontSize: 10, color: Colors.grey),
+                  Flexible(
+                    child: FirebaseAnimatedList(
+                      key: ValueKey<bool>(_anchorToBottom),
+                      query: _messageDBRef,
+                      reverse: _anchorToBottom,
+                      sort: _anchorToBottom ? (DataSnapshot a, DataSnapshot b) => b.key.compareTo(a.key) : null,
+                      itemBuilder: (BuildContext context, DataSnapshot snapshot, Animation<double> animation, int index) {
+                        ChatMessage cm = ChatMessage.fromJSON(snapshot.value);
+                        return SizeTransition(
+                          sizeFactor: animation,
+                          child: WidgetUtils.getChatMessageView(_user, context, cm),
+                        );
+                      },
+                    ),
+                  ),
+                  Divider(
+                    height: 1,
+                  ),
+                  Container(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Expanded(
+                            child: Padding(
+                              padding: WidgetUtils.chatInputPadding(),
+                              child: TextField(
+                                decoration: new InputDecoration(
+                                  contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+                                  enabledBorder: OutlineInputBorder(
+                                      borderRadius: const BorderRadius.all(
+                                        const Radius.circular(40.0),
+                                      ),
+                                      borderSide: BorderSide(color: Colors.blueGrey[600])),
+                                  focusedBorder: OutlineInputBorder(
+                                      borderRadius: const BorderRadius.all(
+                                        const Radius.circular(40.0),
+                                      ),
+                                      borderSide: BorderSide(color: Colors.blueGrey[600])),
+                                  hintText: _translations.text("screens.safe-walk-creation.hints.chat"),
+                                ),
+                                autofocus: false,
+                                controller: _chatInputTextController,
+                                keyboardType: TextInputType.text,
+                                style: TextStyle(fontSize: 15),
+                                maxLines: 4,
+                                minLines: 1,
+                                onChanged: (newValue) {
+                                  _currentChatMessage = newValue;
+                                },
+                              ),
+                            ),
+                          ),
+                          _isUploadingImage
+                              ? SizedBox.shrink()
+                              : Padding(
+                                  padding: WidgetUtils.chatInputPadding(),
+                                  child: IconButton(
+                                    icon: Icon(
+                                      Icons.image,
+                                      color: Colors.blueGrey[600],
+                                    ),
+                                    onPressed: () {
+                                      _pickImage(context, ImageSource.gallery);
+                                    },
+                                  ),
+                                ),
+                          _isUploadingImage
+                              ? Container(
+                                  width: 24,
+                                  height: 24,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 1,
+                                    ),
+                                  ),
+                                )
+                              : Padding(
+                                  padding: WidgetUtils.chatInputPadding(),
+                                  child: IconButton(
+                                    icon: Icon(
+                                      Icons.photo_camera,
+                                      color: Colors.blueGrey[600],
+                                    ),
+                                    onPressed: () {
+                                      _pickImage(context, ImageSource.camera);
+                                    },
+                                  ),
+                                ),
+                          Padding(
+                            padding: WidgetUtils.chatInputPadding(),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.send,
+                                color: Colors.blue,
+                              ),
+                              onPressed: () {
+                                _sendMessage(_currentChatMessage);
+                              },
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   )
                 ],
-                crossAxisAlignment: CrossAxisAlignment.start,
               ),
-              elevation: 4,
-              centerTitle: false,
-              brightness: Brightness.dark,
-              actions: <Widget>[
-                _isDismissingSafeWalk
-                    ? Container(
-                        width: 55,
-                        height: 10,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: CircularProgressIndicator(
-                            backgroundColor: Colors.white,
-                          ),
-                        ),
-                      )
-                    : IconButton(
-                        icon: Icon(Icons.close),
-                        onPressed: () {
-                          _showCloseDistressDialog();
-                        },
-                      )
-              ],
             ),
-            body: Column(
-              children: <Widget>[
-                Flexible(
-                  child: FirebaseAnimatedList(
-                    key: ValueKey<bool>(_anchorToBottom),
-                    query: _messageDBRef,
-                    reverse: _anchorToBottom,
-                    sort: _anchorToBottom ? (DataSnapshot a, DataSnapshot b) => b.key.compareTo(a.key) : null,
-                    itemBuilder: (BuildContext context, DataSnapshot snapshot, Animation<double> animation, int index) {
-                      ChatMessage cm = ChatMessage.fromJSON(snapshot.value);
-                      return SizeTransition(
-                        sizeFactor: animation,
-                        child: WidgetUtils.getChatMessageView(_user, context, cm),
-                      );
-                    },
-                  ),
-                ),
-                Divider(
-                  height: 1,
-                ),
-                Container(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Expanded(
-                          child: Padding(
-                            padding: WidgetUtils.chatInputPadding(),
-                            child: TextField(
-                              decoration: new InputDecoration(
-                                contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
-                                enabledBorder: OutlineInputBorder(
-                                    borderRadius: const BorderRadius.all(
-                                      const Radius.circular(40.0),
-                                    ),
-                                    borderSide: BorderSide(color: Colors.blueGrey[600])),
-                                focusedBorder: OutlineInputBorder(
-                                    borderRadius: const BorderRadius.all(
-                                      const Radius.circular(40.0),
-                                    ),
-                                    borderSide: BorderSide(color: Colors.blueGrey[600])),
-                                hintText: _translations.text("screens.safe-walk-creation.hints.chat"),
-                              ),
-                              autofocus: false,
-                              controller: _chatInputTextController,
-                              keyboardType: TextInputType.text,
-                              style: TextStyle(fontSize: 15),
-                              maxLines: 4,
-                              minLines: 1,
-                              onChanged: (newValue) {
-                                _currentChatMessage = newValue;
-                              },
-                            ),
-                          ),
-                        ),
-                        _isUploadingImage
-                            ? SizedBox.shrink()
-                            : Padding(
-                                padding: WidgetUtils.chatInputPadding(),
-                                child: IconButton(
-                                  icon: Icon(
-                                    Icons.image,
-                                    color: Colors.blueGrey[600],
-                                  ),
-                                  onPressed: () {
-                                    _pickImage(context, ImageSource.gallery);
-                                  },
-                                ),
-                              ),
-                        _isUploadingImage
-                            ? Container(
-                                width: 24,
-                                height: 24,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 1,
-                                  ),
-                                ),
-                              )
-                            : Padding(
-                                padding: WidgetUtils.chatInputPadding(),
-                                child: IconButton(
-                                  icon: Icon(
-                                    Icons.photo_camera,
-                                    color: Colors.blueGrey[600],
-                                  ),
-                                  onPressed: () {
-                                    _pickImage(context, ImageSource.camera);
-                                  },
-                                ),
-                              ),
-                        Padding(
-                          padding: WidgetUtils.chatInputPadding(),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.send,
-                              color: Colors.blue,
-                            ),
-                            onPressed: () {
-                              _sendMessage(_currentChatMessage);
-                            },
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                )
-              ],
-            ),
-          );
+        );
   }
 
   int lastBatteryLevel;

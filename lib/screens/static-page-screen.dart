@@ -1,3 +1,4 @@
+import 'package:cryout_app/utils/widget-utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
@@ -29,26 +30,29 @@ class _StaticPageScreenState extends State {
 
   @override
   Widget build(BuildContext context) {
-    return WebviewScaffold(
-        url: webPageModel.url,
-        javascriptChannels: jsChannels,
-        mediaPlaybackRequiresUserGesture: false,
-        appBar: AppBar(
-          brightness: Theme.of(context).brightness,
-          elevation: 1,
-          backgroundColor: Theme.of(context).backgroundColor,
-          iconTheme: Theme.of(context).iconTheme,
-          title: Text(webPageModel.title, style: TextStyle(color: Theme.of(context).textTheme.headline1.color)),
-        ),
-        withZoom: true,
-        withLocalStorage: true,
-        hidden: true,
-        initialChild: Container(
-          color: Theme.of(context).backgroundColor,
-          child: const Center(
-            child: Text('Loading...'),
+    return AnnotatedRegion(
+      value: WidgetUtils.updateSystemColors(context),
+      child: WebviewScaffold(
+          url: webPageModel.url,
+          javascriptChannels: jsChannels,
+          mediaPlaybackRequiresUserGesture: false,
+          appBar: AppBar(
+            brightness: Theme.of(context).brightness,
+            elevation: 1,
+            backgroundColor: Theme.of(context).backgroundColor,
+            iconTheme: Theme.of(context).iconTheme,
+            title: Text(webPageModel.title, style: TextStyle(color: Theme.of(context).textTheme.headline1.color)),
           ),
-        ));
+          withZoom: true,
+          withLocalStorage: true,
+          hidden: true,
+          initialChild: Container(
+            color: Theme.of(context).backgroundColor,
+            child: const Center(
+              child: Text('Loading...'),
+            ),
+          )),
+    );
   }
 }
 

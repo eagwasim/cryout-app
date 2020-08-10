@@ -47,7 +47,7 @@ class BackgroundLocationUpdate {
           color: "#00b0ff",
           title: "Cry Out",
           text: "Cry Out is active",
-          priority: 0,
+          priority: 2,
           channelName: "cry-out-background-channel",
         ),
       ),

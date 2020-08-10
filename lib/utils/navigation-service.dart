@@ -107,8 +107,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case Routes.RECEIVED_SAFE_WALK_LIST_SCREEN:
       return MaterialPageRoute(builder: (context) => ReceivedSafeWalkListScreen());
     case Routes.SAFE_WALK_WATCHER_SCREEN:
-      var argument = settings.arguments as String;
-      return MaterialPageRoute(builder: (context) => SafeWalkWatcherScreen(safeWalkID: argument));
+      var argument = settings.arguments as dynamic;
+      return MaterialPageRoute(
+          builder: (context) => SafeWalkWatcherScreen(
+                safeWalkID: argument['safeWalkId'],
+                openMessages: argument['openMessages'],
+              ));
     case Routes.FIREBASE_SMS_CODE_CONFIRMATION_SCREEN:
       var argument = settings.arguments as String;
       return MaterialPageRoute(builder: (context) => PhoneConfirmationFirebaseScreen(verificationId: argument));

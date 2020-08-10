@@ -14,6 +14,7 @@ import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/translations.dart';
+import 'package:cryout_app/utils/widget-utils.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -79,95 +80,98 @@ class _ReceivedDistressSignalListScreenState extends State {
               ),
             ),
           )
-        : Scaffold(
-            backgroundColor: Theme.of(context).backgroundColor,
-            appBar: AppBar(
+        : AnnotatedRegion(
+            value: WidgetUtils.updateSystemColors(context),
+            child: Scaffold(
               backgroundColor: Theme.of(context).backgroundColor,
-              iconTheme: Theme.of(context).iconTheme,
-              elevation: 0,
-              centerTitle: false,
-              brightness: Theme.of(context).brightness,
-              title: Text(_translations.text("screens.distress.signals.title"), style: TextStyle(color: Theme.of(context).textTheme.headline1.color)),
-              actions: <Widget>[
-                _isLoading
-                    ? Center(
-                        child: Container(
-                            width: 38,
-                            height: 38,
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(),
-                            )),
-                      )
-                    : SizedBox.shrink()
-              ],
-            ),
-            body: Column(
-              children: <Widget>[
-                Expanded(
-                  child: SmartRefresher(
-                    onLoading: _loadFromServer,
-                    onRefresh: _loadFromServer,
-                    controller: _refreshController,
-                    header: WaterDropHeader(
-                      complete: Text(_translations.text("screens.common.refresh.is-refresh-completed")),
-                      failed: Text(_translations.text("screens.common.refresh.is-refresh-failed")),
-                      waterDropColor: Theme.of(context).accentColor,
-                    ),
-                    child: _receivedDistressSignals.length == 0
-                        ? _getNoItemsView()
-                        : ListView.builder(
-                            itemCount: _receivedDistressSignals.length,
-                            itemBuilder: (_, int position) {
-                              final item = _receivedDistressSignals[position];
-                              return _getDistressSignalNotificationView(item, position);
-                            },
-                          ),
-                  ),
-                ),
-                Container(
-                  height: _addHeight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 0, bottom: 4, left: 8.0, right: 8),
-                        child: NativeAdmob(
-                          // Your ad unit id
-                          adUnitID: Platform.isIOS ? FireBaseHandler.IOS_NATIVE_AD_UNIT_ID : FireBaseHandler.ANDROID_NATIVE_AD_UNIT_ID,
-                          controller: _nativeAdController,
-                          type: NativeAdmobType.banner,
-                          options: NativeAdmobOptions(
-                              adLabelTextStyle: NativeTextStyle(
-                                color: Theme.of(context).textTheme.headline2.color,
-                              ),
-                              callToActionStyle: NativeTextStyle(
-                                backgroundColor: Theme.of(context).accentColor,
-                                color: Theme.of(context).textTheme.button.color,
-                              ),
-                              headlineTextStyle: NativeTextStyle(
-                                color: Theme.of(context).textTheme.headline2.color,
-                                fontSize: Theme.of(context).textTheme.headline2.fontSize,
-                              ),
-                              showMediaContent: true,
-                              bodyTextStyle: NativeTextStyle(
-                                color: Theme.of(context).textTheme.headline2.color,
-                                fontSize: Theme.of(context).textTheme.bodyText1.fontSize,
-                              ),
-                              advertiserTextStyle: NativeTextStyle(
-                                color: Theme.of(context).textTheme.headline2.color,
+              appBar: AppBar(
+                backgroundColor: Theme.of(context).backgroundColor,
+                iconTheme: Theme.of(context).iconTheme,
+                elevation: 0,
+                centerTitle: false,
+                brightness: Theme.of(context).brightness,
+                title: Text(_translations.text("screens.distress.signals.title"), style: TextStyle(color: Theme.of(context).textTheme.headline1.color)),
+                actions: <Widget>[
+                  _isLoading
+                      ? Center(
+                          child: Container(
+                              width: 38,
+                              height: 38,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: CircularProgressIndicator(),
                               )),
-                          // Don't show loading widget when in loading state
-                          loading: Container(),
+                        )
+                      : SizedBox.shrink()
+                ],
+              ),
+              body: Column(
+                children: <Widget>[
+                  Expanded(
+                    child: SmartRefresher(
+                      onLoading: _loadFromServer,
+                      onRefresh: _loadFromServer,
+                      controller: _refreshController,
+                      header: WaterDropHeader(
+                        complete: Text(_translations.text("screens.common.refresh.is-refresh-completed")),
+                        failed: Text(_translations.text("screens.common.refresh.is-refresh-failed")),
+                        waterDropColor: Theme.of(context).accentColor,
+                      ),
+                      child: _receivedDistressSignals.length == 0
+                          ? _getNoItemsView()
+                          : ListView.builder(
+                              itemCount: _receivedDistressSignals.length,
+                              itemBuilder: (_, int position) {
+                                final item = _receivedDistressSignals[position];
+                                return _getDistressSignalNotificationView(item, position);
+                              },
+                            ),
+                    ),
+                  ),
+                  Container(
+                    height: _addHeight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 0, bottom: 4, left: 8.0, right: 8),
+                          child: NativeAdmob(
+                            // Your ad unit id
+                            adUnitID: Platform.isIOS ? FireBaseHandler.IOS_NATIVE_AD_UNIT_ID : FireBaseHandler.ANDROID_NATIVE_AD_UNIT_ID,
+                            controller: _nativeAdController,
+                            type: NativeAdmobType.banner,
+                            options: NativeAdmobOptions(
+                                adLabelTextStyle: NativeTextStyle(
+                                  color: Theme.of(context).textTheme.headline2.color,
+                                ),
+                                callToActionStyle: NativeTextStyle(
+                                  backgroundColor: Theme.of(context).accentColor,
+                                  color: Theme.of(context).textTheme.button.color,
+                                ),
+                                headlineTextStyle: NativeTextStyle(
+                                  color: Theme.of(context).textTheme.headline2.color,
+                                  fontSize: Theme.of(context).textTheme.headline2.fontSize,
+                                ),
+                                showMediaContent: true,
+                                bodyTextStyle: NativeTextStyle(
+                                  color: Theme.of(context).textTheme.headline2.color,
+                                  fontSize: Theme.of(context).textTheme.bodyText1.fontSize,
+                                ),
+                                advertiserTextStyle: NativeTextStyle(
+                                  color: Theme.of(context).textTheme.headline2.color,
+                                )),
+                            // Don't show loading widget when in loading state
+                            loading: Container(),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
   }

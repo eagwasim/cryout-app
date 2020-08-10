@@ -28,12 +28,13 @@ import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 
 class SafeWalkWatcherScreen extends StatefulWidget {
   final String safeWalkID;
+  final bool openMessages;
 
-  const SafeWalkWatcherScreen({Key key, this.safeWalkID}) : super(key: key);
+  const SafeWalkWatcherScreen({Key key, this.safeWalkID, this.openMessages}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return _SafeWalkWatcherScreenState(this.safeWalkID);
+    return _SafeWalkWatcherScreenState(this.safeWalkID, openMessages: this.openMessages ?? false);
   }
 }
 
@@ -60,13 +61,14 @@ class _SafeWalkWatcherScreenState extends State {
 
   Set<Marker> _markers = Set<Marker>();
   bool _anchorToBottom = true;
+  bool openMessages;
 
   TextEditingController _chatInputTextController;
 
   List<StreamSubscription<Event>> _locationUpdateSubscription = [];
   Completer<GoogleMapController> _controller = Completer();
 
-  _SafeWalkWatcherScreenState(this._safeWalkID);
+  _SafeWalkWatcherScreenState(this._safeWalkID, {this.openMessages});
 
   User _user;
 
@@ -113,46 +115,56 @@ class _SafeWalkWatcherScreenState extends State {
       return WidgetUtils.getLoaderWidget(context, _translations.text("screens.distress-category-selection.sending-distress-signal"));
     }
 
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: Text(_receivedSafeWalk.userFirstName + " " + _receivedSafeWalk.userLastName),
-        backgroundColor: Colors.green[700],
-        brightness: Brightness.dark,
-        elevation: 1,
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.error_outline),
-            onPressed: () {
-              _showSendDistressCallDialog();
-            },
-          ),
-          _receivedSafeWalk.userPhoneNumber == null || _receivedSafeWalk.userPhoneNumber == ""
-              ? SizedBox.shrink()
-              : IconButton(
-                  icon: Icon(Icons.call),
-                  onPressed: () {
-                    UrlLauncher.launch("tel://${_receivedSafeWalk.userPhoneNumber}");
-                  },
-                ),
-          IconButton(
-            icon: Icon(Icons.message),
-            onPressed: () {
-              _messageWindow();
-            },
-          )
-        ],
-      ),
-      body: GoogleMap(
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
-          updatePinOnMap();
-        },
-        initialCameraPosition: CameraPosition(
-          target: initialLocation,
-          zoom: 11.0,
+    if (openMessages) {
+      openMessages = false;
+      Future.delayed(Duration(milliseconds: 300), () {
+        _messageWindow();
+      });
+    }
+
+    return AnnotatedRegion(
+      value: WidgetUtils.updateSystemColors(context),
+      child: Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(
+          title: Text(_receivedSafeWalk.userFirstName + " " + _receivedSafeWalk.userLastName),
+          backgroundColor: Colors.green[700],
+          brightness: Brightness.dark,
+          elevation: 1,
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.error_outline),
+              onPressed: () {
+                _showSendDistressCallDialog();
+              },
+            ),
+            _receivedSafeWalk.userPhoneNumber == null || _receivedSafeWalk.userPhoneNumber == ""
+                ? SizedBox.shrink()
+                : IconButton(
+                    icon: Icon(Icons.call),
+                    onPressed: () {
+                      UrlLauncher.launch("tel://${_receivedSafeWalk.userPhoneNumber}");
+                    },
+                  ),
+            IconButton(
+              icon: Icon(Icons.message),
+              onPressed: () {
+                _messageWindow();
+              },
+            )
+          ],
         ),
-        markers: _markers,
+        body: GoogleMap(
+          onMapCreated: (GoogleMapController controller) {
+            _controller.complete(controller);
+            updatePinOnMap();
+          },
+          initialCameraPosition: CameraPosition(
+            target: initialLocation,
+            zoom: 11.0,
+          ),
+          markers: _markers,
+        ),
       ),
     );
   }

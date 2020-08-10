@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -13,7 +14,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
-import 'package:pin_code_text_field/pin_code_text_field.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 
 class PhoneConfirmationScreen extends StatefulWidget {
   @override
@@ -23,82 +24,117 @@ class PhoneConfirmationScreen extends StatefulWidget {
 }
 
 class _PhoneConfirmationScreenState extends State {
-  TextEditingController controller = TextEditingController(text: "");
+  TextEditingController controller;
+  StreamController<ErrorAnimationType> errorController;
   Translations _translations;
   bool _isProcessing = false;
+  String currentText;
+
+  @override
+  void dispose() {
+    errorController.close();
+    errorController = null;
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    _translations = Translations.of(context);
+    if (_translations == null) {
+      _translations = Translations.of(context);
+    }
+    if (errorController == null) {
+      errorController = StreamController<ErrorAnimationType>();
+    }
+
+    controller = TextEditingController(text: currentText);
 
     if (_isProcessing) {
       return WidgetUtils.getLoaderWidget(context, _translations.text("screens.phone.login.confirmation.message"));
     }
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).backgroundColor,
-      appBar: AppBar(
+    return AnnotatedRegion(
+      value: WidgetUtils.updateSystemColors(context),
+      child: Scaffold(
         backgroundColor: Theme.of(context).backgroundColor,
-        elevation: 0,
-        brightness: Theme.of(context).brightness,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                    child: Padding(
-                  padding: const EdgeInsets.only(left: 16.0, right: 16, top: 8),
-                  child: Text(
-                    Translations.of(context).text("screens.phone.confirmation.title"),
-                    textAlign: TextAlign.start,
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).backgroundColor,
+          elevation: 0,
+          brightness: Theme.of(context).brightness,
+          iconTheme: Theme.of(context).iconTheme,
+        ),
+        body: SafeArea(
+          child: Column(
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                      child: Padding(
+                    padding: const EdgeInsets.only(left: 16.0, right: 16, top: 8),
+                    child: Text(
+                      Translations.of(context).text("screens.phone.confirmation.title"),
+                      textAlign: TextAlign.start,
+                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                    ),
+                  )),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                      child: Padding(
+                    padding: const EdgeInsets.only(left: 16.0, right: 16, top: 16),
+                    child: Text(
+                      Translations.of(context).text("screens.phone.confirmation.message"),
+                      textAlign: TextAlign.start,
+                      style: TextStyle(fontSize: 15),
+                    ),
+                  )),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.all(16),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left:24.0, right: 24),
+                child: PinCodeTextField(
+                  length: 4,
+                  obsecureText: false,
+                  animationType: AnimationType.fade,
+                  pinTheme: PinTheme(
+                    shape: PinCodeFieldShape.circle,
+                    borderRadius: BorderRadius.circular(5),
+                    fieldHeight: 50,
+                    fieldWidth: 40,
+                    activeColor: Colors.blue,
+                    inactiveColor: Colors.grey,
+                    activeFillColor: Colors.white,
                   ),
-                )),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                    child: Padding(
-                  padding: const EdgeInsets.only(left: 16.0, right: 16, top: 16),
-                  child: Text(
-                    Translations.of(context).text("screens.phone.confirmation.message"),
-                    textAlign: TextAlign.start,
-                    style: TextStyle(fontSize: 15),
-                  ),
-                )),
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.all(16),
-            ),
-            PinCodeTextField(
-              autofocus: true,
-              controller: controller,
-              hideCharacter: false,
-              highlight: true,
-              highlightColor: Colors.grey[700],
-              defaultBorderColor: Colors.grey,
-              hasTextBorderColor: Colors.deepOrange,
-              maxLength: 4,
-              onTextChanged: (text) {},
-              onDone: (text) async {
-               _login(text);
-              },
-              wrapAlignment: WrapAlignment.spaceAround,
-              pinBoxDecoration: ProvidedPinBoxDecoration.defaultPinBoxDecoration,
-              pinTextStyle: TextStyle(fontSize: 30.0),
-              pinTextAnimatedSwitcherTransition: ProvidedPinBoxTextAnimation.scalingTransition,
-              pinTextAnimatedSwitcherDuration: Duration(milliseconds: 300),
-              highlightAnimationBeginColor: Colors.black,
-              highlightAnimationEndColor: Colors.white12,
-              keyboardType: TextInputType.number,
-            ),
-          ],
+                  animationDuration: Duration(milliseconds: 300),
+                  enableActiveFill: false,
+                  autoFocus: true,
+                  controller: controller,
+                  backgroundColor: Theme.of(context).backgroundColor,
+                  textInputType: TextInputType.number,
+                  onCompleted: (v) {
+                   _login(v);
+                  },
+                  onChanged: (value) {
+                    setState(() {
+                      currentText = value;
+                    });
+                  },
+                  beforeTextPaste: (text) {
+                    print("Allowing to paste $text");
+                    //if you return true then it will show the paste confirmation dialog. Otherwise if false, then nothing will happen.
+                    //but you can show anything you want here, like your pop up saying wrong paste format or etc
+                    return true;
+                  },
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -116,6 +152,7 @@ class _PhoneConfirmationScreenState extends State {
     if (resp.statusCode == HttpStatus.badRequest) {
       setState(() {
         _isProcessing = false;
+        currentText = "";
       });
       WidgetUtils.showAlertDialog(
         context,
@@ -128,6 +165,7 @@ class _PhoneConfirmationScreenState extends State {
     if (resp.statusCode == HttpStatus.forbidden) {
       setState(() {
         _isProcessing = false;
+        currentText = "";
       });
       WidgetUtils.showAlertDialog(
         context,
@@ -140,6 +178,7 @@ class _PhoneConfirmationScreenState extends State {
     if (resp.statusCode != HttpStatus.ok) {
       setState(() {
         _isProcessing = false;
+        currentText = "";
       });
       WidgetUtils.showAlertDialog(
         context,
@@ -173,10 +212,6 @@ class _PhoneConfirmationScreenState extends State {
         await SharedPreferenceUtil.setString(userPreferencesResponse[index]["name"], userPreferencesResponse[index]["value"]);
       }
     }
-
-    setState(() {
-      _isProcessing = false;
-    });
 
     FireBaseHandler.subscribeToUserTopic(user.id);
 

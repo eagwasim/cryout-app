@@ -39,136 +39,139 @@ class _PhoneVerificationScreenState extends State {
   Widget build(BuildContext context) {
     _translations = Translations.of(context);
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).backgroundColor,
-      appBar: AppBar(
+    return AnnotatedRegion(
+      value: WidgetUtils.updateSystemColors(context),
+      child: Scaffold(
         backgroundColor: Theme.of(context).backgroundColor,
-        elevation: 0,
-        brightness: Theme.of(context).brightness,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                    child: Padding(
-                  padding: const EdgeInsets.only(left: 16.0, right: 16, top: 8),
-                  child: Text(
-                    Translations.of(context).text("screens.phone.login.title"),
-                    textAlign: TextAlign.start,
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                  ),
-                )),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                    child: Padding(
-                  padding: const EdgeInsets.only(left: 16.0, right: 16, top: 16),
-                  child: Text(
-                    Translations.of(context).text("screens.phone.login.message"),
-                    textAlign: TextAlign.start,
-                    style: TextStyle(fontSize: 15),
-                  ),
-                )),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16, top: 6),
-              child: InternationalPhoneNumberInput(
-                onInputChanged: (PhoneNumber number) {
-                  _internationalizedPhoneNumber = number.phoneNumber;
-                },
-                onInputValidated: (bool value) {
-                  _isValid = value;
-                },
-                ignoreBlank: true,
-                autoValidate: true,
-                autoFocus: false,
-                errorMessage: _translations.text("screens.phone-verification.error.message"),
-                selectorTextStyle: Theme.of(context).textTheme.bodyText1,
-                initialValue: number,
-                textFieldController: _controller,
-                selectorType: PhoneInputSelectorType.DIALOG,
-                inputBorder: UnderlineInputBorder(),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 0, right: 8, top: 8),
-              child: Row(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).backgroundColor,
+          elevation: 0,
+          brightness: Theme.of(context).brightness,
+        ),
+        body: SafeArea(
+          child: Column(
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Radio(
-                    value: Channel.SMS,
-                    groupValue: _channel,
-                    activeColor: Theme.of(context).accentColor,
-                    onChanged: (Channel value) {
-                      setState(() {
-                        _channel = value;
-                      });
-                    },
-                  ),
-                  Text(
-                    _translations.text("screens.phone-verifications.channels.sms"),
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Radio(
-                    value: Channel.CALL,
-                    groupValue: _channel,
-                    activeColor: Theme.of(context).accentColor,
-                    onChanged: (Channel value) {
-                      setState(() {
-                        _channel = value;
-                      });
-                    },
-                  ),
-                  Text(
-                    _translations.text("screens.phone-verifications.channels.call"),
-                    style: TextStyle(fontSize: 18),
-                  ),
+                  Expanded(
+                      child: Padding(
+                    padding: const EdgeInsets.only(left: 16.0, right: 16, top: 8),
+                    child: Text(
+                      Translations.of(context).text("screens.phone.login.title"),
+                      textAlign: TextAlign.start,
+                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                    ),
+                  )),
                 ],
               ),
-            ),
-            Expanded(
-              child: Container(),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.end,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: _isProcessing
-                        ? CircularProgressIndicator()
-                        : RaisedButton(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(25.0),
-                            ),
-                            child: Text(
-                              _translations.text("screens.common.continue"),
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            onPressed: () {
-                              if (_channel == Channel.CALL) {
-                                _verifyPhoneNumber();
-                              } else {
-                                _verifyPhoneNumberFirebase();
-                              }
-                            },
-                          ),
-                  )
+                  Expanded(
+                      child: Padding(
+                    padding: const EdgeInsets.only(left: 16.0, right: 16, top: 16),
+                    child: Text(
+                      Translations.of(context).text("screens.phone.login.message"),
+                      textAlign: TextAlign.start,
+                      style: TextStyle(fontSize: 15),
+                    ),
+                  )),
                 ],
               ),
-            )
-          ],
+              Padding(
+                padding: const EdgeInsets.only(left: 16, right: 16, top: 6),
+                child: InternationalPhoneNumberInput(
+                  onInputChanged: (PhoneNumber number) {
+                    _internationalizedPhoneNumber = number.phoneNumber;
+                  },
+                  onInputValidated: (bool value) {
+                    _isValid = value;
+                  },
+                  ignoreBlank: true,
+                  autoValidate: true,
+                  autoFocus: false,
+                  errorMessage: _translations.text("screens.phone-verification.error.message"),
+                  selectorTextStyle: Theme.of(context).textTheme.bodyText1,
+                  initialValue: number,
+                  textFieldController: _controller,
+                  selectorType: PhoneInputSelectorType.DIALOG,
+                  inputBorder: UnderlineInputBorder(),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 0, right: 8, top: 8),
+                child: Row(
+                  children: <Widget>[
+                    Radio(
+                      value: Channel.SMS,
+                      groupValue: _channel,
+                      activeColor: Theme.of(context).accentColor,
+                      onChanged: (Channel value) {
+                        setState(() {
+                          _channel = value;
+                        });
+                      },
+                    ),
+                    Text(
+                      _translations.text("screens.phone-verifications.channels.sms"),
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(8),
+                    ),
+                    Radio(
+                      value: Channel.CALL,
+                      groupValue: _channel,
+                      activeColor: Theme.of(context).accentColor,
+                      onChanged: (Channel value) {
+                        setState(() {
+                          _channel = value;
+                        });
+                      },
+                    ),
+                    Text(
+                      _translations.text("screens.phone-verifications.channels.call"),
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Container(),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: _isProcessing
+                          ? CircularProgressIndicator()
+                          : RaisedButton(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(25.0),
+                              ),
+                              child: Text(
+                                _translations.text("screens.common.continue"),
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              onPressed: () {
+                                if (_channel == Channel.CALL) {
+                                  _verifyPhoneNumber();
+                                } else {
+                                  _verifyPhoneNumberFirebase();
+                                }
+                              },
+                            ),
+                    )
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -232,16 +235,17 @@ class _PhoneVerificationScreenState extends State {
         _showError(authException.message);
       },
       codeSent: (String verificationId, [int forceResendingToken]) {
-        _verifyOTP(verificationId);
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {
         setState(() {
           _isProcessing = false;
         });
         locator<NavigationService>().pushNamed(Routes.FIREBASE_SMS_CODE_CONFIRMATION_SCREEN, arguments: verificationId);
       },
+      codeAutoRetrievalTimeout: (String verificationId) {
+        print(verificationId);
+      },
     );
   }
+/*
 
   TextEditingController _firebaseSMSCodeController = TextEditingController(text: "");
 
@@ -286,6 +290,7 @@ class _PhoneVerificationScreenState extends State {
       ),
     );
   }
+*/
 
   void _showError(String message) {
     WidgetUtils.showAlertDialog(context, "", message);

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:cryout_app/main.dart';
@@ -21,6 +22,7 @@ import 'package:path_provider/path_provider.dart';
 class NotificationHandler {
   static final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   static final Map<String, bool> _notificationChanelSubscription = {};
+  static final Random random = new Random();
 
   static Future<void> initialize() async {
     var initializationSettingsAndroid = AndroidInitializationSettings('ic_stat_alarm_1');
@@ -253,7 +255,7 @@ class NotificationHandler {
   }
 
   static Future<void> _handleSafeWalkWatcherMessageNotificationClick(dynamic data) async {
-    locator<NavigationService>().pushNamed(Routes.SAFE_WALK_WATCHER_SCREEN, arguments: data["safeWalkID"]);
+    locator<NavigationService>().pushNamed(Routes.SAFE_WALK_WATCHER_SCREEN, arguments: {'safeWalkId': data["safeWalkID"], 'openMessages': true});
   }
 
   static Future<void> _handleSafeWalkWalkerMessageNotificationClick(dynamic data) async {
@@ -276,18 +278,20 @@ class NotificationHandler {
       GENERIC_NOTIFICATION_CHANNEL_ID,
       NOTIFICATION_APP_NAME,
       GENERIC_NOTIFICATION_CHANNEL_NAME,
-      importance: Importance.Default,
-      priority: Priority.Default,
+      importance: Importance.High,
+      priority: Priority.High,
       ticker: 'ticker',
       icon: "ic_stat_alarm_1",
       playSound: true,
       sound: RawResourceAndroidNotificationSound(GENERIC_NOTIFICATION_ALERT_SOUND),
       color: Colors.blue,
+      enableVibration: true,
+      enableLights: true,
     );
-    var iOSPlatformChannelSpecifics = IOSNotificationDetails(sound: '$GENERIC_NOTIFICATION_ALERT_SOUND.m4r');
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails(sound: '$GENERIC_NOTIFICATION_ALERT_SOUND.m4r', presentSound: true, presentAlert: true);
     var platformChannelSpecifics = NotificationDetails(androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
 
-    await flutterLocalNotificationsPlugin.show(0, title, body, platformChannelSpecifics, payload: null);
+    await flutterLocalNotificationsPlugin.show(random.nextInt(1000), title, body, platformChannelSpecifics, payload: null);
   }
 
   static Future<void> _showMessageNotification(String title, String body, dynamic payload) async {
@@ -295,18 +299,21 @@ class NotificationHandler {
       DISTRESS_SIGNAL_MESSAGE_NOTIFICATION_CHANNEL_ID,
       NOTIFICATION_APP_NAME,
       DISTRESS_SIGNAL_MESSAGE_NOTIFICATION_CHANNEL_NAME,
-      importance: Importance.Default,
-      priority: Priority.Default,
+      importance: Importance.High,
+      priority: Priority.High,
       ticker: 'ticker',
       icon: "ic_stat_message_notification_icon",
       playSound: true,
       sound: RawResourceAndroidNotificationSound(GENERIC_NOTIFICATION_ALERT_SOUND),
       color: Colors.blue,
+      vibrationPattern: Int64List.fromList([0, 1000]),
+      enableVibration: true,
+      enableLights: true,
     );
-    var iOSPlatformChannelSpecifics = IOSNotificationDetails(sound: '$GENERIC_NOTIFICATION_ALERT_SOUND.m4r');
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails(sound: '$GENERIC_NOTIFICATION_ALERT_SOUND.m4r', presentSound: true, presentAlert: true);
     var platformChannelSpecifics = NotificationDetails(androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
 
-    await flutterLocalNotificationsPlugin.show(0, title, body, platformChannelSpecifics, payload: jsonEncode(payload));
+    await flutterLocalNotificationsPlugin.show(random.nextInt(1000), title, body, platformChannelSpecifics, payload: jsonEncode(payload));
   }
 
   static Future<void> _showMessageNotificationWithImage(String title, String body, String imageUrl, dynamic payload) async {
@@ -317,19 +324,22 @@ class NotificationHandler {
       DISTRESS_SIGNAL_MESSAGE_NOTIFICATION_CHANNEL_ID,
       NOTIFICATION_APP_NAME,
       DISTRESS_SIGNAL_MESSAGE_NOTIFICATION_CHANNEL_NAME,
-      importance: Importance.Default,
-      priority: Priority.Default,
+      importance: Importance.High,
+      priority: Priority.High,
       ticker: 'ticker',
       icon: "ic_stat_message_notification_icon",
       playSound: true,
       styleInformation: bigPictureStyle,
       sound: RawResourceAndroidNotificationSound(GENERIC_NOTIFICATION_ALERT_SOUND),
       color: Colors.blue,
+      vibrationPattern: Int64List.fromList([0, 1000]),
+      enableVibration: true,
+      enableLights: true,
     );
-    var iOSPlatformChannelSpecifics = IOSNotificationDetails(sound: '$GENERIC_NOTIFICATION_ALERT_SOUND.m4r');
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails(sound: '$GENERIC_NOTIFICATION_ALERT_SOUND.m4r', presentSound: true, presentAlert: true);
     var platformChannelSpecifics = NotificationDetails(androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
 
-    await flutterLocalNotificationsPlugin.show(0, title, body, platformChannelSpecifics, payload: jsonEncode(payload));
+    await flutterLocalNotificationsPlugin.show(random.nextInt(1000), title, body, platformChannelSpecifics, payload: jsonEncode(payload));
   }
 
   static Future<void> _showDistressSignalNotification(String title, String body, dynamic payload) async {
@@ -338,18 +348,21 @@ class NotificationHandler {
       NOTIFICATION_APP_NAME,
       DISTRESS_SIGNAL_NOTIFICATION_CHANNEL_NAME,
       importance: Importance.Max,
-      priority: Priority.High,
+      priority: Priority.Max,
       ticker: 'ticker',
       icon: "ic_stat_alarm_1",
       playSound: true,
       sound: RawResourceAndroidNotificationSound(DISTRESS_SIGNAL_ALERT_SOUND),
       color: Colors.deepOrange,
-      vibrationPattern: Int64List.fromList([0, 100]),
+      vibrationPattern: Int64List.fromList([0, 1000]),
+      enableVibration: true,
+      enableLights: true,
+
     );
-    var iOSPlatformChannelSpecifics = IOSNotificationDetails(sound: '$DISTRESS_SIGNAL_ALERT_SOUND.m4r', presentSound: true);
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails(sound: '$DISTRESS_SIGNAL_ALERT_SOUND.m4r', presentSound: true, presentAlert: true);
     var platformChannelSpecifics = NotificationDetails(androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
 
-    await flutterLocalNotificationsPlugin.show(0, title, body, platformChannelSpecifics, payload: jsonEncode(payload));
+    await flutterLocalNotificationsPlugin.show(random.nextInt(1000), title, body, platformChannelSpecifics, payload: jsonEncode(payload));
   }
 
   static Future<String> _downloadAndSaveFile(String url, String fileName) async {

@@ -5,6 +5,7 @@ import 'package:cryout_app/http/base-resource.dart';
 import 'package:cryout_app/http/samaritan-resource.dart';
 import 'package:cryout_app/main.dart';
 import 'package:cryout_app/models/distress-signal.dart';
+import 'package:cryout_app/models/emergency-contact.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
 import 'package:cryout_app/models/received-safe-walk.dart';
 import 'package:cryout_app/models/safe-walk.dart';
@@ -76,8 +77,10 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
   }
 
+
   @override
   Widget build(BuildContext context) {
+
     if (_user == null) {
       _setUp();
     }
@@ -86,334 +89,337 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
       _translations = Translations.of(context);
     }
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).backgroundColor,
-      appBar: AppBar(
+    return AnnotatedRegion(
+      value: WidgetUtils.updateSystemColors(context),
+      child: Scaffold(
         backgroundColor: Theme.of(context).backgroundColor,
-        iconTheme: Theme.of(context).iconTheme,
-        elevation: 0,
-        title: Text(
-          _translations.text("screens.home.title"),
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.headline1.color),
-        ),
-        centerTitle: false,
-        brightness: Theme.of(context).brightness,
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.wifi_tethering, color: _activeDistressCallCount == 0 ? Colors.grey : Colors.deepOrange),
-            onPressed: () {
-              locator<NavigationService>().navigateTo(Routes.RECEIVED_DISTRESS_SIGNAL_SCREEN);
-            },
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).backgroundColor,
+          iconTheme: Theme.of(context).iconTheme,
+          elevation: 0,
+          title: Text(
+            _translations.text("screens.home.title"),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.headline1.color),
           ),
-          IconButton(
-            icon: Icon(Icons.directions_walk, color: _activeSamaritanWalkCount == 0 ? Colors.grey : Colors.blueAccent),
-            onPressed: () {
-              locator<NavigationService>().navigateTo(Routes.RECEIVED_SAFE_WALK_LIST_SCREEN);
-            },
-          ),
-          IconButton(
-            icon: ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: CachedNetworkImage(
-                fit: BoxFit.cover,
-                imageUrl: _user == null ? "https://via.placeholder.com/44x44?text=|" : _user.profilePhoto,
-                height: 28,
-                width: 28,
-              ),
+          centerTitle: false,
+          brightness: Theme.of(context).brightness,
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.wifi_tethering, color: _activeDistressCallCount == 0 ? Colors.grey : Colors.deepOrange),
+              onPressed: () {
+                locator<NavigationService>().navigateTo(Routes.RECEIVED_DISTRESS_SIGNAL_SCREEN);
+              },
             ),
-            onPressed: () {
-              _showUserDetails();
-            },
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: ListView(
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.only(left: 16.0, bottom: 8, top: 8),
-                  child: Text(
-                    _translations.text("screens.common.hi") + " " + (_user == null ? "" : _user.fullName()),
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
-                  ),
+            IconButton(
+              icon: Icon(Icons.directions_walk, color: _activeSamaritanWalkCount == 0 ? Colors.grey : Colors.blueAccent),
+              onPressed: () {
+                locator<NavigationService>().navigateTo(Routes.RECEIVED_SAFE_WALK_LIST_SCREEN);
+              },
+            ),
+            IconButton(
+              icon: ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: CachedNetworkImage(
+                  fit: BoxFit.cover,
+                  imageUrl: _user == null ? "https://via.placeholder.com/44x44?text=|" : _user.profilePhoto,
+                  height: 28,
+                  width: 28,
                 ),
-              ],
+              ),
+              onPressed: () {
+                _showUserDetails();
+              },
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 20.0, bottom: 8, right: 20.0),
-              child: Divider(),
-            ),
-            _currentDistressCall == null
-                ? SizedBox.shrink()
-                : Padding(
-                    padding: const EdgeInsets.only(left: 16.0, bottom: 8, right: 16),
+          ],
+        ),
+        body: SafeArea(
+          child: ListView(
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16.0, bottom: 8, top: 8),
                     child: Text(
-                      _translations.text("screens.home.active-distress-signal"),
-                      style: Theme.of(context).textTheme.caption,
+                      _translations.text("screens.common.hi") + " " + (_user == null ? "" : _user.fullName()),
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
                     ),
                   ),
-            _currentDistressCall == null
-                ? SizedBox.shrink()
-                : Padding(
-                    padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 20.0, bottom: 8, right: 20.0),
+                child: Divider(),
+              ),
+              _currentDistressCall == null
+                  ? SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.only(left: 16.0, bottom: 8, right: 16),
+                      child: Text(
+                        _translations.text("screens.home.active-distress-signal"),
+                        style: Theme.of(context).textTheme.caption,
                       ),
-                      child: InkWell(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 16.0, right: 8, top: 8, bottom: 8),
-                          child: Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: Text(
-                                  _translations.text("choices.distress.categories.${_currentDistressCall.details}"),
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                                ),
-                              ),
-                              WidgetUtils.glowingIconFor(context, Icons.error_outline, Colors.deepOrange)
-                            ],
-                          ),
-                        ),
-                        onTap: () {
-                          locator<NavigationService>().pushNamed(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN, arguments: _currentDistressCall);
-                        },
-                      ),
-                    )),
-            _safeWalk == null
-                ? SizedBox.shrink()
-                : Padding(
-                    padding: const EdgeInsets.only(left: 16.0, bottom: 8, right: 16),
-                    child: Text(
-                      _translations.text("screens.home.active-safe-walk"),
-                      style: Theme.of(context).textTheme.caption,
                     ),
-                  ),
-            _safeWalk == null
-                ? SizedBox.shrink()
-                : Padding(
-                    padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: InkWell(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 16.0, right: 8, top: 8, bottom: 8),
-                          child: Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: Text(
-                                  _translations.text("screens.common.to") + ": " + _safeWalk.destination.toLowerCase(),
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                                ),
-                              ),
-                              WidgetUtils.glowingIconFor(context, Icons.directions_walk, Colors.blueAccent)
-                            ],
-                          ),
+              _currentDistressCall == null
+                  ? SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        onTap: () {
-                          locator<NavigationService>().pushNamed(Routes.SAFE_WALK_WALKER_SCREEN, arguments: _safeWalk);
-                        },
-                      ),
-                    )),
-            _safeWalk == null && _currentDistressCall == null
-                ? SizedBox.shrink()
-                : Padding(
-                    padding: const EdgeInsets.only(left: 20.0, bottom: 8, right: 20.0),
-                    child: Divider(),
-                  ),
-            _safeWalk != null
-                ? SizedBox.shrink()
-                : Padding(
-                    padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
-                    child: Card(
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
-                              child: Image.asset(
-                                _user.getWalkingImageAsset(),
-                                height: 90,
-                                width: 90,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Colors.white70,
+                        child: InkWell(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 16.0, right: 8, top: 8, bottom: 8),
+                            child: Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: Text(
+                                    _translations.text("choices.distress.categories.${_currentDistressCall.details}"),
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                  ),
                                 ),
-                                borderRadius: BorderRadius.all(Radius.circular(8)),
-                                color: Colors.white,
-                              ),
+                                WidgetUtils.glowingIconFor(context, Icons.error_outline, Colors.deepOrange)
+                              ],
                             ),
                           ),
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
+                          onTap: () {
+                            locator<NavigationService>().pushNamed(Routes.VICTIM_DISTRESS_CHANNEL_SCREEN, arguments: _currentDistressCall);
+                          },
+                        ),
+                      )),
+              _safeWalk == null
+                  ? SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.only(left: 16.0, bottom: 8, right: 16),
+                      child: Text(
+                        _translations.text("screens.home.active-safe-walk"),
+                        style: Theme.of(context).textTheme.caption,
+                      ),
+                    ),
+              _safeWalk == null
+                  ? SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: InkWell(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 16.0, right: 8, top: 8, bottom: 8),
+                            child: Row(
                               children: <Widget>[
-                                Row(
-                                  children: <Widget>[
-                                    Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(right: 8),
-                                        child: Text(
-                                          _translations.text("screens.home.safe-walk"),
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
+                                Expanded(
+                                  child: Text(
+                                    _translations.text("screens.common.to") + ": " + _safeWalk.destination.toLowerCase(),
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                WidgetUtils.glowingIconFor(context, Icons.directions_walk, Colors.blueAccent)
+                              ],
+                            ),
+                          ),
+                          onTap: () {
+                            locator<NavigationService>().pushNamed(Routes.SAFE_WALK_WALKER_SCREEN, arguments: _safeWalk);
+                          },
+                        ),
+                      )),
+              _safeWalk == null && _currentDistressCall == null
+                  ? SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.only(left: 20.0, bottom: 8, right: 20.0),
+                      child: Divider(),
+                    ),
+              _safeWalk != null
+                  ? SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                      child: Card(
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Container(
+                                child: Image.asset(
+                                  _user.getWalkingImageAsset(),
+                                  height: 90,
+                                  width: 90,
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.white70,
+                                  ),
+                                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: <Widget>[
+                                  Row(
+                                    children: <Widget>[
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(right: 8),
+                                          child: Text(
+                                            _translations.text("screens.home.safe-walk"),
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    FlatButton(
-                                      onPressed: () {
-                                        locator<NavigationService>().pushNamed(Routes.START_SAFE_WALK_SCREEN).then((value) => _setUp());
-                                      },
-                                      child: Text(
-                                        _translations.text("screens.home.safe-walk.start"),
-                                        style: TextStyle(color: Theme.of(context).accentColor),
-                                      ),
-                                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                      padding: const EdgeInsets.only(right: 0, left: 0, bottom: 0, top: 0),
-                                    )
-                                  ],
-                                ),
-                                Divider(),
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 8.0),
-                                  child: Text(
-                                    _translations.text("screens.home.safe-walk.detail"),
-                                    style: Theme.of(context).textTheme.caption,
+                                      FlatButton(
+                                        onPressed: () {
+                                          locator<NavigationService>().pushNamed(Routes.START_SAFE_WALK_SCREEN).then((value) => _setUp());
+                                        },
+                                        child: Text(
+                                          _translations.text("screens.home.safe-walk.start"),
+                                          style: TextStyle(color: Theme.of(context).accentColor),
+                                        ),
+                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        padding: const EdgeInsets.only(right: 0, left: 0, bottom: 0, top: 0),
+                                      )
+                                    ],
                                   ),
+                                  Divider(),
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 8.0),
+                                    child: Text(
+                                      _translations.text("screens.home.safe-walk.detail"),
+                                      style: Theme.of(context).textTheme.caption,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+              Padding(
+                padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                child: Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                          child: Image.asset(
+                            _user == null ? "assets/images/superman.png" : _user.gender == "MALE" ? "assets/images/superman.png" : "assets/images/superwoman.png",
+                            height: 90,
+                            width: 90,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.white70,
+                            ),
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: Text(
+                                      _translations.text("screens.home.samaritan-mode"),
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Switch(
+                                  activeColor: Theme.of(context).accentColor,
+                                  value: _samaritan != null && _samaritan,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _samaritan = value;
+                                    });
+                                    updateSamaritanMode(context, value);
+                                  },
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                 )
                               ],
                             ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-            Padding(
-              padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
-              child: Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        child: Image.asset(
-                          _user == null ? "assets/images/superman.png" : _user.gender == "MALE" ? "assets/images/superman.png" : "assets/images/superwoman.png",
-                          height: 90,
-                          width: 90,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.white70,
-                          ),
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 8),
-                                  child: Text(
-                                    _translations.text("screens.home.samaritan-mode"),
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
+                            Divider(),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Text(
+                                _translations.text("screens.home.samaritan-mode.details"),
+                                style: Theme.of(context).textTheme.caption,
                               ),
-                              Switch(
-                                activeColor: Theme.of(context).accentColor,
-                                value: _samaritan != null && _samaritan,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _samaritan = value;
-                                  });
-                                  updateSamaritanMode(context, value);
-                                },
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              )
-                            ],
-                          ),
-                          Divider(),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: Text(
-                              _translations.text("screens.home.samaritan-mode.details"),
-                              style: Theme.of(context).textTheme.caption,
-                            ),
-                          )
-                        ],
-                      ),
-                    )
-                  ],
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(
-                  child: Text(
-                _translations.text("screens.home.fine-print"),
-                style: TextStyle(
-                  fontSize: 10,
-                  fontStyle: FontStyle.italic,
-                  color: Theme.of(context).textTheme.caption.color.withAlpha(100),
-                ),
-                textAlign: TextAlign.center,
-              )),
-            )
-          ],
-          shrinkWrap: false,
-        ),
-      ),
-      floatingActionButton: _currentDistressCall == null
-          ? Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: RaisedButton.icon(
-                elevation: 4,
-                onPressed: () {
-                  locator<NavigationService>().pushNamed(Routes.DISTRESS_CATEGORY_SELECTION_SCREEN).then((value) => _setUp());
-                },
-                icon: Icon(
-                  Icons.error_outline,
-                  color: Colors.white,
-                ),
-                label: Text(
-                  _translations.text("screens.home.call-to-action"),
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Colors.white),
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30.0),
-                ),
+              Padding(
                 padding: EdgeInsets.all(16),
-              ),
-            )
-          : SizedBox.shrink(),
+                child: Center(
+                    child: Text(
+                  _translations.text("screens.home.fine-print"),
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontStyle: FontStyle.italic,
+                    color: Theme.of(context).textTheme.caption.color.withAlpha(100),
+                  ),
+                  textAlign: TextAlign.center,
+                )),
+              )
+            ],
+            shrinkWrap: false,
+          ),
+        ),
+        floatingActionButton: _currentDistressCall == null
+            ? Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: RaisedButton.icon(
+                  elevation: 4,
+                  onPressed: () {
+                    locator<NavigationService>().pushNamed(Routes.DISTRESS_CATEGORY_SELECTION_SCREEN).then((value) => _setUp());
+                  },
+                  icon: Icon(
+                    Icons.error_outline,
+                    color: Colors.white,
+                  ),
+                  label: Text(
+                    _translations.text("screens.home.call-to-action"),
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Colors.white),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  padding: EdgeInsets.all(16),
+                ),
+              )
+            : SizedBox.shrink(),
+      ),
     );
   }
 
@@ -736,9 +742,11 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
     await FireBaseHandler.unsubscribeFromAllTopics();
     await ReceivedDistressSignalRepository.clear();
     await ReceivedSafeWalkRepository.clear();
+    await EmergencyContactRepository.clear();
     await BackgroundLocationUpdate.stopLocationTracking();
     await SharedPreferenceUtil.clear();
     await FirebaseAuth.instance.signOut();
+
     locator<NavigationService>().pushNamedAndRemoveUntil(Routes.PHONE_VERIFICATION_SCREEN);
   }
 }

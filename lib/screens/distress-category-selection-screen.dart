@@ -48,38 +48,41 @@ class _DistressCategorySelectionScreenState extends State {
 
     return _processing
         ? WidgetUtils.getLoaderWidget(context, _translations.text("screens.distress-category-selection.sending-distress-signal"))
-        : Scaffold(
-            backgroundColor: Theme.of(context).backgroundColor,
-            appBar: AppBar(
+        : AnnotatedRegion(
+            value: WidgetUtils.updateSystemColors(context),
+            child: Scaffold(
               backgroundColor: Theme.of(context).backgroundColor,
-              elevation: 0,
-              brightness: Theme.of(context).brightness,
-              iconTheme: IconThemeData(color: Colors.grey[600]),
-              centerTitle: false,
-              title: Text(
-                _translations.text("screens.distress-category-selection.whats-the-emergency"),
-                textAlign: TextAlign.start,
-                style: TextStyle(color: Theme.of(context).textTheme.title.color),
+              appBar: AppBar(
+                backgroundColor: Theme.of(context).backgroundColor,
+                elevation: 0,
+                brightness: Theme.of(context).brightness,
+                iconTheme: IconThemeData(color: Colors.grey[600]),
+                centerTitle: false,
+                title: Text(
+                  _translations.text("screens.distress-category-selection.whats-the-emergency"),
+                  textAlign: TextAlign.start,
+                  style: TextStyle(color: Theme.of(context).textTheme.title.color),
+                ),
               ),
+              body: SafeArea(
+                  child: ListView.separated(
+                itemCount: _categories.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(_translations.text("choices.distress.categories.${_categories[index]}")),
+                    onTap: () {
+                      _sendDistressSignal(_categories[index]);
+                    },
+                  );
+                },
+                separatorBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+                    child: Divider(),
+                  );
+                },
+              )),
             ),
-            body: SafeArea(
-                child: ListView.separated(
-              itemCount: _categories.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(_translations.text("choices.distress.categories.${_categories[index]}")),
-                  onTap: () {
-                    _sendDistressSignal(_categories[index]);
-                  },
-                );
-              },
-              separatorBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-                  child: Divider(),
-                );
-              },
-            )),
           );
   }
 

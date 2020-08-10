@@ -71,87 +71,90 @@ class _ProfilePictureUpdateScreenState extends State {
     Future<User> user = SharedPreferenceUtil.currentUser();
     user.then((value) => _user = value);
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).backgroundColor,
-      appBar: AppBar(
+    return AnnotatedRegion(
+      value: WidgetUtils.updateSystemColors(context),
+      child: Scaffold(
         backgroundColor: Theme.of(context).backgroundColor,
-        elevation: 0,
-        brightness: Theme.of(context).brightness,
-        iconTheme: Theme.of(context).iconTheme,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.all(16),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                InkWell(
-                  child: _imageFile == null
-                      ? _circularImage(Icon(
-                          Icons.image,
-                          size: 250,
-                          color: Colors.blueAccent,
-                        ))
-                      : _circularImage(Image.file(
-                          _imageFile,
-                          height: 200,
-                        )),
-                  onTap: () {
-                    _pickImage(context, ImageSource.gallery);
-                  },
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                    child: Padding(
-                  padding: const EdgeInsets.only(left: 16.0, right: 16, top: 16),
-                  child: Text(
-                    Translations.of(context).text("screens.profile-photo-update.subtitle"),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 15),
-                  ),
-                )),
-              ],
-            ),
-            Expanded(
-              child: Container(),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).backgroundColor,
+          elevation: 0,
+          brightness: Theme.of(context).brightness,
+          iconTheme: Theme.of(context).iconTheme,
+        ),
+        body: SafeArea(
+          child: Column(
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.all(16),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: RaisedButton(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(25.0),
-                      ),
-                      child: Text(
-                        _translations.text("screens.common.done"),
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      onPressed: () async {
-                        if (_imageFile == null) {
-                          return;
-                        }
-                        setState(() {
-                          _isProcessing = true;
-                        });
-                        _uploadImage(context, _imageFile);
-                      },
-                    ),
-                  )
+                  InkWell(
+                    child: _imageFile == null
+                        ? _circularImage(Icon(
+                            Icons.image,
+                            size: 250,
+                            color: Colors.blueAccent,
+                          ))
+                        : _circularImage(Image.file(
+                            _imageFile,
+                            height: 200,
+                          )),
+                    onTap: () {
+                      _pickImage(context, ImageSource.gallery);
+                    },
+                  ),
                 ],
               ),
-            )
-          ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                      child: Padding(
+                    padding: const EdgeInsets.only(left: 16.0, right: 16, top: 16),
+                    child: Text(
+                      Translations.of(context).text("screens.profile-photo-update.subtitle"),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 15),
+                    ),
+                  )),
+                ],
+              ),
+              Expanded(
+                child: Container(),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: RaisedButton(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: new BorderRadius.circular(25.0),
+                        ),
+                        child: Text(
+                          _translations.text("screens.common.done"),
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        onPressed: () async {
+                          if (_imageFile == null) {
+                            return;
+                          }
+                          setState(() {
+                            _isProcessing = true;
+                          });
+                          _uploadImage(context, _imageFile);
+                        },
+                      ),
+                    )
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
