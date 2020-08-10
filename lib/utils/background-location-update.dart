@@ -36,7 +36,7 @@ class BackgroundLocationUpdate {
     bg.BackgroundGeolocation.ready(
       bg.Config(
         desiredAccuracy: bg.Config.DESIRED_ACCURACY_NAVIGATION,
-        distanceFilter: 5,
+        distanceFilter: 10,
         stopOnTerminate: false,
         startOnBoot: true,
         debug: false,
@@ -47,7 +47,7 @@ class BackgroundLocationUpdate {
           color: "#00b0ff",
           title: "Cry Out",
           text: "Cry Out is active",
-          priority: 0,
+          priority: 2,
           channelName: "cry-out-background-channel",
         ),
       ),

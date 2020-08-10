@@ -5,9 +5,7 @@ class User {
   String firstName;
   String lastName;
   String phoneNumber;
-  String emailAddress;
   String authKey;
-  String role;
   String gender;
   String profilePhoto;
 
@@ -19,9 +17,7 @@ class User {
     this.firstName,
     this.lastName,
     this.phoneNumber,
-    this.emailAddress,
     this.authKey,
-    this.role,
     this.gender,
     this.dateOfBirth,
     this.profilePhoto,
@@ -33,9 +29,7 @@ class User {
         firstName: json["firstName"] ?? "",
         lastName: json["lastName"] ?? "",
         phoneNumber: json["phoneNumber"] ?? "",
-        emailAddress: json["emailAddress"] ?? "",
         status: json["status"] ?? "",
-        role: json["role"] ?? "",
         gender: json["gender"] ?? "",
         dateOfBirth: json["dateOfBirth"] ?? "",
         profilePhoto: json["profilePhoto"] ?? "");
@@ -46,10 +40,8 @@ class User {
       'firstName': firstName,
       'lastName': lastName,
       'phoneNumber': phoneNumber,
-      'emailAddress': emailAddress,
       'id': id,
       'dateOfBirth': dateOfBirth,
-      'role': role,
       'gender': gender,
       'status': status,
       'profilePhoto': profilePhoto,

@@ -5,6 +5,7 @@
   "screens.common.done": "Done",
   "screens.common.add": "Add",
   "screens.common.save": "Save",
+  "screens.common.confirm": "Confirm",
   "screens.common.end": "End",
   "screens.common.hi": "Hi",
   "screens.common.to": "To",
@@ -51,7 +52,7 @@
   "screens.name-update.hints.gender.male": "Male",
   "screens.name-update.hints.gender.female": "Female",
   "screens.name-update.hints.gender.non_binary": "Non Binary",
-  "screens.name-update.message": "Updating this info later is currently not possible",
+  "screens.name-update.message": "Updating these info later is currently not possible",
   "screens.profile-photo-update.subtitle": "Click to update your profile picture",
   "screens.profile-photo-update.title": "Upload photo",
   "screens.profile-photo-update.processing": "Completing profile update...",
@@ -115,7 +116,7 @@
   "screens.emergency-contacts.error.internationalization.title": "Invalid number format",
   "screens.emergency-contacts.error.internationalization.message": "Phone number must be in the international format eg: +14155552671, +2348130000191...",
   "screens.emergency-contacts.error.phone-number.not-registered.title": "User not found",
-  "screens.emergency-contacts.error.phone-number.not-registered.message": "The selected contact doesn't have a Cry Out account yet. Please confirm the phone number and try again or asked them to download the Cry Out app!",
+  "screens.emergency-contacts.error.phone-number.not-registered.message": "The selected contact doesn't have a Cry Out account yet. Please confirm the phone number and try again or ask them to download the Cry Out app!",
   "screens.emergency-contacts.error.phone-number.same-user.title": "Really???",
   "screens.emergency-contacts.error.phone-number.same-user.message": "You are your own emergency contact?? ( ._.)",
   "screens.emergency-contacts.error.contacts.title": "Emergency contacts (swipe to remove): ",
@@ -150,5 +151,6 @@
   "screens.phone-verification.error.message": "Invalid phone number",
   "screens.emergency-contacts.empty.message": "You have no emergency contacts",
   "screens.phone-verifications.channels.sms": "SMS",
-  "screens.phone-verifications.channels.call": "Call me"
+  "screens.phone-verifications.channels.call": "Call me",
+  "screens.phone-verifications.enter-code.hint": "SMS code"
 }

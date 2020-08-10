@@ -9,6 +9,7 @@ import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:toast/toast.dart';
@@ -85,26 +86,29 @@ class WidgetUtils {
   }
 
   static Widget getLoaderWidget(BuildContext context, String text) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).backgroundColor,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            SizedBox(
-              height: 100.0,
-              width: 100.0,
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(Colors.blueAccent),
-                strokeWidth: 8.0,
+    return AnnotatedRegion(
+      value: WidgetUtils.updateSystemColors(context),
+      child: Scaffold(
+        backgroundColor: Theme.of(context).backgroundColor,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              SizedBox(
+                height: 100.0,
+                width: 100.0,
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(Colors.blueAccent),
+                  strokeWidth: 8.0,
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-            ),
-            Padding(padding: const EdgeInsets.all(8.0), child: Text(text)),
-          ],
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+              ),
+              Padding(padding: const EdgeInsets.all(8.0), child: Text(text)),
+            ],
+          ),
         ),
       ),
     );
@@ -520,9 +524,29 @@ class WidgetUtils {
     UserResource.reportUser(context, {"userId": userId, "reason": reason});
   }
 
-  static EdgeInsetsGeometry chatInputPadding(){
+  static EdgeInsetsGeometry chatInputPadding() {
     double top = 8;
-    double bottom = Platform.isIOS ? 24 : 16;
+    double bottom = Platform.isIOS ? 20 : 16;
     return EdgeInsets.only(top: top, bottom: bottom);
+  }
+
+  static SystemUiOverlayStyle updateSystemColors(BuildContext context) {
+    if (!Platform.isAndroid) {
+      return Theme.of(context).brightness == Brightness.dark ? SystemUiOverlayStyle.dark : SystemUiOverlayStyle.light;
+    }
+
+    var mySystemTheme;
+
+    if (Theme.of(context).brightness == Brightness.dark) {
+      mySystemTheme = SystemUiOverlayStyle.dark.copyWith(
+        systemNavigationBarColor: Theme.of(context).backgroundColor,
+      );
+    } else {
+      mySystemTheme = SystemUiOverlayStyle.light.copyWith(
+        systemNavigationBarColor: Theme.of(context).backgroundColor,
+      );
+    }
+
+    return mySystemTheme;
   }
 }

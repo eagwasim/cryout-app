@@ -41,98 +41,101 @@ class _SafeWalkCreationScreenState extends State {
 
     _destinationController = TextEditingController(text: _destination);
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).backgroundColor,
-      appBar: AppBar(
-        iconTheme: Theme.of(context).iconTheme,
-        title: Text(
-          _translations.text("screens.safe-walk-creation.title"),
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.headline1.color),
-        ),
-        centerTitle: false,
-        elevation: 0,
+    return AnnotatedRegion(
+      value: WidgetUtils.updateSystemColors(context),
+      child: Scaffold(
         backgroundColor: Theme.of(context).backgroundColor,
-        brightness: Theme.of(context).brightness,
-      ),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TextField(
-                decoration: new InputDecoration(
-                  hintText: _translations.text("screens.safe-walk-creation.destination"),
-                ),
-                autofocus: false,
-                controller: _destinationController,
-                keyboardType: TextInputType.text,
-                onChanged: (newValue) {
-                  _destination = newValue;
-                },
-              ),
-            ),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 16.0, bottom: 16, top: 8),
-                    child: Text(
-                      _translations.text("screens.safe-walk-creation.select-contacts"),
-                      style: Theme.of(context).textTheme.caption,
-                    ),
-                  ),
-                ),
-                InkWell(
-                  onTap: () {
-                    locator<NavigationService>().pushNamed(Routes.MANAGE_EMERGENCY_CONTACTS_SCREEN).then((value) => setState(() {}));
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 16.0, top: 0, bottom: 8, left: 16),
-                    child: Text(
-                      _translations.text("screens.safe-walk-creation.manage"),
-                      style: TextStyle(fontWeight: Theme.of(context).textTheme.caption.fontWeight, fontSize: Theme.of(context).textTheme.caption.fontSize, color: Theme.of(context).accentColor),
-                    ),
-                  ),
-                )
-              ],
-            ),
-            Flexible(
-                child: FutureBuilder<List<EmergencyContact>>(
-              future: EmergencyContactRepository.all(),
-              builder: (context, snapshot) {
-                if(!snapshot.hasData || snapshot.data.length == 0){
-                  return _getNoItemsView();
-                }
-                return ListView.builder(itemCount: snapshot.data.length, itemBuilder: (context, index) => _getEmergencyContactView(snapshot.data[index]));
-              },
-            )),
-          ],
+        appBar: AppBar(
+          iconTheme: Theme.of(context).iconTheme,
+          title: Text(
+            _translations.text("screens.safe-walk-creation.title"),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.headline1.color),
+          ),
+          centerTitle: false,
+          elevation: 0,
+          backgroundColor: Theme.of(context).backgroundColor,
+          brightness: Theme.of(context).brightness,
         ),
-      ),
-      floatingActionButton: _isProcessing
-          ? CircularProgressIndicator()
-          : Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: RaisedButton.icon(
-                elevation: 4,
-                onPressed: () {
-                  _beginSafeWalk();
-                },
-                icon: Icon(
-                  Icons.directions_walk,
-                  color: Colors.white,
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  decoration: new InputDecoration(
+                    hintText: _translations.text("screens.safe-walk-creation.destination"),
+                  ),
+                  autofocus: false,
+                  controller: _destinationController,
+                  keyboardType: TextInputType.text,
+                  onChanged: (newValue) {
+                    _destination = newValue;
+                  },
                 ),
-                label: Text(
-                  _translations.text("screens.safe-walk-creation.action"),
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Colors.white),
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30.0),
-                ),
-                padding: EdgeInsets.all(16),
               ),
-            ),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 16.0, bottom: 16, top: 8),
+                      child: Text(
+                        _translations.text("screens.safe-walk-creation.select-contacts"),
+                        style: Theme.of(context).textTheme.caption,
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      locator<NavigationService>().pushNamed(Routes.MANAGE_EMERGENCY_CONTACTS_SCREEN).then((value) => setState(() {}));
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 16.0, top: 0, bottom: 8, left: 16),
+                      child: Text(
+                        _translations.text("screens.safe-walk-creation.manage"),
+                        style: TextStyle(fontWeight: Theme.of(context).textTheme.caption.fontWeight, fontSize: Theme.of(context).textTheme.caption.fontSize, color: Theme.of(context).accentColor),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+              Flexible(
+                  child: FutureBuilder<List<EmergencyContact>>(
+                future: EmergencyContactRepository.all(),
+                builder: (context, snapshot) {
+                  if(!snapshot.hasData || snapshot.data.length == 0){
+                    return _getNoItemsView();
+                  }
+                  return ListView.builder(itemCount: snapshot.data.length, itemBuilder: (context, index) => _getEmergencyContactView(snapshot.data[index]));
+                },
+              )),
+            ],
+          ),
+        ),
+        floatingActionButton: _isProcessing
+            ? CircularProgressIndicator()
+            : Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: RaisedButton.icon(
+                  elevation: 4,
+                  onPressed: () {
+                    _beginSafeWalk();
+                  },
+                  icon: Icon(
+                    Icons.directions_walk,
+                    color: Colors.white,
+                  ),
+                  label: Text(
+                    _translations.text("screens.safe-walk-creation.action"),
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Colors.white),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  padding: EdgeInsets.all(16),
+                ),
+              ),
+      ),
     );
   }
 

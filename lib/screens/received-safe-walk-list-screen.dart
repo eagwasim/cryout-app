@@ -14,6 +14,7 @@ import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/translations.dart';
+import 'package:cryout_app/utils/widget-utils.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +33,6 @@ class ReceivedSafeWalkListScreen extends StatefulWidget {
 }
 
 class _ReceivedSafeWalkListScreenState extends State {
-
   NativeAdmobController _nativeAdController = NativeAdmobController();
   RefreshController _refreshController = RefreshController(initialRefresh: false);
   Translations _translations;
@@ -78,94 +78,97 @@ class _ReceivedSafeWalkListScreenState extends State {
               ),
             ),
           )
-        : Scaffold(
-            backgroundColor: Theme.of(context).backgroundColor,
-            appBar: AppBar(
+        : AnnotatedRegion(
+            value: WidgetUtils.updateSystemColors(context),
+            child: Scaffold(
               backgroundColor: Theme.of(context).backgroundColor,
-              iconTheme: Theme.of(context).iconTheme,
-              elevation: 0,
-              brightness: Theme.of(context).brightness,
-              title: Text(_translations.text("screens.safe-walk.signals.title"), style: TextStyle(color: Theme.of(context).textTheme.headline1.color)),
-              actions: <Widget>[
-                _isLoading
-                    ? Center(
-                        child: Container(
-                            width: 38,
-                            height: 38,
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(),
-                            )),
-                      )
-                    : SizedBox.shrink()
-              ],
-            ),
-            body: Column(
-              children: <Widget>[
-                Expanded(
-                  child: SmartRefresher(
-                    onLoading: _loadFromServer,
-                    onRefresh: _loadFromServer,
-                    controller: _refreshController,
-                    header: WaterDropHeader(
-                      complete: Text(_translations.text("screens.common.refresh.is-refresh-completed")),
-                      failed: Text(_translations.text("screens.common.refresh.is-refresh-failed")),
-                      waterDropColor: Theme.of(context).accentColor,
-                    ),
-                    child: _receivedSafeWalkList.length == 0
-                        ? _getNoItemsView()
-                        : ListView.builder(
-                            itemCount: _receivedSafeWalkList.length,
-                            itemBuilder: (_, int position) {
-                              final item = _receivedSafeWalkList[position];
-                              return _getSafeWalkNotificationView(item, position);
-                            },
-                          ),
-                  ),
-                ),
-                Container(
-                  height: _addHeight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: NativeAdmob(
-                          // Your ad unit id
-                          adUnitID: Platform.isIOS ? FireBaseHandler.IOS_NATIVE_AD_UNIT_ID : FireBaseHandler.ANDROID_NATIVE_AD_UNIT_ID,
-                          controller: _nativeAdController,
-                          type: NativeAdmobType.banner,
-                          options: NativeAdmobOptions(
-                              adLabelTextStyle: NativeTextStyle(
-                                color: Theme.of(context).textTheme.headline2.color,
-                              ),
-                              callToActionStyle: NativeTextStyle(
-                                backgroundColor: Theme.of(context).accentColor,
-                                color: Theme.of(context).textTheme.button.color,
-                              ),
-                              headlineTextStyle: NativeTextStyle(
-                                color: Theme.of(context).textTheme.headline2.color,
-                                fontSize: Theme.of(context).textTheme.headline2.fontSize,
-                              ),
-                              showMediaContent: true,
-                              bodyTextStyle: NativeTextStyle(
-                                color: Theme.of(context).textTheme.headline2.color,
-                                fontSize: Theme.of(context).textTheme.bodyText1.fontSize,
-                              ),
-                              advertiserTextStyle: NativeTextStyle(
-                                color: Theme.of(context).textTheme.headline2.color,
+              appBar: AppBar(
+                backgroundColor: Theme.of(context).backgroundColor,
+                iconTheme: Theme.of(context).iconTheme,
+                elevation: 0,
+                brightness: Theme.of(context).brightness,
+                title: Text(_translations.text("screens.safe-walk.signals.title"), style: TextStyle(color: Theme.of(context).textTheme.headline1.color)),
+                actions: <Widget>[
+                  _isLoading
+                      ? Center(
+                          child: Container(
+                              width: 38,
+                              height: 38,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: CircularProgressIndicator(),
                               )),
-                          // Don't show loading widget when in loading state
-                          loading: Container(),
+                        )
+                      : SizedBox.shrink()
+                ],
+              ),
+              body: Column(
+                children: <Widget>[
+                  Expanded(
+                    child: SmartRefresher(
+                      onLoading: _loadFromServer,
+                      onRefresh: _loadFromServer,
+                      controller: _refreshController,
+                      header: WaterDropHeader(
+                        complete: Text(_translations.text("screens.common.refresh.is-refresh-completed")),
+                        failed: Text(_translations.text("screens.common.refresh.is-refresh-failed")),
+                        waterDropColor: Theme.of(context).accentColor,
+                      ),
+                      child: _receivedSafeWalkList.length == 0
+                          ? _getNoItemsView()
+                          : ListView.builder(
+                              itemCount: _receivedSafeWalkList.length,
+                              itemBuilder: (_, int position) {
+                                final item = _receivedSafeWalkList[position];
+                                return _getSafeWalkNotificationView(item, position);
+                              },
+                            ),
+                    ),
+                  ),
+                  Container(
+                    height: _addHeight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: NativeAdmob(
+                            // Your ad unit id
+                            adUnitID: Platform.isIOS ? FireBaseHandler.IOS_NATIVE_AD_UNIT_ID : FireBaseHandler.ANDROID_NATIVE_AD_UNIT_ID,
+                            controller: _nativeAdController,
+                            type: NativeAdmobType.banner,
+                            options: NativeAdmobOptions(
+                                adLabelTextStyle: NativeTextStyle(
+                                  color: Theme.of(context).textTheme.headline2.color,
+                                ),
+                                callToActionStyle: NativeTextStyle(
+                                  backgroundColor: Theme.of(context).accentColor,
+                                  color: Theme.of(context).textTheme.button.color,
+                                ),
+                                headlineTextStyle: NativeTextStyle(
+                                  color: Theme.of(context).textTheme.headline2.color,
+                                  fontSize: Theme.of(context).textTheme.headline2.fontSize,
+                                ),
+                                showMediaContent: true,
+                                bodyTextStyle: NativeTextStyle(
+                                  color: Theme.of(context).textTheme.headline2.color,
+                                  fontSize: Theme.of(context).textTheme.bodyText1.fontSize,
+                                ),
+                                advertiserTextStyle: NativeTextStyle(
+                                  color: Theme.of(context).textTheme.headline2.color,
+                                )),
+                            // Don't show loading widget when in loading state
+                            loading: Container(),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
   }
@@ -244,7 +247,7 @@ class _ReceivedSafeWalkListScreenState extends State {
                                   style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
                                 )),
                                 Text(
-                                  receivedSafeWalkSignal.dateCreated == null ? "" : timeago.format(DateTime.fromMillisecondsSinceEpoch(receivedSafeWalkSignal.dateCreated), locale: 'en_short'),
+                                  receivedSafeWalkSignal.dateCreated == null ? "" : timeago.format(DateTime.fromMillisecondsSinceEpoch(receivedSafeWalkSignal.dateCreated), locale: 'en'),
                                   style: TextStyle(fontStyle: FontStyle.italic, fontSize: 10, color: Colors.grey),
                                 ),
                               ],
@@ -314,7 +317,7 @@ class _ReceivedSafeWalkListScreenState extends State {
       await SharedPreferenceUtil.setBool("safe-walk.logged." + receivedSafeWalk.safeWalkId, true);
     }
 
-    locator<NavigationService>().pushNamed(Routes.SAFE_WALK_WATCHER_SCREEN, arguments: receivedSafeWalk.safeWalkId);
+    locator<NavigationService>().pushNamed(Routes.SAFE_WALK_WATCHER_SCREEN, arguments: {'safeWalkId': receivedSafeWalk.safeWalkId, 'openMessages': false});
   }
 
   void _ignoreSafeWalk(int index, ReceivedSafeWalk receivedSafeWalk) async {
@@ -376,6 +379,7 @@ class _ReceivedSafeWalkListScreenState extends State {
 
     if (response.statusCode == 200) {
       dynamic data = jsonDecode(response.body)['data'];
+
       List<ReceivedSafeWalk> signalsFromServer = (data['data'] as List<dynamic>).map((e) => ReceivedSafeWalk.fromJSON(e)).toList();
 
       await ReceivedSafeWalkRepository.clear();

@@ -560,13 +560,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.4.0"
-  pin_code_text_field:
+  pin_code_fields:
     dependency: "direct main"
     description:
-      name: pin_code_text_field
+      name: pin_code_fields
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.6.0"
+    version: "4.0.0"
   platform:
     dependency: transitive
     description:

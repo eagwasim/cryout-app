@@ -58,4 +58,5 @@ class UserResource {
 
     return response;
   }
+
 }

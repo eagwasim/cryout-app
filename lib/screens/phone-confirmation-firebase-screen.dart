@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -16,37 +15,31 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
-class PhoneConfirmationScreen extends StatefulWidget {
+class PhoneConfirmationFirebaseScreen extends StatefulWidget {
+  final String verificationId;
+
+  const PhoneConfirmationFirebaseScreen({Key key, this.verificationId}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
-    return _PhoneConfirmationScreenState();
+    return _PhoneConfirmationFirebaseScreenState(this.verificationId);
   }
 }
 
-class _PhoneConfirmationScreenState extends State {
-  TextEditingController controller;
-  StreamController<ErrorAnimationType> errorController;
+class _PhoneConfirmationFirebaseScreenState extends State {
+  final String _verificationId;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   Translations _translations;
   bool _isProcessing = false;
   String currentText;
+  TextEditingController _firebaseSMSCodeController;
 
-  @override
-  void dispose() {
-    errorController.close();
-    errorController = null;
-    super.dispose();
-  }
+  _PhoneConfirmationFirebaseScreenState(this._verificationId);
 
   @override
   Widget build(BuildContext context) {
-    if (_translations == null) {
-      _translations = Translations.of(context);
-    }
-    if (errorController == null) {
-      errorController = StreamController<ErrorAnimationType>();
-    }
-
-    controller = TextEditingController(text: currentText);
+    _translations = Translations.of(context);
+    _firebaseSMSCodeController = TextEditingController(text: currentText);
 
     if (_isProcessing) {
       return WidgetUtils.getLoaderWidget(context, _translations.text("screens.phone.login.confirmation.message"));
@@ -97,9 +90,9 @@ class _PhoneConfirmationScreenState extends State {
                 padding: EdgeInsets.all(16),
               ),
               Padding(
-                padding: const EdgeInsets.only(left:24.0, right: 24),
+                padding: const EdgeInsets.only(left: 24.0, right: 24),
                 child: PinCodeTextField(
-                  length: 4,
+                  length: 6,
                   obsecureText: false,
                   animationType: AnimationType.fade,
                   pinTheme: PinTheme(
@@ -114,25 +107,26 @@ class _PhoneConfirmationScreenState extends State {
                   animationDuration: Duration(milliseconds: 300),
                   enableActiveFill: false,
                   autoFocus: true,
-                  controller: controller,
+                  controller: _firebaseSMSCodeController,
                   backgroundColor: Theme.of(context).backgroundColor,
                   textInputType: TextInputType.number,
                   onCompleted: (v) {
-                   _login(v);
+                    currentText = v;
+                    _preLogin();
                   },
                   onChanged: (value) {
+                    print(value);
                     setState(() {
                       currentText = value;
                     });
                   },
                   beforeTextPaste: (text) {
-                    print("Allowing to paste $text");
                     //if you return true then it will show the paste confirmation dialog. Otherwise if false, then nothing will happen.
                     //but you can show anything you want here, like your pop up saying wrong paste format or etc
                     return true;
                   },
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -140,32 +134,39 @@ class _PhoneConfirmationScreenState extends State {
     );
   }
 
-  void _login(String text) async {
+  void _preLogin() {
     setState(() {
       _isProcessing = true;
     });
+    String smsCode = _firebaseSMSCodeController.text.trim();
 
-    String phoneNumber = await SharedPreferenceUtil.getPhoneNumberForVerification();
+    AuthCredential _credential = PhoneAuthProvider.getCredential(verificationId: _verificationId, smsCode: smsCode);
+    _auth.signInWithCredential(_credential).then((AuthResult result) {
+      _loginUser(result);
+    }).catchError(
+      (e) {
+        _showError(e.message);
+      },
+    );
+  }
 
-    Response resp = await AccessResource.phoneNumberConfirmation({"phoneNumber": phoneNumber, "code": text});
+  void _showError(String message) {
+    setState(() {
+      currentText = "";
+      _isProcessing = false;
+    });
 
-    if (resp.statusCode == HttpStatus.badRequest) {
-      setState(() {
-        _isProcessing = false;
-        currentText = "";
-      });
-      WidgetUtils.showAlertDialog(
-        context,
-        _translations.text("screens.phone.confirmation.error.invalid_code.title"),
-        _translations.text("screens.phone.confirmation.error.invalid_code.message"),
-      );
-      return;
-    }
+    WidgetUtils.showAlertDialog(context, "", message);
+  }
+
+  void _loginUser(AuthResult authResult) async {
+    IdTokenResult idTokenResult = await authResult.user.getIdToken(refresh: false);
+
+    Response resp = await AccessResource.loginUserByFirebaseToken({'token': idTokenResult.token});
 
     if (resp.statusCode == HttpStatus.forbidden) {
       setState(() {
         _isProcessing = false;
-        currentText = "";
       });
       WidgetUtils.showAlertDialog(
         context,
@@ -178,7 +179,6 @@ class _PhoneConfirmationScreenState extends State {
     if (resp.statusCode != HttpStatus.ok) {
       setState(() {
         _isProcessing = false;
-        currentText = "";
       });
       WidgetUtils.showAlertDialog(
         context,
@@ -202,9 +202,10 @@ class _PhoneConfirmationScreenState extends State {
     await SharedPreferenceUtil.saveUser(user);
     await SharedPreferenceUtil.saveToken(token);
     await SharedPreferenceUtil.saveRefreshToken(refreshToken);
-
-    final FirebaseAuth _auth = FirebaseAuth.instance;
-
+    // Remove user
+    FirebaseUser firebaseUser = await FirebaseAuth.instance.currentUser();
+    firebaseUser.delete();
+    // Sign them in with our token
     await _auth.signInWithCustomToken(token: notificationToken);
 
     if (userPreferencesResponse.isNotEmpty) {
@@ -212,6 +213,10 @@ class _PhoneConfirmationScreenState extends State {
         await SharedPreferenceUtil.setString(userPreferencesResponse[index]["name"], userPreferencesResponse[index]["value"]);
       }
     }
+
+    setState(() {
+      _isProcessing = false;
+    });
 
     FireBaseHandler.subscribeToUserTopic(user.id);
 

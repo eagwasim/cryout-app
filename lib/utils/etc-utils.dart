@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class EtcUtils {
   static bool isNumeric(String s) {
     if (s == null) {
@@ -21,7 +23,7 @@ class EtcUtils {
       if (isNumeric(d)) {
         return int.parse(d);
       }
-      return DateTime.parse(d).millisecondsSinceEpoch;
+      return DateFormat("yyyy-MM-DD'T'hh:mm:ss.SSS").parse(d, true).toLocal().millisecondsSinceEpoch;
     } else if (d is int) {
       return d;
     } else {
@@ -29,5 +31,3 @@ class EtcUtils {
     }
   }
 }
-
-

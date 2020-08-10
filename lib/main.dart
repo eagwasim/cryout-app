@@ -122,9 +122,4 @@ class _MyAppState<MyApp> extends State {
       navigatorKey: locator<NavigationService>().navigatorKey,
     );
   }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }
