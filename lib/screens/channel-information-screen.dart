@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cryout_app/http/channel-resource.dart';
-import 'package:cryout_app/models/channel.dart';
+import 'package:cryout_app/models/safety-channel.dart';
 import 'package:cryout_app/screens/widgets/channel-about-widget.dart';
 import 'package:cryout_app/screens/widgets/channel-posts-widget.dart';
 import 'package:cryout_app/screens/widgets/channel-subscribers-widget.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/pub-sub.dart';
+import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:cryout_app/utils/widget-utils.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +40,7 @@ class _ChannelInformationScreenState extends State with SingleTickerProviderStat
 
   Translations _translations;
 
-  Channel _channel;
+  SafetyChannel _channel;
 
   _ChannelInformationScreenState(this._channelId);
 
@@ -119,7 +120,13 @@ class _ChannelInformationScreenState extends State with SingleTickerProviderStat
                   child: Icon(
                     Icons.edit,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    locator<NavigationService>().pushNamed(Routes.CHANNEL_POST_CREATION_SCREEN, arguments: _channel).then((value) {
+                      if (value != null && value) {
+                        EventManager.notify(Events.CHANNEL_POST_CREATED);
+                      }
+                    });
+                  },
                 )
               : null,
         ),
@@ -144,7 +151,7 @@ class _ChannelInformationScreenState extends State with SingleTickerProviderStat
 
     setState(() {
       _setUpComplete = true;
-      _channel = Channel.fromJSON(data);
+      _channel = SafetyChannel.fromJSON(data);
     });
   }
 
@@ -157,7 +164,7 @@ class _ChannelInformationScreenState extends State with SingleTickerProviderStat
           iconTheme: Theme.of(context).iconTheme,
           title: Text(
             _translations.text(_translations.text("screens.channel-screen.failed-to-load")),
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color:Theme.of(context).iconTheme.color),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).iconTheme.color),
           ),
           elevation: 1,
           brightness: Theme.of(context).brightness,

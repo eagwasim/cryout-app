@@ -19,7 +19,7 @@ class DistressResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return sendDistressCall(context, body);
+        return await sendDistressCall(context, body);
       }
     }
     return response;
@@ -35,7 +35,7 @@ class DistressResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return closeDistressCall(context, id);
+        return await closeDistressCall(context, id);
       }
     }
     return response;
@@ -50,7 +50,7 @@ class DistressResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return updateDistressSignalResponseStatus(context, id, data);
+        return await updateDistressSignalResponseStatus(context, id, data);
       }
     }
     return response;
@@ -65,7 +65,7 @@ class DistressResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return updateDistressSignalResponseStatus(context, id, data);
+        return await updateDistressSignalResponseStatus(context, id, data);
       }
     }
     return response;

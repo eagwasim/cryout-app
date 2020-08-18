@@ -19,7 +19,7 @@ class ChannelResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return createChannel(context, body);
+        return await createChannel(context, body);
       }
     }
 
@@ -35,7 +35,7 @@ class ChannelResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return getUserCreatedChannels(context, cursor);
+        return await getUserCreatedChannels(context, cursor);
       }
     }
 
@@ -52,7 +52,7 @@ class ChannelResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return getUserSubscribedChannels(context, cursor);
+        return await getUserSubscribedChannels(context, cursor);
       }
     }
     return response;
@@ -67,7 +67,7 @@ class ChannelResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return searchChannels(context, query);
+        return await searchChannels(context, query);
       }
     }
     return response;
@@ -82,7 +82,7 @@ class ChannelResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return getChannel(context, channelId);
+        return await getChannel(context, channelId);
       }
     }
     return response;
@@ -97,7 +97,7 @@ class ChannelResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return subscribeToChannel(context, channelId);
+        return await subscribeToChannel(context, channelId);
       }
     }
     return response;
@@ -112,22 +112,22 @@ class ChannelResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return subscribeToChannel(context, channelId);
+        return await subscribeToChannel(context, channelId);
       }
     }
     return response;
   }
 
-  static Future<Response> getChannelPosts(BuildContext context, int channelId) async {
+  static Future<Response> getChannelPosts(BuildContext context, int channelId, String cursor, int page, int limit) async {
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
     headers["Authorization"] = "Bearer " + token;
 
-    Response response = await get(BaseResource.BASE_URL + _RESOURCE_URL + "/$channelId/unsubscribe", headers: headers);
+    Response response = await get(BaseResource.BASE_URL + _RESOURCE_URL + "/$channelId/posts?cursor=$cursor&page=$page&limit=$limit", headers: headers);
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return getChannelPosts(context, channelId);
+        return await getChannelPosts(context, channelId, cursor, page, limit);
       }
     }
     return response;
@@ -142,11 +142,12 @@ class ChannelResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return getChannelPosts(context, channelId);
+        return await getChannelSubscribers(context, channelId, cursor, page, limit);
       }
     }
     return response;
   }
+
   static Future<Response> deleteChannel(BuildContext context, int channelId) async {
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
@@ -156,10 +157,24 @@ class ChannelResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return deleteChannel(context, channelId);
+        return await deleteChannel(context, channelId);
       }
     }
     return response;
   }
 
+  static Future<Response> publishPost(BuildContext context, int channelId, dynamic data) async {
+    String token = await SharedPreferenceUtil.getToken();
+    Map<String, String> headers = Map.from(BaseResource.HEADERS);
+    headers["Authorization"] = "Bearer " + token;
+
+    Response response = await post(BaseResource.BASE_URL + _RESOURCE_URL + "/$channelId/posts", body: jsonEncode(data), headers: headers);
+
+    if (response.statusCode == 401) {
+      if (await AccessResource.refreshToken(context)) {
+        return await publishPost(context, channelId, data);
+      }
+    }
+    return response;
+  }
 }

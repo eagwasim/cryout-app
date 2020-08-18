@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cryout_app/http/channel-resource.dart';
-import 'package:cryout_app/models/channel.dart';
+import 'package:cryout_app/models/safety-channel.dart';
 import 'package:cryout_app/models/user.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +12,7 @@ import 'package:http/http.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class ChannelSubscribersWidget extends StatefulWidget {
-  final Channel channel;
+  final SafetyChannel channel;
 
   const ChannelSubscribersWidget({Key key, this.channel}) : super(key: key);
 
@@ -23,7 +23,7 @@ class ChannelSubscribersWidget extends StatefulWidget {
 }
 
 class _ChannelSubscribersWidgetState extends State {
-  final Channel _channel;
+  final SafetyChannel _channel;
   List<User> _users = [];
   RefreshController _refreshController = RefreshController(initialRefresh: false);
   Translations _translations;
@@ -132,12 +132,15 @@ class _ChannelSubscribersWidgetState extends State {
       page++;
       _users.clear();
       _refreshController.refreshCompleted();
-      setState(() {
-        (data["data"] as List<dynamic>).forEach((element) {
-          print(element);
-          _users.add(User.fromJson(element));
+
+      try {
+        setState(() {
+          (data["data"] as List<dynamic>).forEach((element) {
+            print(element);
+            _users.add(User.fromJson(element));
+          });
         });
-      });
+      }catch(e){}
     } else {
       _refreshController.refreshFailed();
     }

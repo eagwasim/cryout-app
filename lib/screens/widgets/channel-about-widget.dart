@@ -1,5 +1,5 @@
 import 'package:cryout_app/http/channel-resource.dart';
-import 'package:cryout_app/models/channel.dart';
+import 'package:cryout_app/models/safety-channel.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/pub-sub.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,7 +10,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart';
 
 class ChannelAboutWidget extends StatefulWidget {
-  final Channel channel;
+  final SafetyChannel channel;
 
   const ChannelAboutWidget({Key key, this.channel}) : super(key: key);
 
@@ -21,7 +21,7 @@ class ChannelAboutWidget extends StatefulWidget {
 }
 
 class _ChannelAboutWidgetState extends State {
-  final Channel _channel;
+  final SafetyChannel _channel;
   bool _deleting = false;
 
   _ChannelAboutWidgetState(this._channel);

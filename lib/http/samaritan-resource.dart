@@ -20,7 +20,7 @@ class SamaritanResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return getUserReceivedDistressSignals(context, cursor);
+        return await getUserReceivedDistressSignals(context, cursor);
       }
     }
     return response;
@@ -35,7 +35,7 @@ class SamaritanResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return getUserReceivedDistressSignal(context, id);
+        return await getUserReceivedDistressSignal(context, id);
       }
     }
     return response;
@@ -50,7 +50,7 @@ class SamaritanResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return dismissDistressSignals(context, id);
+        return await dismissDistressSignals(context, id);
       }
     }
     return response;
@@ -66,7 +66,7 @@ class SamaritanResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return updateSamaritanMode(context, body);
+        return await updateSamaritanMode(context, body);
       }
     }
     return response;
@@ -82,7 +82,7 @@ class SamaritanResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return updateSamaritanMode(context, body);
+        return await updateSamaritanMode(context, body);
       }
     }
     return response;
@@ -97,7 +97,7 @@ class SamaritanResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return getUserReceivedSafeWalks(context, cursor);
+        return await getUserReceivedSafeWalks(context, cursor);
       }
     }
     return response;
@@ -112,7 +112,7 @@ class SamaritanResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return getUserReceivedSafeWalk(context, id);
+        return await getUserReceivedSafeWalk(context, id);
       }
     }
     return response;
@@ -127,7 +127,7 @@ class SamaritanResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return dismissDistressSignals(context, id);
+        return await dismissDistressSignals(context, id);
       }
     }
     return response;
@@ -142,7 +142,7 @@ class SamaritanResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return activeSafeWalksCount(context);
+        return await activeSafeWalksCount(context);
       }
     }
     return response;
@@ -157,7 +157,7 @@ class SamaritanResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return activeSafeWalksCount(context);
+        return await activeSafeWalksCount(context);
       }
     }
     return response;

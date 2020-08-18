@@ -1,4 +1,4 @@
-class Channel {
+class SafetyChannel {
   int id;
   String name;
   String description;
@@ -15,7 +15,7 @@ class Channel {
   String dateCreated;
   String dateModified;
 
-  Channel({
+  SafetyChannel({
     this.id,
     this.name,
     this.description,
@@ -51,8 +51,8 @@ class Channel {
     };
   }
 
-  static Channel fromJSON(dynamic json) {
-    return Channel(
+  static SafetyChannel fromJSON(dynamic json) {
+    return SafetyChannel(
         id: json["id"],
         name: json["name"],
         description: json["description"],

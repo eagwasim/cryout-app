@@ -20,7 +20,7 @@ class UserResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return updateUser(context, body);
+        return await updateUser(context, body);
       }
     }
     return response;
@@ -36,7 +36,7 @@ class UserResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return reportUser(context, body);
+        return await reportUser(context, body);
       }
     }
     return response;
@@ -52,7 +52,7 @@ class UserResource {
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return checkPhoneNumber(context, phoneNumber);
+        return await checkPhoneNumber(context, phoneNumber);
       }
     }
 

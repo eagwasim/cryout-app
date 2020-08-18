@@ -160,5 +160,7 @@
   "screens.channel.subscribed.empty": "You haven't subscribed to any channels",
   "screens.channel-screen.failed-to-load": "Failed to load",
   "screens.channel-screen.loading-failed": "We have failed to load the channel details",
-  "screens.channel-subscribers-screen.empty": "You have no subscribers"
+  "screens.channel-subscribers-screen.empty": "You have no subscribers",
+  "screens.channel-post.creation.title": "New Post",
+  "screens.channel-post.screen.empty": "No posts yet"
 }

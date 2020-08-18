@@ -24,6 +24,7 @@ class Routes {
   static const CHANNEL_CREATION_SCREEN = "/channel-creation-screen";
   static const CHANNEL_INFORMATION_SCREEN = "/channel-information-screen";
   static const CHANNEL_SEARCH_SCREEN = "/channel-search-screen";
+  static const CHANNEL_POST_CREATION_SCREEN = "/channel-post-creation-screen";
 
   static Future<String> initialRoute() async {
     User user = await SharedPreferenceUtil.currentUser();

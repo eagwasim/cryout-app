@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:cryout_app/http/channel-resource.dart';
-import 'package:cryout_app/models/channel.dart';
+import 'package:cryout_app/models/safety-channel.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:cryout_app/utils/widget-utils.dart';
@@ -10,7 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
 
 class ChannelPostCreationScreen extends StatefulWidget {
-  final Channel channel;
+  final SafetyChannel channel;
 
   const ChannelPostCreationScreen({Key key, this.channel}) : super(key: key);
 
@@ -25,7 +25,7 @@ class _ChannelPostCreationScreenState extends State {
 
   TextEditingController _titleController;
   TextEditingController _descriptionController;
-  final Channel _channel;
+  final SafetyChannel _channel;
 
   String _name = "";
   String _description = "";
@@ -57,7 +57,7 @@ class _ChannelPostCreationScreenState extends State {
           brightness: Theme.of(context).brightness,
           iconTheme: Theme.of(context).iconTheme,
           title: Text(
-            _translations.text("screens.channel.creation.title"),
+            _translations.text("screens.channel-post.creation.title"),
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).iconTheme.color),
           ),
         ),
@@ -72,7 +72,7 @@ class _ChannelPostCreationScreenState extends State {
                     maxLength: 30,
                     maxLengthEnforced: true,
                     decoration: InputDecoration(
-                      hintText: "Channel Name (minimum of 2 characters)",
+                      hintText: "Subject (minimum of 2 characters)",
                     ),
                     onChanged: (text) {
                       _name = text;
@@ -86,12 +86,12 @@ class _ChannelPostCreationScreenState extends State {
                     minLines: 5,
                     maxLines: 5,
                     enableInteractiveSelection: true,
-                    maxLength: 240,
+                    maxLength: 500,
                     maxLengthEnforced: true,
                     onChanged: (text) {
                       _description = text;
                     },
-                    decoration: InputDecoration(hintText: "Channel Description (minimum of 10 characters)", floatingLabelBehavior: FloatingLabelBehavior.always),
+                    decoration: InputDecoration(hintText: "What would you like to share? (minimum of 10 characters)", floatingLabelBehavior: FloatingLabelBehavior.always),
                   ),
                 ),
               ],
@@ -105,21 +105,20 @@ class _ChannelPostCreationScreenState extends State {
                   borderRadius: new BorderRadius.circular(25.0),
                 ),
                 child: Text(
-                  "Create Channel",
+                  "Publish post",
                   style: TextStyle(color: Colors.white),
                 ),
                 onPressed: () {
-                  _createChannel();
+                  _createChannelPost();
                 },
               ),
       ),
     );
   }
 
-  void _createChannel() async {
+  void _createChannelPost() async {
     String title = _name.trim();
     String description = _description.trim();
-    String visibility = "PUBLIC";
 
     if (title.isEmpty || title.length < 2 || description.trim().isEmpty || description.length < 10) {
       print("returning....");
@@ -130,16 +129,11 @@ class _ChannelPostCreationScreenState extends State {
       _processing = true;
     });
 
-    Response response = await ChannelResource.createChannel(context, {"name": title, "description": description, "visibility": visibility});
+    Response response = await ChannelResource.publishPost(context, _channel.id, {"title": title, "message": description});
 
     setState(() {
       _processing = false;
     });
-
-    if (response.statusCode == HttpStatus.conflict) {
-      WidgetUtils.showAlertDialog(context, "Duplicate", "You already have a channel named '" + title + "'");
-      return;
-    }
 
     if (response.statusCode != HttpStatus.created) {
       WidgetUtils.showAlertDialog(context, _translations.text("screens.common.error.general.title"), _translations.text("screens.common.error.general.message"));

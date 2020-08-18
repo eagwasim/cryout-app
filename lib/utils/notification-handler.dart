@@ -59,8 +59,21 @@ class NotificationHandler {
         _handleNewSafeWalkNotification(notificationData, isAppLaunch);
       } else if (notificationData['type'] == NOTIFICATION_TYPE_SAFE_WALK_CHANNEL_MESSAGE) {
         _handleSafeWalkChannelMessage(notificationData, isAppLaunch);
+      } else if (notificationData['type'] == NOTIFICATION_TYPE_SAFETY_CHANNEL_MESSAGE) {
+        _handleSafetyChannelNotification(notificationData, isAppLaunch);
       }
-    } catch (e) {
+    } catch (e) {}
+  }
+
+  static void _handleSafetyChannelNotification(dynamic data, bool isAppLaunch) {
+    var payload = {"route": Routes.CHANNEL_INFORMATION_SCREEN, "channelId": data["channelId"]};
+
+    if (!isAppLaunch && !_notificationChanelSubscription.containsKey(Routes.CHANNEL_INFORMATION_SCREEN + data["channelId"])) {
+      _showMessageNotification(data["title"], data["message"], payload);
+    } else {
+      if (isAppLaunch) {
+        _handleSafetyChannelMessageNotificationClick(payload);
+      }
     }
   }
 
@@ -258,6 +271,10 @@ class NotificationHandler {
     locator<NavigationService>().pushNamed(Routes.SAFE_WALK_WATCHER_SCREEN, arguments: {'safeWalkId': data["safeWalkID"], 'openMessages': true});
   }
 
+  static Future<void> _handleSafetyChannelMessageNotificationClick(dynamic data) async {
+    locator<NavigationService>().pushNamed(Routes.CHANNEL_INFORMATION_SCREEN, arguments: int.parse(data["channelId"]));
+  }
+
   static Future<void> _handleSafeWalkWalkerMessageNotificationClick(dynamic data) async {
     locator<NavigationService>().pushNamed(Routes.SAFE_WALK_WALKER_SCREEN);
   }
@@ -270,8 +287,7 @@ class NotificationHandler {
     locator<NavigationService>().pushNamed(Routes.RECEIVED_SAFE_WALK_LIST_SCREEN);
   }
 
-  static Future<void> _onDidReceiveLocalNotification(int id, String title, String body, String payload) async {
-  }
+  static Future<void> _onDidReceiveLocalNotification(int id, String title, String body, String payload) async {}
 
   static Future<void> _showGenericNotification(String title, String body) async {
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
@@ -357,7 +373,6 @@ class NotificationHandler {
       vibrationPattern: Int64List.fromList([0, 1000]),
       enableVibration: true,
       enableLights: true,
-
     );
     var iOSPlatformChannelSpecifics = IOSNotificationDetails(sound: '$DISTRESS_SIGNAL_ALERT_SOUND.m4r', presentSound: true, presentAlert: true);
     var platformChannelSpecifics = NotificationDetails(androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
@@ -393,4 +408,5 @@ class NotificationHandler {
   static const String NOTIFICATION_TYPE_ACCOUNT_BLOCKED = 'ACCOUNT_BLOCKED';
   static const String NOTIFICATION_TYPE_SAFE_WALK_START_NOTIFICATION = 'SAFE_WALK_START_NOTIFICATION';
   static const String NOTIFICATION_TYPE_SAFE_WALK_CHANNEL_MESSAGE = 'SAFE_WALK_CHANNEL_MESSAGE';
+  static const String NOTIFICATION_TYPE_SAFETY_CHANNEL_MESSAGE = 'SAFETY_CHANNEL_MESSAGE';
 }

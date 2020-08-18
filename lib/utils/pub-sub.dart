@@ -15,6 +15,7 @@ class Events {
   static const CHANNEL_SUBSCRIBED = "channel-subscribed";
   static const CHANNEL_UNSUBSCRIBED = "channel-unsubscribed";
   static const CHANNEL_DELETED = "channel-deleted";
+  static const CHANNEL_POST_CREATED = "channel-post-created";
 }
 
 class EventManager {

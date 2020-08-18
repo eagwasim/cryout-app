@@ -19,7 +19,7 @@ class SafeWalkResource{
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return sendSafeWalk(context, body);
+        return await sendSafeWalk(context, body);
       }
     }
     return response;
@@ -35,7 +35,7 @@ class SafeWalkResource{
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return closeSafeWalk(context, id);
+        return await closeSafeWalk(context, id);
       }
     }
     return response;
@@ -50,7 +50,7 @@ class SafeWalkResource{
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return updateSafeWalkSignalResponseStatus(context, id, data);
+        return await updateSafeWalkSignalResponseStatus(context, id, data);
       }
     }
     return response;
@@ -64,7 +64,7 @@ class SafeWalkResource{
 
     if (response.statusCode == 401) {
       if (await AccessResource.refreshToken(context)) {
-        return updateSafeWalkSignalResponseStatus(context, id, data);
+        return await updateSafeWalkSignalResponseStatus(context, id, data);
       }
     }
     return response;

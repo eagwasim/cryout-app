@@ -1,12 +1,13 @@
 import 'package:cryout_app/models/distress-signal.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
+import 'package:cryout_app/models/safety-channel.dart';
 import 'package:cryout_app/screens/base-screen.dart';
 import 'package:cryout_app/screens/channel-creation-screen.dart';
 import 'package:cryout_app/screens/channel-information-screen.dart';
+import 'package:cryout_app/screens/channel-post-creation-screen.dart';
 import 'package:cryout_app/screens/channel-search-screen.dart';
 import 'package:cryout_app/screens/distress-category-selection-screen.dart';
 import 'package:cryout_app/screens/emergency-contacts-management-screen.dart';
-import 'package:cryout_app/screens/home-screen.dart';
 import 'package:cryout_app/screens/introduction-screen.dart';
 import 'package:cryout_app/screens/phone-confirmation-firebase-screen.dart';
 import 'package:cryout_app/screens/phone-confirmation-screen.dart';
@@ -124,6 +125,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(builder: (context) => ChannelCreationScreen());
     case Routes.CHANNEL_SEARCH_SCREEN:
       return MaterialPageRoute(builder: (context) => ChannelSearchScreen());
+    case Routes.CHANNEL_POST_CREATION_SCREEN:
+      var argument = settings.arguments as SafetyChannel;
+      return MaterialPageRoute(builder: (context) => ChannelPostCreationScreen(channel: argument));
     default:
       return MaterialPageRoute(builder: (context) => SplashScreen());
   }
