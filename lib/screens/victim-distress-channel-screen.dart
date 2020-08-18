@@ -85,7 +85,7 @@ class _VictimDistressChannelScreenState extends State {
             child: Scaffold(
               backgroundColor: Theme.of(context).backgroundColor,
               appBar: AppBar(
-                backgroundColor: Colors.red,
+                backgroundColor: Theme.of(context).accentColor,
                 title: Text(_translations.text("choices.distress.categories.${_distressCall.details}")),
                 elevation: 4,
                 centerTitle: false,

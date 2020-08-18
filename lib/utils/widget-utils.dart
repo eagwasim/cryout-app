@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cryout_app/http/user-resource.dart';
 import 'package:cryout_app/models/chat-message.dart';
 import 'package:cryout_app/models/user.dart';
+import 'package:cryout_app/utils/colors.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:flutter/material.dart';
@@ -215,6 +216,7 @@ class WidgetUtils {
               alignment: Alignment.topLeft,
               nip: BubbleNip.leftBottom,
               color: Colors.grey[900],
+              elevation: 0,
               child: Container(
                 constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
                 child: Column(
@@ -269,6 +271,7 @@ class WidgetUtils {
               alignment: Alignment.topLeft,
               nip: BubbleNip.leftBottom,
               color: Colors.grey[900],
+              elevation: 0,
               child: Container(
                 constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
                 child: Column(
@@ -311,6 +314,7 @@ class WidgetUtils {
         alignment: Alignment.topRight,
         nip: BubbleNip.rightBottom,
         color: Colors.blue[600],
+        elevation: 0,
         child: Container(
           constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
           child: Column(
@@ -341,6 +345,7 @@ class WidgetUtils {
       padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
       child: Bubble(
         margin: BubbleEdges.only(top: 0),
+        elevation: 0,
         alignment: Alignment.topRight,
         nip: BubbleNip.rightBottom,
         color: Colors.blue[600],
@@ -556,7 +561,7 @@ class WidgetUtils {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter, // 10% of the width, so there are ten blinds.
-          colors: [ Colors.black, Colors.black, Colors.grey[900], Colors.grey[800]], // whitish to gray
+          colors: [Colors.black, Colors.black, Colors.grey[900], Colors.grey[800]], // whitish to gray
           tileMode: TileMode.clamp, // repeats the gradient over the canvas
         ),
       );
@@ -564,11 +569,19 @@ class WidgetUtils {
       return BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,// 10% of the width, so there are ten blinds.
-          colors: [ Colors.white, Colors.grey[200]], // whitish to gray
+          end: Alignment.bottomCenter, // 10% of the width, so there are ten blinds.
+          colors: [Colors.white, Colors.white, Colors.grey[200], Colors.grey[300]], // whitish to gray
           tileMode: TileMode.clamp, // repeats the gradient over the canvas
         ),
       );
+    }
+  }
+
+  static Color colorFromId(BuildContext context, int id) {
+    if (Theme.of(context).brightness == Brightness.dark) {
+      return darkColors[id % darkColors.length];
+    } else {
+      return brightColors[id % darkColors.length];
     }
   }
 }

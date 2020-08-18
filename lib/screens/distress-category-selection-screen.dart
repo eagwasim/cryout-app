@@ -56,7 +56,7 @@ class _DistressCategorySelectionScreenState extends State {
                 backgroundColor: Theme.of(context).backgroundColor,
                 elevation: 0,
                 brightness: Theme.of(context).brightness,
-                iconTheme: IconThemeData(color: Colors.grey[600]),
+                iconTheme: Theme.of(context).iconTheme,
                 centerTitle: false,
                 title: Text(
                   _translations.text("screens.distress-category-selection.whats-the-emergency"),

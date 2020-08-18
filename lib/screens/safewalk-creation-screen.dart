@@ -49,7 +49,7 @@ class _SafeWalkCreationScreenState extends State {
           iconTheme: Theme.of(context).iconTheme,
           title: Text(
             _translations.text("screens.safe-walk-creation.title"),
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.headline1.color),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).iconTheme.color),
           ),
           centerTitle: false,
           elevation: 0,

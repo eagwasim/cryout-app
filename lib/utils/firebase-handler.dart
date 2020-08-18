@@ -12,6 +12,7 @@ class FireBaseHandler {
   static const _SAMARITAN_TOPIC_PREFIX = "channels.samaritan.";
   static const _DISTRESS_CHANNEL_TOPIC_PREFIX = "channels.distress.";
   static const _SAFE_WALK_CHANNEL_TOPIC = "channels.safe-walk.";
+  static const _CHANNEL_TOPIC = "channels.";
 
   static const IOS_BANNER_AD_UNIT_ID = 'ca-app-pub-6773273500391344/5319146497';
   static const ANDROID_BANNER_AD_UNIT_ID = 'ca-app-pub-6773273500391344/2853244187';
@@ -44,7 +45,6 @@ class FireBaseHandler {
   static void configure() {
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
-
         NotificationHandler.handleInAppNotification(message, false);
       },
       onBackgroundMessage: myBackgroundMessageHandler,
@@ -52,7 +52,6 @@ class FireBaseHandler {
         NotificationHandler.handleInAppNotification(message, true);
       },
       onResume: (Map<String, dynamic> message) async {
-
         NotificationHandler.handleInAppNotification(message, true);
       },
     );
@@ -99,6 +98,16 @@ class FireBaseHandler {
     SharedPreferenceUtil.addToRegisteredTopic(_SAFE_WALK_CHANNEL_TOPIC + "$channelId");
   }
 
+  static void subscribeToChannel(String channelId) {
+    _firebaseMessaging.subscribeToTopic(_CHANNEL_TOPIC + "$channelId");
+    SharedPreferenceUtil.addToRegisteredTopic(_CHANNEL_TOPIC + "$channelId");
+  }
+
+  static void unsubscribeToChannel(String channelId) {
+    _firebaseMessaging.unsubscribeFromTopic(_CHANNEL_TOPIC + "$channelId");
+    SharedPreferenceUtil.removeFromTopicList(_CHANNEL_TOPIC + "$channelId");
+  }
+
   static void unSubscribeToSafeWalkChannelTopic(String channelId) {
     _firebaseMessaging.unsubscribeFromTopic(_SAFE_WALK_CHANNEL_TOPIC + "$channelId");
     SharedPreferenceUtil.removeFromTopicList(_SAFE_WALK_CHANNEL_TOPIC + "$channelId");
@@ -115,5 +124,4 @@ class FireBaseHandler {
       _firebaseMessaging.unsubscribeFromTopic(element);
     });
   }
-
 }

@@ -21,6 +21,9 @@ class Routes {
   static const SAFE_WALK_WATCHER_SCREEN = "/safe-walk-watcher-screen";
   static const RECEIVED_SAFE_WALK_LIST_SCREEN = "/received-safe-walk-list-screen";
   static const FIREBASE_SMS_CODE_CONFIRMATION_SCREEN = "/firebase-sms-code-confirmation-screen";
+  static const CHANNEL_CREATION_SCREEN = "/channel-creation-screen";
+  static const CHANNEL_INFORMATION_SCREEN = "/channel-information-screen";
+  static const CHANNEL_SEARCH_SCREEN = "/channel-search-screen";
 
   static Future<String> initialRoute() async {
     User user = await SharedPreferenceUtil.currentUser();

@@ -45,8 +45,12 @@ class _EmergencyContactsManagementScreenState extends State {
       _translations = Translations.of(context);
     }
 
-    _fullNameController = TextEditingController(text: _fullName);
-    _phoneNumberController = TextEditingController(text: _internationalizedPhoneNumber);
+    if (_fullNameController == null) {
+      _fullNameController = TextEditingController(text: _fullName);
+    }
+    if (_phoneNumberController == null) {
+      _phoneNumberController = TextEditingController(text: _internationalizedPhoneNumber);
+    }
 
     if (!_setUpComplete) {
       _setUp();
@@ -62,7 +66,7 @@ class _EmergencyContactsManagementScreenState extends State {
                 iconTheme: Theme.of(context).iconTheme,
                 title: Text(
                   _translations.text("screens.emergency-contacts.title"),
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.headline1.color),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).iconTheme.color),
                 ),
                 centerTitle: false,
                 elevation: 0,
@@ -79,58 +83,59 @@ class _EmergencyContactsManagementScreenState extends State {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Column(
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8, right: 8),
-                              child: TextField(
-                                decoration: new InputDecoration(
-                                  hintText: _translations.text("screens.emergency-contacts.full-name"),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8, right: 8),
+                                child: TextField(
+                                  decoration: new InputDecoration(
+                                    hintText: _translations.text("screens.emergency-contacts.full-name"),
+                                  ),
+                                  autofocus: false,
+                                  controller: _fullNameController,
+                                  keyboardType: TextInputType.text,
+                                  onChanged: (newValue) {
+                                    _fullName = newValue;
+                                  },
                                 ),
-                                autofocus: false,
-                                controller: _fullNameController,
-                                keyboardType: TextInputType.text,
-                                onChanged: (newValue) {
-                                  _fullName = newValue;
-                                },
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8, right: 8),
-                              child: TextField(
-                                decoration: new InputDecoration(
-                                  hintText: _translations.text("screens.emergency-contacts.phone-number"),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8, right: 8),
+                                child: TextField(
+                                  decoration: new InputDecoration(
+                                    hintText: _translations.text("screens.emergency-contacts.phone-number"),
+                                  ),
+                                  autofocus: false,
+                                  controller: _phoneNumberController,
+                                  keyboardType: TextInputType.phone,
+                                  onChanged: (newValue) {
+                                    _internationalizedPhoneNumber = newValue;
+                                  },
                                 ),
-                                autofocus: false,
-                                controller: _phoneNumberController,
-                                keyboardType: TextInputType.phone,
-                                onChanged: (newValue) {
-                                  _internationalizedPhoneNumber = newValue;
-                                },
                               ),
-                            ),
-                            _savingPhoneNumber
-                                ? Padding(
-                                    padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16, bottom: 16),
-                                    child: Center(
-                                      child: Container(
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 1,
+                              _savingPhoneNumber
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16, bottom: 16),
+                                      child: Center(
+                                        child: Container(
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 1,
+                                          ),
+                                          height: 20,
+                                          width: 20,
                                         ),
-                                        height: 20,
-                                        width: 20,
                                       ),
-                                    ),
-                                  )
-                                : Padding(
-                                    padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8),
-                                    child: Row(
-                                      children: <Widget>[
-                                        Expanded(
-                                          child: FlatButton.icon(
+                                    )
+                                  : Padding(
+                                      padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: <Widget>[
+                                          FlatButton.icon(
                                             onPressed: () async {
                                               cp.Contact contact = await _contactPicker.selectContact();
-
                                               if (contact != null) {
                                                 if (contact.phoneNumber.number.startsWith("+")) {
                                                   _internationalizedPhoneNumber = contact.phoneNumber.number;
@@ -145,14 +150,13 @@ class _EmergencyContactsManagementScreenState extends State {
                                             icon: Icon(
                                               Icons.contact_phone,
                                               color: Colors.grey,
+                                              size: 16,
                                             ),
                                             label: Text(
                                               _translations.text("screens.emergency-contacts.pick-from-contacts"),
                                             ),
                                           ),
-                                        ),
-                                        Expanded(
-                                          child: FlatButton.icon(
+                                          FlatButton.icon(
                                             onPressed: () async {
                                               _internationalizedPhoneNumber = await _formatPhoneNumber(_internationalizedPhoneNumber.replaceAll(new RegExp("[^\+0-9]"), ""));
 
@@ -170,6 +174,7 @@ class _EmergencyContactsManagementScreenState extends State {
                                             icon: Icon(
                                               Icons.save,
                                               color: Theme.of(context).accentColor,
+                                              size: 16,
                                             ),
                                             label: Text(
                                               _translations.text("screens.emergency-contacts.save-contact"),
@@ -178,16 +183,16 @@ class _EmergencyContactsManagementScreenState extends State {
                                               ),
                                             ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 16.0),
+                      padding: const EdgeInsets.only(left: 24.0, right: 16.0, top: 16.0, bottom: 16.0),
                       child: Text(
                         _translations.text("screens.emergency-contacts.error.contacts.title"),
                         style: Theme.of(context).textTheme.caption,
@@ -272,12 +277,24 @@ class _EmergencyContactsManagementScreenState extends State {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              emergencyContact.fullName,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0, right: 8, bottom: 4),
+              child: Text(
+                emergencyContact.fullName,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+              ),
             ),
-            Text(emergencyContact.phoneNumber),
-            Divider()
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0, right: 8, bottom: 8),
+              child: Text(
+                emergencyContact.phoneNumber,
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0, right: 8, bottom: 8),
+              child: Divider(),
+            )
           ],
         ),
       ),

@@ -129,7 +129,7 @@ class _SafeWalkWatcherScreenState extends State {
         key: _scaffoldKey,
         appBar: AppBar(
           title: Text(_receivedSafeWalk.userFirstName + " " + _receivedSafeWalk.userLastName),
-          backgroundColor: Colors.green[700],
+          backgroundColor: Colors.blueAccent,
           brightness: Brightness.dark,
           elevation: 1,
           actions: <Widget>[
@@ -171,33 +171,36 @@ class _SafeWalkWatcherScreenState extends State {
   }
 
   Widget _getRetryScreen() {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).backgroundColor,
-        iconTheme: Theme.of(context).iconTheme,
-        title: Text(
-          _translations.text(_translations.text("screens.samaritan-distress-channel-screen.failed-to-load")),
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.headline1.color),
+    return AnnotatedRegion(
+      value: WidgetUtils.updateSystemColors(context),
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).backgroundColor,
+          iconTheme: Theme.of(context).iconTheme,
+          title: Text(
+            _translations.text(_translations.text("screens.samaritan-distress-channel-screen.failed-to-load")),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).iconTheme.color),
+          ),
+          elevation: 1,
+          brightness: Theme.of(context).brightness,
         ),
-        elevation: 1,
-        brightness: Theme.of(context).brightness,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Text(_translations.text("screens.samaritan-distress-channel-screen.loading-failed")),
-            RaisedButton(
-              child: Text(_translations.text("screens.common.retry")),
-              onPressed: () {
-                setState(() {
-                  _setUpComplete = false;
-                  _loadingFailed = false;
-                });
-              },
-            )
-          ],
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Text(_translations.text("screens.samaritan-distress-channel-screen.loading-failed")),
+              RaisedButton(
+                child: Text(_translations.text("screens.common.retry")),
+                onPressed: () {
+                  setState(() {
+                    _setUpComplete = false;
+                    _loadingFailed = false;
+                  });
+                },
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -314,7 +317,7 @@ class _SafeWalkWatcherScreenState extends State {
                   iconTheme: Theme.of(context).iconTheme,
                   title: Text(
                     _translations.text("screens.common.messages"),
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.headline1.color),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).iconTheme.color),
                   ),
                   elevation: 0,
                   brightness: Theme.of(context).brightness,
@@ -335,9 +338,7 @@ class _SafeWalkWatcherScreenState extends State {
                     },
                   ),
                 ),
-                Divider(
-                  height: 1,
-                ),
+
                 Container(
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8.0, right: 8.0),

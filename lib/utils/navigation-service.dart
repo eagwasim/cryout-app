@@ -1,6 +1,9 @@
 import 'package:cryout_app/models/distress-signal.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
 import 'package:cryout_app/screens/base-screen.dart';
+import 'package:cryout_app/screens/channel-creation-screen.dart';
+import 'package:cryout_app/screens/channel-information-screen.dart';
+import 'package:cryout_app/screens/channel-search-screen.dart';
 import 'package:cryout_app/screens/distress-category-selection-screen.dart';
 import 'package:cryout_app/screens/emergency-contacts-management-screen.dart';
 import 'package:cryout_app/screens/home-screen.dart';
@@ -110,14 +113,17 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(builder: (context) => ReceivedSafeWalkListScreen());
     case Routes.SAFE_WALK_WATCHER_SCREEN:
       var argument = settings.arguments as dynamic;
-      return MaterialPageRoute(
-          builder: (context) => SafeWalkWatcherScreen(
-                safeWalkID: argument['safeWalkId'],
-                openMessages: argument['openMessages'],
-              ));
+      return MaterialPageRoute(builder: (context) => SafeWalkWatcherScreen(safeWalkID: argument['safeWalkId'], openMessages: argument['openMessages']));
     case Routes.FIREBASE_SMS_CODE_CONFIRMATION_SCREEN:
       var argument = settings.arguments as String;
       return MaterialPageRoute(builder: (context) => PhoneConfirmationFirebaseScreen(verificationId: argument));
+    case Routes.CHANNEL_INFORMATION_SCREEN:
+      var channelId = settings.arguments as int;
+      return MaterialPageRoute(builder: (context) => ChannelInformationScreen(channelId));
+    case Routes.CHANNEL_CREATION_SCREEN:
+      return MaterialPageRoute(builder: (context) => ChannelCreationScreen());
+    case Routes.CHANNEL_SEARCH_SCREEN:
+      return MaterialPageRoute(builder: (context) => ChannelSearchScreen());
     default:
       return MaterialPageRoute(builder: (context) => SplashScreen());
   }

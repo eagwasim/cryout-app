@@ -90,6 +90,7 @@ class _MyAppState<MyApp> extends State {
           ),
         ),
         iconTheme: IconThemeData(color: Colors.grey[800]),
+        tabBarTheme: TabBarTheme.of(context).copyWith(labelColor: Colors.black, unselectedLabelColor: Colors.grey),
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
@@ -100,6 +101,7 @@ class _MyAppState<MyApp> extends State {
           textTheme: ButtonTextTheme.primary,
           height: 40,
         ),
+        tabBarTheme: TabBarTheme.of(context).copyWith(labelColor: Colors.white, unselectedLabelColor: Colors.grey),
         cardColor: Colors.grey[900],
         // Define the default font family.
         fontFamily: 'Raleway',

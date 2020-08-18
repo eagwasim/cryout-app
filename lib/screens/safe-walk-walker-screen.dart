@@ -131,9 +131,6 @@ class _SafeWalkWalkerScreenState extends State {
                       },
                     ),
                   ),
-                  Divider(
-                    height: 1,
-                  ),
                   Container(
                     child: Padding(
                       padding: const EdgeInsets.only(left: 8.0, right: 8.0),

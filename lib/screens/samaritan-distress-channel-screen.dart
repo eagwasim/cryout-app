@@ -101,20 +101,20 @@ class _SamaritanDistressChannelScreenState extends State {
           title: Column(
             children: <Widget>[
               Text(
-                _translations.text("choices.distress.categories.${_receivedDistressSignal.detail}"),
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.headline1.color),
+                _receivedDistressSignal.firstName + " " + _receivedDistressSignal.lastName.substring(0, 1) + ".",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).iconTheme.color),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 4.0),
                 child: Text(
-                  _receivedDistressSignal.firstName + " " + _receivedDistressSignal.lastName.substring(0, 1) + ".",
+                    _translations.text("choices.distress.categories.${_receivedDistressSignal.detail}"),
                   style: TextStyle(fontSize: 10, color: Colors.grey),
                 ),
               )
             ],
             crossAxisAlignment: CrossAxisAlignment.start,
           ),
-          elevation: 1,
+          elevation: 0,
           brightness: Theme.of(context).brightness,
           actions: <Widget>[
             IconButton(
@@ -163,9 +163,7 @@ class _SamaritanDistressChannelScreenState extends State {
                 },
               ),
             ),
-            Divider(
-              height: 1,
-            ),
+
             Container(
               child: Padding(
                 padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 4),
@@ -179,6 +177,7 @@ class _SamaritanDistressChannelScreenState extends State {
                           maxLines: 4,
                           minLines: 1,
                           textInputAction: TextInputAction.newline,
+
                           decoration: new InputDecoration(
                             contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
                             enabledBorder: OutlineInputBorder(
@@ -201,7 +200,7 @@ class _SamaritanDistressChannelScreenState extends State {
                           ),
                           autofocus: false,
                           controller: _chatInputTextController,
-                          keyboardType: TextInputType.text,
+                          keyboardType: TextInputType.multiline,
                           style: TextStyle(fontSize: 15),
 
                           onChanged: (newValue) {
@@ -372,7 +371,7 @@ class _SamaritanDistressChannelScreenState extends State {
         iconTheme: Theme.of(context).iconTheme,
         title: Text(
           _translations.text(_translations.text("screens.samaritan-distress-channel-screen.failed-to-load")),
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.headline1.color),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).iconTheme.color),
         ),
         elevation: 1,
         brightness: Theme.of(context).brightness,

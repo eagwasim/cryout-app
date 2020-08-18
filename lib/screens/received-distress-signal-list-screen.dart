@@ -90,7 +90,7 @@ class _ReceivedDistressSignalListScreenState extends State {
                 elevation: 0,
                 centerTitle: false,
                 brightness: Theme.of(context).brightness,
-                title: Text(_translations.text("screens.distress.signals.title"), style: TextStyle(color: Theme.of(context).textTheme.headline1.color)),
+                title: Text(_translations.text("screens.distress.signals.title"), style: TextStyle(color: Theme.of(context).iconTheme.color)),
                 actions: <Widget>[
                   _isLoading
                       ? Center(
@@ -178,93 +178,86 @@ class _ReceivedDistressSignalListScreenState extends State {
 
   Widget _getDistressSignalNotificationView(ReceivedDistressSignal receivedDistressSignal, int index) {
     return Dismissible(
-      background: Row(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Icon(
-              Icons.close,
-              color: Colors.red,
-            ),
+      background: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Icon(
+            Icons.close,
+            color: Colors.red,
           ),
-          Expanded(
-            child: SizedBox.shrink(),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Icon(
-              Icons.close,
-              color: Colors.red,
-            ),
-          ),
-        ],
+        ),
       ),
       key: Key("${receivedDistressSignal.id}"),
       child: Padding(
-        padding: const EdgeInsets.only(left: 8.0, right: 8, bottom: 8),
-        child: Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: InkWell(
-              onTap: () {
-                _checkOutDistressSignal(receivedDistressSignal);
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(right: 8.0, left: 8.0, top: 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(30),
-                      child: CachedNetworkImage(
-                        fit: BoxFit.cover,
-                        imageUrl: receivedDistressSignal.photo == null ? "https://via.placeholder.com/44x44?text=|" : receivedDistressSignal.photo,
-                        fadeOutDuration: const Duration(seconds: 1),
-                        fadeInDuration: const Duration(seconds: 0),
-                        height: 40,
-                        width: 40,
-                      ),
+        padding: const EdgeInsets.only(left: 8.0, right: 4, bottom: 8),
+        child: InkWell(
+          onTap: () {
+            _checkOutDistressSignal(receivedDistressSignal);
+          },
+          child: Padding(
+            padding: const EdgeInsets.only(right: 8.0, left: 8.0, top:4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(left:8.0, right: 4),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(30),
+                    child: CachedNetworkImage(
+                      fit: BoxFit.cover,
+                      imageUrl: receivedDistressSignal.photo == null ? "https://via.placeholder.com/44x44?text=|" : receivedDistressSignal.photo,
+                      fadeOutDuration: const Duration(seconds: 1),
+                      fadeInDuration: const Duration(seconds: 0),
+                      height: 50,
+                      width: 50,
                     ),
-                    Expanded(
-                        child: Padding(
-                      padding: const EdgeInsets.only(right: 8.0, left: 4.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(right: 0.0, left: 8.0, top: 0, bottom: 4),
-                            child: Row(
-                              children: <Widget>[
-                                Expanded(child: Text(_translations.text("choices.distress.categories.${receivedDistressSignal.detail}"), style: TextStyle(fontSize: 18))),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
-                            child: Row(
-                              children: <Widget>[
-                                Expanded(
-                                    child: Text(
-                                  receivedDistressSignal.firstName + " " + receivedDistressSignal.lastName.substring(0, 1) + ".",
-                                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
-                                )),
-                                Text(
-                                  (receivedDistressSignal.dateCreated == null ? "" : timeago.format(DateTime.fromMillisecondsSinceEpoch(receivedDistressSignal.dateCreated), locale: 'en')) +
-                                      "  ·  " +
-                                      (receivedDistressSignal.distance == null ? "" : receivedDistressSignal.distance + "km"),
-                                  style: TextStyle(fontStyle: FontStyle.italic, fontSize: 10, color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    )),
-                  ],
+                  ),
                 ),
-              ),
-            )),
+                Expanded(
+                    child: Padding(
+                  padding: const EdgeInsets.only(right: 8.0, left: 4.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.only(right: 0.0, left: 8.0, top: 0, bottom: 4),
+                        child: Row(
+                          children: <Widget>[
+                            Expanded(
+                                child: Text(
+                                  receivedDistressSignal.firstName + " " + receivedDistressSignal.lastName.substring(0, 1) + ".",
+                                  style: TextStyle(fontSize: 16, fontWeight: receivedDistressSignal.status == 'ACTIVE' ? FontWeight.bold: FontWeight.normal),
+                                )),
+                            Text(
+                                  (receivedDistressSignal.distance == null ? "" : receivedDistressSignal.distance + "km"),
+                              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 10, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                        child: Row(
+                          children: <Widget>[
+                            Expanded(child: Text(_translations.text("choices.distress.categories.${receivedDistressSignal.detail}"), style: TextStyle(color: Colors.grey))),
+                            Text(
+                              (receivedDistressSignal.dateCreated == null ? "" : timeago.format(DateTime.fromMillisecondsSinceEpoch(receivedDistressSignal.dateCreated), locale: 'en')),
+                              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 10, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left:8.0, bottom: 8),
+                        child: Divider(),
+                      )
+                    ],
+                  ),
+                )),
+              ],
+            ),
+          ),
+        ),
       ),
       onDismissed: (direction) {
         _ignoreDistressSignal(index, receivedDistressSignal);

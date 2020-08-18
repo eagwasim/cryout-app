@@ -38,18 +38,27 @@ class DatabaseProvider {
         db.execute(
             "CREATE TABLE received_safe_walks (id INTEGER PRIMARY KEY, safeWalkId TEXT, userId TEXT, destination TEXT, userFirstName TEXT, userLastName TEXT, userPhoto TEXT, dateCreated INTEGER, opened INTEGER, userPhoneNumber TEXT, status TEXT);");
         db.execute("CREATE TABLE emergency_contacts (id INTEGER PRIMARY KEY, fullName TEXT, phoneNumber TEXT);");
+        db.execute("CREATE TABLE my_channels (id INTEGER PRIMARY KEY, name TEXT, description TEXT, dateCreated INTEGER, subscriberCount INTEGER)");
+        db.execute(
+            "CREATE TABLE subscribed_channels (id INTEGER PRIMARY KEY, name TEXT, description TEXT, dateCreated INTEGER, role TEXT, latestPostText TEXT, latestPostId INTEGER, subscriberCount INTEGER, readStatus TEXT)");
       },
 
       onUpgrade: (db, oldVersion, newVersion) {
-        if (newVersion == 2 && oldVersion == 1) {
+        if (oldVersion < 2) {
           db.execute("ALTER TABLE received_safe_walks ADD userPhoneNumber TEXT;");
           db.execute("ALTER TABLE received_safe_walks ADD status TEXT;");
           db.execute("ALTER TABLE received_distress_signals ADD status TEXT;");
         }
+
+        if (oldVersion < 3) {
+          db.execute("CREATE TABLE my_channels (id INTEGER PRIMARY KEY, name TEXT, description TEXT, dateCreated INTEGER, subscriberCount INTEGER)");
+          db.execute(
+              "CREATE TABLE subscribed_channels (id INTEGER PRIMARY KEY, name TEXT, description TEXT, dateCreated INTEGER, role TEXT, latestPostText TEXT, latestPostId INTEGER, subscriberCount INTEGER, readStatus TEXT)");
+        }
       },
       // Set the version. This executes the onCreate function and provides a
       // path to perform database upgrades and downgrades.
-      version: 2,
+      version: 3,
     );
   }
 }

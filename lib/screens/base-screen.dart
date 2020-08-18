@@ -1,3 +1,4 @@
+import 'package:cryout_app/screens/channels-screen.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -31,7 +32,7 @@ class _BaseScreenState extends State {
 
   final List<NavScreenHolder> _screens = [
     NavScreenHolder(HomeScreen(), "screens.base.nav.home", FontAwesomeIcons.userShield),
-    NavScreenHolder(Center(child: Text("Page Two"),), "screens.base.nav.channels", FontAwesomeIcons.rss),
+    NavScreenHolder(ChannelsScreen(), "screens.base.nav.channels", FontAwesomeIcons.rss),
   ];
 
   _BaseScreenState(this._selectedScreen);
@@ -46,21 +47,21 @@ class _BaseScreenState extends State {
       body: _screens.elementAt(_selectedScreen).screen,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          // color: Theme.of(context).bottomAppBarTheme.color,
           shape: BoxShape.rectangle,
-          border: Border(top: BorderSide(color: Colors.grey.withAlpha(100)))
+          border: Border(
+            top: BorderSide(width: .5, color: Colors.grey.withAlpha(50)),
+          ),
         ),
         child: SafeArea(
-          maintainBottomViewPadding: false,
-          bottom: false,
+          maintainBottomViewPadding: true,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
+            padding: const EdgeInsets.only(left: 16.0, right: 16, top: 8, bottom: 8),
             child: GNav(
                 gap: 16,
                 activeColor: Colors.white,
                 iconSize: 24,
                 padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                //duration: Duration(milliseconds: 400),
+                duration: Duration(milliseconds: 800),
                 tabBackgroundColor: Colors.grey[900],
                 tabs: _screens
                     .map(
@@ -69,9 +70,10 @@ class _BaseScreenState extends State {
                         text: _translations.text(e.title),
                         iconColor: Theme.of(context).iconTheme.color,
                       ),
-                    ).toList(),
+                    )
+                    .toList(),
                 selectedIndex: _selectedScreen,
-                onTabChange: (index) async{
+                onTabChange: (index) async {
                   setState(() {
                     _selectedScreen = index;
                   });

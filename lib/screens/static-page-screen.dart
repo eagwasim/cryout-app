@@ -41,7 +41,7 @@ class _StaticPageScreenState extends State {
             elevation: 1,
             backgroundColor: Theme.of(context).backgroundColor,
             iconTheme: Theme.of(context).iconTheme,
-            title: Text(webPageModel.title, style: TextStyle(color: Theme.of(context).textTheme.headline1.color)),
+            title: Text(webPageModel.title, style: TextStyle(color: Theme.of(context).iconTheme.color)),
           ),
           withZoom: true,
           withLocalStorage: true,
