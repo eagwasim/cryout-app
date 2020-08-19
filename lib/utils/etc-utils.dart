@@ -23,7 +23,15 @@ class EtcUtils {
       if (isNumeric(d)) {
         return int.parse(d);
       }
-      return DateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS").parse(d, true).toLocal().millisecondsSinceEpoch;
+      try {
+        return DateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS").parse(d, true).toLocal().millisecondsSinceEpoch;
+      } catch (e) {
+        try {
+          return DateFormat("yyyy-MM-dd'T'hh:mm:ss").parse(d, true).toLocal().millisecondsSinceEpoch;
+        } catch (e) {
+          return null;
+        }
+      }
     } else if (d is int) {
       return d;
     } else {

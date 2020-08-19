@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cryout_app/http/channel-resource.dart';
 import 'package:cryout_app/models/subscribed-channel.dart';
+import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/pub-sub.dart';
 import 'package:cryout_app/utils/routes.dart';
@@ -101,10 +102,12 @@ class _SubscribedChannelsState extends State with Subscriber {
       for (int i = 0; i < dataFromServer.length; i++) {
         await SubscribedChannelRepository.save(dataFromServer.elementAt(i));
       }
-
-      setState(() {
-        _subscribedChannels.addAll(dataFromServer);
-      });
+      try {
+        setState(() {
+          _subscribedChannels.addAll(dataFromServer);
+        });
+      } catch (e) {}
+      _updateChannelSubscriptions();
     }
   }
 
@@ -142,7 +145,7 @@ class _SubscribedChannelsState extends State with Subscriber {
     setState(() {
       _subscribedChannels.addAll(signalsFromServer);
     });
-
+    _updateChannelSubscriptions();
     _refreshController.refreshCompleted();
 
     return signalsFromServer;
@@ -200,7 +203,7 @@ class _SubscribedChannelsState extends State with Subscriber {
 
   Widget _getSubscribedChannelView(SubscribedChannel item, int position) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4.0, right: 4, bottom: 8),
+      padding: const EdgeInsets.only(left: 4.0, right: 4, bottom: 0, top: 8),
       child: InkWell(
         onTap: () {
           locator<NavigationService>().pushNamed(Routes.CHANNEL_INFORMATION_SCREEN, arguments: item.id).then((value) {
@@ -272,5 +275,11 @@ class _SubscribedChannelsState extends State with Subscriber {
   @override
   void notify(String event, {data}) {
     initialLoad();
+  }
+
+  Future<void> _updateChannelSubscriptions() async {
+    for (int index = 0; index < _subscribedChannels.length; index++) {
+      FireBaseHandler.subscribeToChannel(_subscribedChannels[index].id.toString());
+    }
   }
 }

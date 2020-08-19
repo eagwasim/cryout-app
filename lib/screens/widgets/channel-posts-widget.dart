@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -5,10 +6,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cryout_app/http/channel-resource.dart';
 import 'package:cryout_app/models/channel-post.dart';
 import 'package:cryout_app/models/safety-channel.dart';
+import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/pub-sub.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_native_admob/flutter_native_admob.dart';
+import 'package:flutter_native_admob/native_admob_controller.dart';
+import 'package:flutter_native_admob/native_admob_options.dart';
 import 'package:http/http.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -27,19 +32,22 @@ class ChannelPostsWidget extends StatefulWidget {
 class _ChannelPostsWidgetState extends State with Subscriber {
   final SafetyChannel _channel;
   Translations _translations;
+  NativeAdmobController _nativeAdController = NativeAdmobController();
+  StreamSubscription _subscription;
 
   _ChannelPostsWidgetState(this._channel);
 
   String cursor = "";
   int page = 0;
   int limit = 100;
-
+  double _addHeight = 0;
   List<ChannelPost> _channelPosts = [];
   RefreshController _refreshController = RefreshController(initialRefresh: false);
 
   @override
   void initState() {
     super.initState();
+    _subscription = _nativeAdController.stateChanged.listen(_onStateChanged);
     _initialLoad();
     EventManager.subscribe(Events.CHANNEL_POST_CREATED, this);
   }
@@ -47,6 +55,8 @@ class _ChannelPostsWidgetState extends State with Subscriber {
   @override
   void dispose() {
     super.dispose();
+    _subscription.cancel();
+    _nativeAdController.dispose();
     EventManager.unsubscribe(Events.CHANNEL_POST_CREATED, this);
   }
 
@@ -56,24 +66,70 @@ class _ChannelPostsWidgetState extends State with Subscriber {
       _translations = Translations.of(context);
     }
 
-    return SmartRefresher(
-      onLoading: _initialLoad,
-      onRefresh: _loadMore,
-      controller: _refreshController,
-      header: WaterDropHeader(
-        complete: Text(_translations.text("screens.common.refresh.is-refresh-completed")),
-        failed: Text(_translations.text("screens.common.refresh.is-refresh-failed")),
-        waterDropColor: Theme.of(context).accentColor,
-      ),
-      child: _channelPosts.length == 0
-          ? _getNoItemsView()
-          : ListView.builder(
-              itemCount: _channelPosts.length,
-              itemBuilder: (_, int position) {
-                final item = _channelPosts[position];
-                return _getItemView(item, position);
-              },
+    return Column(
+      children: [
+        Expanded(
+          child: SmartRefresher(
+            onLoading: _initialLoad,
+            onRefresh: _loadMore,
+            controller: _refreshController,
+            header: WaterDropHeader(
+              complete: Text(_translations.text("screens.common.refresh.is-refresh-completed")),
+              failed: Text(_translations.text("screens.common.refresh.is-refresh-failed")),
+              waterDropColor: Theme.of(context).accentColor,
             ),
+            child: _channelPosts.length == 0
+                ? _getNoItemsView()
+                : ListView.builder(
+                    itemCount: _channelPosts.length,
+                    itemBuilder: (_, int position) {
+                      final item = _channelPosts[position];
+                      return _getItemView(item, position);
+                    },
+                  ),
+          ),
+        ),
+        _channel.role == "ADMIN"
+            ? SizedBox.shrink()
+            : Column(
+                children: [
+                  Divider(),
+                  Container(
+                    height: _addHeight,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 0.0, bottom: 8, left: 4, right: 4),
+                      child: NativeAdmob(
+                        // Your ad unit id
+                        adUnitID: Platform.isIOS ? FireBaseHandler.IOS_NATIVE_AD_UNIT_ID : FireBaseHandler.ANDROID_NATIVE_AD_UNIT_ID,
+                        controller: _nativeAdController,
+                        type: NativeAdmobType.banner,
+                        options: NativeAdmobOptions(
+                          adLabelTextStyle: NativeTextStyle(
+                            color: Theme.of(context).textTheme.headline2.color,
+                          ),
+                          callToActionStyle: NativeTextStyle(
+                            backgroundColor: Theme.of(context).accentColor,
+                            color: Colors.white,
+                          ),
+                          headlineTextStyle: NativeTextStyle(
+                            color: Theme.of(context).textTheme.headline2.color,
+                          ),
+                          showMediaContent: true,
+                          bodyTextStyle: NativeTextStyle(
+                            color: Theme.of(context).textTheme.headline2.color,
+                          ),
+                          advertiserTextStyle: NativeTextStyle(
+                            color: Theme.of(context).textTheme.headline2.color,
+                          ),
+                        ),
+                        // Don't show loading widget when in loading state
+                        loading: Container(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+      ],
     );
   }
 
@@ -94,8 +150,10 @@ class _ChannelPostsWidgetState extends State with Subscriber {
   }
 
   void _initialLoad() async {
-    Response response = await ChannelResource.getChannelPosts(context, _channel.id, cursor, page, limit);
     page = 0;
+    cursor = "";
+    Response response = await ChannelResource.getChannelPosts(context, _channel.id, cursor, page, limit);
+
     if (response.statusCode == HttpStatus.ok) {
       dynamic data = jsonDecode(response.body)["data"];
       cursor = data["cursor"];
@@ -131,16 +189,15 @@ class _ChannelPostsWidgetState extends State with Subscriber {
 
   Widget _getItemView(ChannelPost item, int position) {
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Card(
-          child: Column(
+      padding: const EdgeInsets.only(left: 8, right: 8),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.only(left: 8.0, right: 4, top: 16),
+                padding: const EdgeInsets.only(left: 8.0, right: 4, top: 4),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(30),
                   child: CachedNetworkImage(
@@ -158,7 +215,7 @@ class _ChannelPostsWidgetState extends State with Subscriber {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(top: 16.0, left: 8, right: 8),
+                      padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
                       child: Text(
                         item.creatorName,
                         textAlign: TextAlign.start,
@@ -171,25 +228,34 @@ class _ChannelPostsWidgetState extends State with Subscriber {
                         item.dateCreated == null ? "" : timeago.format(DateTime.fromMillisecondsSinceEpoch(item.dateCreated), locale: 'en'),
                         style: TextStyle(fontStyle: FontStyle.italic, fontSize: 10, color: Colors.grey),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
             ],
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 8),
             child: Text(
               item.title,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(bottom: 16.0, left: 8, right: 8),
-            child: Text(item.message),
+            padding: const EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 8),
+            child: Text(item.message, style: TextStyle(fontSize: 15, fontWeight: FontWeight.normal)),
           ),
+          Padding(
+            padding: const EdgeInsets.only(
+              left: 8,
+              right: 8,
+            ),
+            child: Divider(
+              color: Colors.grey.withAlpha(150),
+            ),
+          )
         ],
-      )),
+      ),
     );
   }
 
@@ -201,5 +267,24 @@ class _ChannelPostsWidgetState extends State with Subscriber {
   @override
   void notify(String event, {data}) {
     _initialLoad();
+  }
+
+  void _onStateChanged(AdLoadState state) {
+    switch (state) {
+      case AdLoadState.loading:
+        setState(() {
+          _addHeight = 0;
+        });
+        break;
+
+      case AdLoadState.loadCompleted:
+        setState(() {
+          _addHeight = 85;
+        });
+        break;
+
+      default:
+        break;
+    }
   }
 }

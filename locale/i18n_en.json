@@ -52,7 +52,7 @@
   "screens.name-update.hints.gender.male": "Male",
   "screens.name-update.hints.gender.female": "Female",
   "screens.name-update.hints.gender.non_binary": "Non Binary",
-  "screens.name-update.message": "Updating these info later is currently not possible",
+  "screens.name-update.message": "Updating this info later is currently not possible",
   "screens.profile-photo-update.subtitle": "Click to update your profile picture",
   "screens.profile-photo-update.title": "Upload photo",
   "screens.profile-photo-update.processing": "Completing profile update...",

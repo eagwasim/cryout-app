@@ -45,7 +45,7 @@ class _ChannelsScreenState extends State with SingleTickerProviderStateMixin, Ch
             backgroundColor: Theme.of(context).backgroundColor,
             brightness: Theme.of(context).brightness,
             iconTheme: Theme.of(context).iconTheme,
-            elevation: 0,
+            elevation: 4,
             centerTitle: false,
             title: Text(
               "Safety Channels",

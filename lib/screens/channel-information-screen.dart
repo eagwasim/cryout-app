@@ -88,7 +88,7 @@ class _ChannelInformationScreenState extends State with SingleTickerProviderStat
           backgroundColor: Theme.of(context).backgroundColor,
           appBar: AppBar(
             backgroundColor: WidgetUtils.colorFromId(context, _channelId),
-            elevation: 0,
+            elevation: 4,
             brightness: Theme.of(context).brightness,
             iconTheme: Theme.of(context).iconTheme,
             title: Text(

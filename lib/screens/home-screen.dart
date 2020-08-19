@@ -510,12 +510,12 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
 
     DistressSignal distressCall = await SharedPreferenceUtil.getCurrentDistressCall();
     SafeWalk safeWalk = await SharedPreferenceUtil.getCurrentSafeWalk();
-
-    setState(() {
-      _currentDistressCall = distressCall;
-      _safeWalk = safeWalk;
-    });
-
+    try {
+      setState(() {
+        _currentDistressCall = distressCall;
+        _safeWalk = safeWalk;
+      });
+    } catch (e) {}
     if (_userPreferenceDatabaseReference == null) {
       _userPreferenceDatabaseReference = database.reference().child('users').reference().child("${_user.id}").reference().child("preferences").reference();
       _userPreferenceDatabaseReference.keepSynced(true);
@@ -657,18 +657,6 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
                       ),
                     )),
                   ],
-                ),
-                Divider(),
-                FlatButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  icon: Icon(
-                    FontAwesomeIcons.user,
-                    size: 14,
-                  ),
-                  label: Text("Profile"),
-                  padding: EdgeInsets.all(4),
                 ),
                 Divider(),
                 FlatButton.icon(

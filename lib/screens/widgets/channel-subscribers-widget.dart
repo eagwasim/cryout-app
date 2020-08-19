@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -5,9 +6,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cryout_app/http/channel-resource.dart';
 import 'package:cryout_app/models/safety-channel.dart';
 import 'package:cryout_app/models/user.dart';
+import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_native_admob/flutter_native_admob.dart';
+import 'package:flutter_native_admob/native_admob_controller.dart';
+import 'package:flutter_native_admob/native_admob_options.dart';
 import 'package:http/http.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -27,13 +32,25 @@ class _ChannelSubscribersWidgetState extends State {
   List<User> _users = [];
   RefreshController _refreshController = RefreshController(initialRefresh: false);
   Translations _translations;
+  double _addHeight = 0;
+
+  NativeAdmobController _nativeAdController = NativeAdmobController();
+  StreamSubscription _subscription;
 
   _ChannelSubscribersWidgetState(this._channel);
 
   @override
   void initState() {
     super.initState();
+    _subscription = _nativeAdController.stateChanged.listen(_onStateChanged);
     _initialLoad();
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    _nativeAdController.dispose();
+    super.dispose();
   }
 
   @override
@@ -42,24 +59,68 @@ class _ChannelSubscribersWidgetState extends State {
       _translations = Translations.of(context);
     }
 
-    return SmartRefresher(
-      onLoading: _initialLoad,
-      onRefresh: _loadMore,
-      controller: _refreshController,
-      header: WaterDropHeader(
-        complete: Text(_translations.text("screens.common.refresh.is-refresh-completed")),
-        failed: Text(_translations.text("screens.common.refresh.is-refresh-failed")),
-        waterDropColor: Theme.of(context).accentColor,
-      ),
-      child: _users.length == 0
-          ? _getNoItemsView()
-          : ListView.builder(
-              itemCount: _users.length,
-              itemBuilder: (_, int position) {
-                final item = _users[position];
-                return _getUserView(item, position);
-              },
+    return Column(
+      children: [
+        Expanded(
+          child: SmartRefresher(
+            onLoading: _initialLoad,
+            onRefresh: _loadMore,
+            controller: _refreshController,
+            header: WaterDropHeader(
+              complete: Text(_translations.text("screens.common.refresh.is-refresh-completed")),
+              failed: Text(_translations.text("screens.common.refresh.is-refresh-failed")),
+              waterDropColor: Theme.of(context).accentColor,
             ),
+            child: _users.length == 0
+                ? _getNoItemsView()
+                : ListView.builder(
+                    itemCount: _users.length,
+                    itemBuilder: (_, int position) {
+                      final item = _users[position];
+                      return _getUserView(item, position);
+                    },
+                  ),
+          ),
+        ),
+        Column(
+          children: [
+            Divider(),
+            Container(
+              height: _addHeight,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 0.0, bottom: 8, left: 4, right: 4),
+                child: NativeAdmob(
+                  // Your ad unit id
+                  adUnitID: Platform.isIOS ? FireBaseHandler.IOS_NATIVE_AD_UNIT_ID : FireBaseHandler.ANDROID_NATIVE_AD_UNIT_ID,
+                  controller: _nativeAdController,
+                  type: NativeAdmobType.banner,
+                  options: NativeAdmobOptions(
+                    adLabelTextStyle: NativeTextStyle(
+                      color: Theme.of(context).textTheme.headline2.color,
+                    ),
+                    callToActionStyle: NativeTextStyle(
+                      backgroundColor: Theme.of(context).accentColor,
+                      color: Colors.white,
+                    ),
+                    headlineTextStyle: NativeTextStyle(
+                      color: Theme.of(context).textTheme.headline2.color,
+                    ),
+                    showMediaContent: true,
+                    bodyTextStyle: NativeTextStyle(
+                      color: Theme.of(context).textTheme.headline2.color,
+                    ),
+                    advertiserTextStyle: NativeTextStyle(
+                      color: Theme.of(context).textTheme.headline2.color,
+                    ),
+                  ),
+                  // Don't show loading widget when in loading state
+                  loading: Container(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -70,12 +131,12 @@ class _ChannelSubscribersWidgetState extends State {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left:8.0, right: 4),
+            padding: const EdgeInsets.only(left: 8.0, right: 4),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(30),
               child: CachedNetworkImage(
                 fit: BoxFit.cover,
-                imageUrl: item.profilePhoto == null ? "https://via.placeholder.com/44x44?text=|" : item.profilePhoto ,
+                imageUrl: item.profilePhoto == null ? "https://via.placeholder.com/44x44?text=|" : item.profilePhoto,
                 fadeOutDuration: const Duration(seconds: 1),
                 fadeInDuration: const Duration(seconds: 0),
                 height: 40,
@@ -88,11 +149,15 @@ class _ChannelSubscribersWidgetState extends State {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top:20.0, left: 8, right: 8),
-                  child: Text(item.fullName(), textAlign: TextAlign.start, style: TextStyle(fontSize: 16),),
+                  padding: const EdgeInsets.only(top: 20.0, left: 8, right: 8),
+                  child: Text(
+                    item.fullName(),
+                    textAlign: TextAlign.start,
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top:8.0, left: 8, right: 8),
+                  padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
                   child: Divider(),
                 )
               ],
@@ -124,8 +189,10 @@ class _ChannelSubscribersWidgetState extends State {
   int limit = 100;
 
   void _initialLoad() async {
-    Response response = await ChannelResource.getChannelSubscribers(context, _channel.id, cursor, page, limit);
     page = 0;
+    cursor = "";
+    Response response = await ChannelResource.getChannelSubscribers(context, _channel.id, cursor, page, limit);
+
     if (response.statusCode == HttpStatus.ok) {
       dynamic data = jsonDecode(response.body)["data"];
       cursor = data["cursor"];
@@ -140,7 +207,7 @@ class _ChannelSubscribersWidgetState extends State {
             _users.add(User.fromJson(element));
           });
         });
-      }catch(e){}
+      } catch (e) {}
     } else {
       _refreshController.refreshFailed();
     }
@@ -161,6 +228,25 @@ class _ChannelSubscribersWidgetState extends State {
       });
     } else {
       _refreshController.refreshFailed();
+    }
+  }
+
+  void _onStateChanged(AdLoadState state) {
+    switch (state) {
+      case AdLoadState.loading:
+        setState(() {
+          _addHeight = 0;
+        });
+        break;
+
+      case AdLoadState.loadCompleted:
+        setState(() {
+          _addHeight = 85;
+        });
+        break;
+
+      default:
+        break;
     }
   }
 }

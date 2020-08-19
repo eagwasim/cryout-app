@@ -54,7 +54,7 @@ class _DistressCategorySelectionScreenState extends State {
               backgroundColor: Theme.of(context).backgroundColor,
               appBar: AppBar(
                 backgroundColor: Theme.of(context).backgroundColor,
-                elevation: 0,
+                elevation: 4,
                 brightness: Theme.of(context).brightness,
                 iconTheme: Theme.of(context).iconTheme,
                 centerTitle: false,

@@ -87,7 +87,7 @@ class _ReceivedDistressSignalListScreenState extends State {
               appBar: AppBar(
                 backgroundColor: Theme.of(context).backgroundColor,
                 iconTheme: Theme.of(context).iconTheme,
-                elevation: 0,
+                elevation: 4,
                 centerTitle: false,
                 brightness: Theme.of(context).brightness,
                 title: Text(_translations.text("screens.distress.signals.title"), style: TextStyle(color: Theme.of(context).iconTheme.color)),
@@ -128,47 +128,44 @@ class _ReceivedDistressSignalListScreenState extends State {
                             ),
                     ),
                   ),
-                  Container(
-                    height: _addHeight,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                  Column(
+
+                    children: [
+                      Divider(),
+                      Container(
+                        height: _addHeight,
                         child: Padding(
-                          padding: const EdgeInsets.only(top: 0, bottom: 4, left: 8.0, right: 8),
+                          padding: const EdgeInsets.only(top:0.0, bottom: 8, left: 4, right: 4),
                           child: NativeAdmob(
                             // Your ad unit id
                             adUnitID: Platform.isIOS ? FireBaseHandler.IOS_NATIVE_AD_UNIT_ID : FireBaseHandler.ANDROID_NATIVE_AD_UNIT_ID,
                             controller: _nativeAdController,
                             type: NativeAdmobType.banner,
                             options: NativeAdmobOptions(
-                                adLabelTextStyle: NativeTextStyle(
-                                  color: Theme.of(context).textTheme.headline2.color,
-                                ),
-                                callToActionStyle: NativeTextStyle(
-                                  backgroundColor: Theme.of(context).accentColor,
-                                  color: Theme.of(context).textTheme.button.color,
-                                ),
-                                headlineTextStyle: NativeTextStyle(
-                                  color: Theme.of(context).textTheme.headline2.color,
-                                  fontSize: Theme.of(context).textTheme.headline2.fontSize,
-                                ),
-                                showMediaContent: true,
-                                bodyTextStyle: NativeTextStyle(
-                                  color: Theme.of(context).textTheme.headline2.color,
-                                  fontSize: Theme.of(context).textTheme.bodyText1.fontSize,
-                                ),
-                                advertiserTextStyle: NativeTextStyle(
-                                  color: Theme.of(context).textTheme.headline2.color,
-                                )),
+                              adLabelTextStyle: NativeTextStyle(
+                                color: Theme.of(context).textTheme.headline2.color,
+                              ),
+                              callToActionStyle: NativeTextStyle(
+                                backgroundColor: Theme.of(context).accentColor,
+                                color: Colors.white,
+                              ),
+                              headlineTextStyle: NativeTextStyle(
+                                color: Theme.of(context).textTheme.headline2.color,
+                              ),
+                              showMediaContent: true,
+                              bodyTextStyle: NativeTextStyle(
+                                color: Theme.of(context).textTheme.headline2.color,
+                              ),
+                              advertiserTextStyle: NativeTextStyle(
+                                color: Theme.of(context).textTheme.headline2.color,
+                              ),
+                            ),
                             // Don't show loading widget when in loading state
                             loading: Container(),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
@@ -189,7 +186,7 @@ class _ReceivedDistressSignalListScreenState extends State {
       ),
       key: Key("${receivedDistressSignal.id}"),
       child: Padding(
-        padding: const EdgeInsets.only(left: 8.0, right: 4, bottom: 8),
+        padding: const EdgeInsets.only(left: 8.0, right: 4, bottom: 0, top: 8),
         child: InkWell(
           onTap: () {
             _checkOutDistressSignal(receivedDistressSignal);
@@ -362,7 +359,7 @@ class _ReceivedDistressSignalListScreenState extends State {
 
       case AdLoadState.loadCompleted:
         setState(() {
-          _addHeight = 100;
+          _addHeight = 85;
         });
         break;
 

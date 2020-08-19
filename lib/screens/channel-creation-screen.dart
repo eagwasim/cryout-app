@@ -47,6 +47,7 @@ class _ChannelCreationScreenState extends State {
         appBar: AppBar(
           backgroundColor: Theme.of(context).backgroundColor,
           elevation: 0,
+          centerTitle: false,
           brightness: Theme.of(context).brightness,
           iconTheme: Theme.of(context).iconTheme,
           title: Text(

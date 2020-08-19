@@ -47,7 +47,8 @@ class _ChannelSearchScreenState extends State {
         backgroundColor: Theme.of(context).backgroundColor,
         appBar: AppBar(
           backgroundColor: Theme.of(context).backgroundColor,
-          elevation: 0,
+          elevation: 4,
+          centerTitle: false,
           brightness: Theme.of(context).brightness,
           iconTheme: Theme.of(context).iconTheme,
           title: Row(
@@ -129,7 +130,7 @@ class _ChannelSearchScreenState extends State {
 
   Widget _getSearchView(SearchChannel channel, int position) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4.0, right: 4, bottom: 8),
+      padding: const EdgeInsets.only(left: 4.0, right: 4, bottom: 0, top: 8),
       child: InkWell(
         onTap: () {
           locator<NavigationService>().pushNamed(Routes.CHANNEL_INFORMATION_SCREEN, arguments: channel.id).then((value) {
@@ -162,15 +163,6 @@ class _ChannelSearchScreenState extends State {
                       child: Row(
                         children: <Widget>[
                           Expanded(child: Text(channel.name.titleCapitalize(), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 16))),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: Text(
-                              channel.id.toString(),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                              style: TextStyle(color: Colors.grey, fontSize: 10),
-                            ),
-                          )
                         ],
                       ),
                     ),

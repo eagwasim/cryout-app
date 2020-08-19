@@ -131,7 +131,7 @@ class _SafeWalkWatcherScreenState extends State {
           title: Text(_receivedSafeWalk.userFirstName + " " + _receivedSafeWalk.userLastName),
           backgroundColor: Colors.blueAccent,
           brightness: Brightness.dark,
-          elevation: 1,
+          elevation: 4,
           actions: <Widget>[
             IconButton(
               icon: Icon(Icons.error_outline),

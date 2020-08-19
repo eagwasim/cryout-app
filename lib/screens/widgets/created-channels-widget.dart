@@ -206,7 +206,7 @@ class _CreatedChannelsState extends State with Subscriber {
 
   Widget _getMyChannelView(MyChannel item, int position) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4.0, right: 4, bottom: 8),
+      padding: const EdgeInsets.only(left: 4.0, right: 4, bottom: 0, top: 8),
       child: InkWell(
         onTap: () {
           locator<NavigationService>().pushNamed(Routes.CHANNEL_INFORMATION_SCREEN, arguments: item.id).then((value) {
