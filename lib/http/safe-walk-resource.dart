@@ -6,10 +6,14 @@ import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
 
-class SafeWalkResource{
+class SafeWalkResource {
   static const String _SAFE_WALK_BASE_ENDPOINT = "/api/v1/safe/walk";
 
   static Future<Response> sendSafeWalk(BuildContext context, Map<String, dynamic> body) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
 
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
@@ -26,6 +30,10 @@ class SafeWalkResource{
   }
 
   static Future<Response> closeSafeWalk(BuildContext context, int id) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
 
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
@@ -42,6 +50,10 @@ class SafeWalkResource{
   }
 
   static Future<Response> updateSafeWalkSignalResponseStatus(BuildContext context, String id, dynamic data) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
 
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
@@ -57,6 +69,10 @@ class SafeWalkResource{
   }
 
   static Future<Response> notifySafeWalkChannelOfMessage(BuildContext context, String id, dynamic data) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
     headers["Authorization"] = "Bearer " + token;
@@ -69,6 +85,4 @@ class SafeWalkResource{
     }
     return response;
   }
-
-
 }

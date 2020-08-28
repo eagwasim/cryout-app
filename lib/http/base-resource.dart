@@ -1,3 +1,5 @@
+import 'package:connectivity/connectivity.dart';
+
 class BaseResource {
   static const Map<String, String> HEADERS = {"Content-type": "application/json"};
 
@@ -8,4 +10,9 @@ class BaseResource {
   static const int STATUS_CONFLICT = 409;
   static const int STATUS_BAD_REQUEST = 400;
   static const int STATUS_SERVICE_UNAVAILABLE = 503;
+
+  static Future<bool> isConnected() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    return connectivityResult != ConnectivityResult.none;
+  }
 }

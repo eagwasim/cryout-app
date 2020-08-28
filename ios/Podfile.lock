@@ -6,6 +6,13 @@ PODS:
   - CocoaLumberjack (3.6.1):
     - CocoaLumberjack/Core (= 3.6.1)
   - CocoaLumberjack/Core (3.6.1)
+  - connectivity (0.0.1):
+    - Flutter
+    - Reachability
+  - connectivity_for_web (0.1.0):
+    - Flutter
+  - connectivity_macos (0.0.1):
+    - Flutter
   - contact_picker (0.0.1):
     - Flutter
   - Firebase/Analytics (6.27.0):
@@ -182,6 +189,7 @@ PODS:
   - PromisesObjC (1.2.9)
   - Protobuf (3.12.0)
   - PureLayout (3.1.6)
+  - Reachability (3.2)
   - shared_preferences (0.0.1):
     - Flutter
   - shared_preferences_macos (0.0.1):
@@ -202,6 +210,9 @@ PODS:
 DEPENDENCIES:
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
   - battery (from `.symlinks/plugins/battery/ios`)
+  - connectivity (from `.symlinks/plugins/connectivity/ios`)
+  - connectivity_for_web (from `.symlinks/plugins/connectivity_for_web/ios`)
+  - connectivity_macos (from `.symlinks/plugins/connectivity_macos/ios`)
   - contact_picker (from `.symlinks/plugins/contact_picker/ios`)
   - Firebase/Analytics
   - Firebase/Messaging
@@ -263,6 +274,7 @@ SPEC REPOS:
     - PromisesObjC
     - Protobuf
     - PureLayout
+    - Reachability
     - TOCropViewController
 
 EXTERNAL SOURCES:
@@ -270,6 +282,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/background_fetch/ios"
   battery:
     :path: ".symlinks/plugins/battery/ios"
+  connectivity:
+    :path: ".symlinks/plugins/connectivity/ios"
+  connectivity_for_web:
+    :path: ".symlinks/plugins/connectivity_for_web/ios"
+  connectivity_macos:
+    :path: ".symlinks/plugins/connectivity_macos/ios"
   contact_picker:
     :path: ".symlinks/plugins/contact_picker/ios"
   firebase_auth:
@@ -337,6 +355,9 @@ SPEC CHECKSUMS:
   background_fetch: 9221ccc02b41aff8a52b2090d9f791c5ed82eaee
   battery: 6b19dafdbba590f03b1f0cd2f1224e3ffedadbe6
   CocoaLumberjack: b17ae15142558d08bbacf69775fa10c4abbebcc9
+  connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
+  connectivity_for_web: 2b8584556930d4bd490d82b836bcf45067ce345b
+  connectivity_macos: e2e9731b6b22dda39eb1b128f6969d574460e191
   contact_picker: 57db5d8b410b52a0457d88f7b15de7d3307e8f16
   Firebase: fc4cbf6f1592636431821ef9a3c557e4dfd9f268
   firebase_auth: af8784c4d8d87c36f730a305f97bfbcb24db024b
@@ -385,6 +406,7 @@ SPEC CHECKSUMS:
   PromisesObjC: b48e0338dbbac2207e611750777895f7a5811b75
   Protobuf: 2793fcd0622a00b546c60e7cbbcc493e043e9bb9
   PureLayout: bd3c4ec3a3819ad387c99ebb72c6b129c3ed4d2d
+  Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   shared_preferences_macos: f3f29b71ccbb56bf40c9dd6396c9acf15e214087
   shared_preferences_web: 141cce0c3ed1a1c5bf2a0e44f52d31eeb66e5ea9

@@ -136,14 +136,19 @@ class _EmergencyContactsManagementScreenState extends State {
                                           FlatButton.icon(
                                             onPressed: () async {
                                               cp.Contact contact = await _contactPicker.selectContact();
+
                                               if (contact != null) {
                                                 if (contact.phoneNumber.number.startsWith("+")) {
                                                   _internationalizedPhoneNumber = contact.phoneNumber.number;
                                                 } else {
                                                   _internationalizedPhoneNumber = await _formatPhoneNumber(contact.phoneNumber.number);
                                                 }
+
+                                                _fullName = contact.fullName;
+                                                _fullNameController.text = _fullName;
+                                                _phoneNumberController.text = _internationalizedPhoneNumber;
+
                                                 setState(() {
-                                                  _fullName = contact.fullName;
                                                 });
                                               }
                                             },
@@ -344,10 +349,11 @@ class _EmergencyContactsManagementScreenState extends State {
 
     await EmergencyContactRepository.save(emergencyContact);
     setState(() {
-      //_emergencyContacts.insert(0, emergencyContact);
       _savingPhoneNumber = false;
       _fullName = "";
       _internationalizedPhoneNumber = "";
+      _fullNameController.text = _fullName;
+      _phoneNumberController.text = _internationalizedPhoneNumber;
     });
   }
 

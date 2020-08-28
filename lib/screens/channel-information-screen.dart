@@ -10,6 +10,7 @@ import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/pub-sub.dart';
 import 'package:cryout_app/utils/routes.dart';
+import 'package:cryout_app/utils/shared-preference-util.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:cryout_app/utils/widget-utils.dart';
 import 'package:flutter/material.dart';
@@ -56,13 +57,13 @@ class _ChannelInformationScreenState extends State with SingleTickerProviderStat
       _translations = Translations.of(context);
     }
 
-    if (!_setUpComplete) {
-      _setUp();
-      return WidgetUtils.getLoaderWidget(context, _translations.text("screens.common.loading"));
-    }
-
     if (_loadingFailed) {
       return _getRetryScreen();
+    }
+
+    if (_channel == null) {
+      _setUp();
+      return WidgetUtils.getLoaderWidget(context, _translations.text("screens.common.loading"));
     }
 
     if (_tabController == null) {
@@ -135,12 +136,21 @@ class _ChannelInformationScreenState extends State with SingleTickerProviderStat
   }
 
   void _setUp() async {
+    _channel = await SharedPreferenceUtil.getCachedChannel(_channelId.toString());
+
+    if (_channel != null) {
+      setState(() {
+        _loadingFailed = false;
+      });
+    }
+
     Response response = await ChannelResource.getChannel(context, _channelId);
 
     if (response.statusCode != HttpStatus.ok) {
       setState(() {
-        _loadingFailed = true;
-        _setUpComplete = true;
+        if (_channel == null) {
+          _loadingFailed = true;
+        }
       });
       return;
     } else {
@@ -150,9 +160,10 @@ class _ChannelInformationScreenState extends State with SingleTickerProviderStat
     dynamic data = jsonDecode(response.body)["data"];
 
     setState(() {
-      _setUpComplete = true;
       _channel = SafetyChannel.fromJSON(data);
     });
+
+    SharedPreferenceUtil.saveCachedChannel(_channel);
   }
 
   Widget _getRetryScreen() {
@@ -179,7 +190,6 @@ class _ChannelInformationScreenState extends State with SingleTickerProviderStat
                 child: Text(_translations.text("screens.common.retry")),
                 onPressed: () {
                   setState(() {
-                    _setUpComplete = false;
                     _loadingFailed = false;
                   });
                 },
@@ -235,20 +245,12 @@ class _ChannelInformationScreenState extends State with SingleTickerProviderStat
     return [Tab(text: "Posts"), Tab(text: "About")];
   }
 
-  var adminTabs;
-  var otherTabs;
-
   List<Widget> _getViews() {
     if (_channel.role == "ADMIN") {
-      if (adminTabs == null) {
-        adminTabs = [ChannelPostsWidget(channel: _channel), ChannelSubscribersWidget(channel: _channel), ChannelAboutWidget(channel: _channel)];
-      }
-      return adminTabs;
+      return [ChannelPostsWidget(channel: _channel), ChannelSubscribersWidget(channel: _channel), ChannelAboutWidget(channel: _channel)];
     }
-    if (otherTabs == null) {
-      otherTabs = [ChannelPostsWidget(channel: _channel), ChannelAboutWidget(channel: _channel)];
-    }
-    return otherTabs;
+
+    return [ChannelPostsWidget(channel: _channel), ChannelAboutWidget(channel: _channel)];
   }
 
   void subscribe() async {
@@ -259,6 +261,8 @@ class _ChannelInformationScreenState extends State with SingleTickerProviderStat
 
       setState(() {
         _channel.role = "SUBSCRIBER";
+        _channel.subscriberCount += 1;
+        SharedPreferenceUtil.saveCachedChannel(_channel);
         _subscriptionUpdating = false;
       });
     } else {
@@ -275,6 +279,8 @@ class _ChannelInformationScreenState extends State with SingleTickerProviderStat
       EventManager.notify(Events.CHANNEL_SUBSCRIBED);
       setState(() {
         _channel.role = null;
+        _channel.subscriberCount -= 1;
+        SharedPreferenceUtil.saveCachedChannel(_channel);
         _subscriptionUpdating = false;
       });
     } else {

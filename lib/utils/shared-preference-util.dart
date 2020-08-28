@@ -5,7 +5,9 @@ import 'package:cryout_app/models/distress-signal.dart';
 import 'package:cryout_app/models/received-distress-signal.dart';
 import 'package:cryout_app/models/received-safe-walk.dart';
 import 'package:cryout_app/models/safe-walk.dart';
+import 'package:cryout_app/models/safety-channel.dart';
 import 'package:cryout_app/models/user.dart';
+import 'package:cryout_app/screens/phone-verification-screen.dart';
 import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,6 +19,7 @@ class SharedPreferenceUtil {
   static const _USER_AUTHENTICATION_TOKEN = "USER_AUTHENTICATION_TOKEN";
   static const _CACHED_RECEIVED_DISTRESS_CALL = "CACHED_DISTRESS_CALL_";
   static const _CACHED_RECEIVED_SAFE_WALK = "CACHED_SAFE_WALK_";
+  static const _CACHED_CHANNEL = "CACHED_CHANNEL_";
   static const _TOPICS = "REGISTERED_TOPICS_KEY";
   static const _IS_SAFE_WALKING = "IS_SAFE_WALKING";
 
@@ -251,5 +254,21 @@ class SharedPreferenceUtil {
   static Future<void> updateUserLastKnownSafeWalkLocation(String safeWalkId, double lat, double lon) async {
     DatabaseReference _dbPreference = database.reference().child('safe_walk_locations').reference().child("$safeWalkId").reference();
     await _dbPreference.set({"lat": lat, "lon": lon});
+  }
+
+  static Future<SafetyChannel> getCachedChannel(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    String dc = prefs.getString("$_CACHED_CHANNEL.$id");
+
+    if (dc == null) {
+      return null;
+    }
+
+    return SafetyChannel.fromJSON(jsonDecode(dc));
+  }
+
+  static Future<void> saveCachedChannel(SafetyChannel safetyChannel) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("$_CACHED_CHANNEL.${safetyChannel.id}", jsonEncode(safetyChannel.toJSON()));
   }
 }

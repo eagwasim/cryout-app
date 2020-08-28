@@ -12,6 +12,10 @@ class SamaritanResource {
   static const String UPDATE_USER_SAMARITAN_LOCATION = "/location";
 
   static Future<Response> getUserReceivedDistressSignals(BuildContext context, String cursor) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
     headers["Authorization"] = "Bearer " + token;
@@ -27,6 +31,10 @@ class SamaritanResource {
   }
 
   static Future<Response> getUserReceivedDistressSignal(BuildContext context, String id) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
     headers["Authorization"] = "Bearer " + token;
@@ -42,6 +50,10 @@ class SamaritanResource {
   }
 
   static Future<Response> dismissDistressSignals(BuildContext context, String id) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
     headers["Authorization"] = "Bearer " + token;
@@ -57,6 +69,10 @@ class SamaritanResource {
   }
 
   static Future<Response> updateSamaritanMode(BuildContext context, Map<String, dynamic> body) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
 
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
@@ -73,6 +89,10 @@ class SamaritanResource {
   }
 
   static Future<Response> updateSamaritanLocation(BuildContext context, Map<String, dynamic> body) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
 
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
@@ -89,6 +109,10 @@ class SamaritanResource {
   }
 
   static Future<Response> getUserReceivedSafeWalks(BuildContext context, String cursor) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
     headers["Authorization"] = "Bearer " + token;
@@ -104,6 +128,10 @@ class SamaritanResource {
   }
 
   static Future<Response> getUserReceivedSafeWalk(BuildContext context, String id) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
     headers["Authorization"] = "Bearer " + token;
@@ -119,6 +147,10 @@ class SamaritanResource {
   }
 
   static Future<Response> dismissSafeWalk(BuildContext context, String id) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
     headers["Authorization"] = "Bearer " + token;
@@ -134,6 +166,10 @@ class SamaritanResource {
   }
 
   static Future<Response> activeSafeWalksCount(BuildContext context) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
     headers["Authorization"] = "Bearer " + token;
@@ -149,6 +185,10 @@ class SamaritanResource {
   }
 
   static Future<Response> activeDistressCallsCount(BuildContext context) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
     headers["Authorization"] = "Bearer " + token;
@@ -162,5 +202,4 @@ class SamaritanResource {
     }
     return response;
   }
-
 }

@@ -39,7 +39,7 @@ class _ChannelPostsWidgetState extends State with Subscriber {
 
   String cursor = "";
   int page = 0;
-  int limit = 100;
+  int limit = 20;
   double _addHeight = 0;
   List<ChannelPost> _channelPosts = [];
   RefreshController _refreshController = RefreshController(initialRefresh: false);

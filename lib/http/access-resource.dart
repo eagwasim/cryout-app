@@ -13,14 +13,23 @@ class AccessResource {
   static const String LOGIN_USER_BY_FIREBASE_TOKEN_URL = "/api/v1/access/firebase/login";
 
   static Future<Response> phoneNumberVerification(dynamic body) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     return await post(BaseResource.BASE_URL + VERIFY_PHONE_NUMBER_URL, headers: BaseResource.HEADERS, body: jsonEncode(body));
   }
 
   static Future<Response> phoneNumberConfirmation(dynamic body) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     return await post(BaseResource.BASE_URL + CONFIRM_PHONE_NUMBER_URL, headers: BaseResource.HEADERS, body: jsonEncode(body));
   }
 
   static Future<bool> refreshToken(BuildContext buildContext) async {
+
     String refreshToken = await SharedPreferenceUtil.getRefreshToken();
     Response response = await get(BaseResource.BASE_URL + "/token/refresh?refreshToken=" + refreshToken);
 
@@ -38,6 +47,10 @@ class AccessResource {
   }
 
   static Future<Response> loginUserByFirebaseToken(dynamic body) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     return await post(BaseResource.BASE_URL + LOGIN_USER_BY_FIREBASE_TOKEN_URL, headers: BaseResource.HEADERS, body: jsonEncode(body));
   }
 }

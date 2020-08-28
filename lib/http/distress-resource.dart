@@ -10,6 +10,10 @@ class DistressResource {
   static const String _DISTRESS_CALL_BASE_ENDPOINT = "/api/v1/distress/signals";
 
   static Future<Response> sendDistressCall(BuildContext context, Map<String, dynamic> body) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
 
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
@@ -26,6 +30,10 @@ class DistressResource {
   }
 
   static Future<Response> closeDistressCall(BuildContext context, int id) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
 
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
@@ -42,6 +50,10 @@ class DistressResource {
   }
 
   static Future<Response> updateDistressSignalResponseStatus(BuildContext context, String id, dynamic data) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
 
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
@@ -57,6 +69,9 @@ class DistressResource {
   }
 
   static Future<Response> notifyDistressChannelOfMessage(BuildContext context, String id, dynamic data) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
 
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
@@ -70,6 +85,4 @@ class DistressResource {
     }
     return response;
   }
-
-
 }

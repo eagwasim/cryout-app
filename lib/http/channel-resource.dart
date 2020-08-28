@@ -11,6 +11,10 @@ class ChannelResource {
   static const String _RESOURCE_URL = "/api/v1/channels";
 
   static Future<Response> createChannel(BuildContext context, Map<String, dynamic> body) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
     headers["Authorization"] = "Bearer " + token;
@@ -27,6 +31,10 @@ class ChannelResource {
   }
 
   static Future<Response> getUserCreatedChannels(BuildContext context, String cursor) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
     headers["Authorization"] = "Bearer " + token;
@@ -44,6 +52,10 @@ class ChannelResource {
   }
 
   static Future<Response> getUserSubscribedChannels(BuildContext context, String cursor) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
     headers["Authorization"] = "Bearer " + token;
@@ -59,6 +71,10 @@ class ChannelResource {
   }
 
   static Future<Response> searchChannels(BuildContext context, String query) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
     headers["Authorization"] = "Bearer " + token;
@@ -74,6 +90,10 @@ class ChannelResource {
   }
 
   static Future<Response> getChannel(BuildContext context, int channelId) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
     headers["Authorization"] = "Bearer " + token;

@@ -11,6 +11,10 @@ class UserResource {
   static const String REPORT_USER = "/report";
 
   static Future<Response> updateUser(BuildContext context, Map<String, dynamic> body) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
 
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
@@ -27,6 +31,11 @@ class UserResource {
   }
 
   static Future<Response> reportUser(BuildContext context, Map<String, dynamic> body) async {
+
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
 
     Map<String, String> headers = Map.from(BaseResource.HEADERS);
@@ -43,6 +52,10 @@ class UserResource {
   }
 
   static Future<Response> checkPhoneNumber(BuildContext context, String phoneNumber) async {
+    if (!await BaseResource.isConnected()) {
+      return Response("ERROR", 500);
+    }
+
     String token = await SharedPreferenceUtil.getToken();
 
     Map<String, String> headers = Map.from(BaseResource.HEADERS);

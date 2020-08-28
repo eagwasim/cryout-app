@@ -126,12 +126,13 @@ class _ChannelSubscribersWidgetState extends State {
 
   Widget _getUserView(User item, int position) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.only(left:8, right:8, top: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 8.0, right: 4),
+            padding: const EdgeInsets.only(left: 8.0, right: 4, bottom: 8),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(30),
               child: CachedNetworkImage(
@@ -149,7 +150,7 @@ class _ChannelSubscribersWidgetState extends State {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 20.0, left: 8, right: 8),
+                  padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
                   child: Text(
                     item.fullName(),
                     textAlign: TextAlign.start,
@@ -186,7 +187,7 @@ class _ChannelSubscribersWidgetState extends State {
 
   String cursor = "";
   int page = 0;
-  int limit = 100;
+  int limit = 20;
 
   void _initialLoad() async {
     page = 0;
