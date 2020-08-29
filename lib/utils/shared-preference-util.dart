@@ -7,7 +7,6 @@ import 'package:cryout_app/models/received-safe-walk.dart';
 import 'package:cryout_app/models/safe-walk.dart';
 import 'package:cryout_app/models/safety-channel.dart';
 import 'package:cryout_app/models/user.dart';
-import 'package:cryout_app/screens/phone-verification-screen.dart';
 import 'package:cryout_app/utils/preference-constants.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';

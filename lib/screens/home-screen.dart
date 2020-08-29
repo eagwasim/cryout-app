@@ -26,10 +26,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart';
 import 'package:package_info/package_info.dart';
+import 'package:share/share.dart';
+import 'package:uni_links/uni_links.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -49,7 +52,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
 
   DatabaseReference _userPreferenceDatabaseReference;
   List<StreamSubscription<Event>> _preferenceListeners = [];
-
+  StreamSubscription _sub;
   PackageInfo _packageInfo;
 
   int _activeDistressCallCount = 0;
@@ -62,6 +65,7 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
     super.initState();
     FireBaseHandler.requestPermission();
     WidgetsBinding.instance.addObserver(this);
+    initUniLinks();
   }
 
   @override
@@ -71,6 +75,9 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
       element.cancel();
     });
 
+    if (_sub != null) {
+      _sub.cancel();
+    }
     if (_webNotificationService != null && _webNotificationService.isBroadcast()) {
       _webNotificationService.stopBroadcast();
     }
@@ -105,6 +112,12 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
           centerTitle: false,
           brightness: Theme.of(context).brightness,
           actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.share, color: Colors.grey),
+              onPressed: () {
+                _shareApp();
+              },
+            ),
             IconButton(
               icon: Icon(FontAwesomeIcons.satelliteDish, color: _activeDistressCallCount == 0 ? Colors.grey : Theme.of(context).accentColor),
               onPressed: () {
@@ -566,8 +579,9 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
         });
       }));
     }
-
-    setState(() {});
+    try {
+      setState(() {});
+    } catch (e) {}
     _updateLocationTrackingStatus();
   }
 
@@ -775,5 +789,36 @@ class _HomeScreenState extends State with WidgetsBindingObserver {
     await FirebaseAuth.instance.signOut();
 
     locator<NavigationService>().pushNamedAndRemoveUntil(Routes.PHONE_VERIFICATION_SCREEN);
+  }
+
+  void _shareApp() {
+    Share.share('Get Cry Out! Your personal safety app https://cryout.app/dl', subject: 'Download Cry Out');
+  }
+
+  Future<Null> initUniLinks() async {
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      String initialLink = await getInitialLink();
+      openLink(initialLink);
+
+      _sub = getLinksStream().listen((String link) {
+        openLink(link);
+      }, onError: (err) {
+        // Handle exception by warning the user their action did not succeed
+      });
+    } on PlatformException {
+      // Handle exception by warning the user their action did not succeed
+      // return?
+    }
+  }
+
+  void openLink(String appLink) {
+    if (appLink == null) {
+      return;
+    }
+    if (appLink.startsWith("https://cryout.app/ch/")) {
+      String channelId = appLink.split("/").last;
+      locator<NavigationService>().pushNamed(Routes.CHANNEL_INFORMATION_SCREEN, arguments: int.parse(channelId));
+    }
   }
 }

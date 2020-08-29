@@ -129,9 +129,8 @@ class _ReceivedDistressSignalListScreenState extends State {
                     ),
                   ),
                   Column(
-
                     children: [
-                      Divider(),
+                      _addHeight == 0 ? SizedBox.shrink() : Divider(height: 0.5,),
                       Container(
                         height: _addHeight,
                         child: Padding(

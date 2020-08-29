@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:cryout_app/http/channel-resource.dart';
 import 'package:cryout_app/models/search-channels.dart';
-import 'package:cryout_app/models/subscribed-channel.dart';
+import 'package:cryout_app/utils/extensions.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/routes.dart';
 import 'package:cryout_app/utils/widget-utils.dart';
@@ -13,7 +13,6 @@ import 'package:flutter_text_drawable/flutter_text_drawable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart';
 import 'package:progress_indicators/progress_indicators.dart';
-import 'package:cryout_app/utils/extensions.dart';
 
 class ChannelSearchScreen extends StatefulWidget {
   @override

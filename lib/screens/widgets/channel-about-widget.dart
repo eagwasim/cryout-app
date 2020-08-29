@@ -3,17 +3,15 @@ import 'dart:io';
 
 import 'package:cryout_app/http/channel-resource.dart';
 import 'package:cryout_app/models/safety-channel.dart';
+import 'package:cryout_app/utils/extensions.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
-import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/pub-sub.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:cryout_app/utils/extensions.dart';
 import 'package:flutter_native_admob/flutter_native_admob.dart';
 import 'package:flutter_native_admob/native_admob_controller.dart';
 import 'package:flutter_native_admob/native_admob_options.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart';
 
 class ChannelAboutWidget extends StatefulWidget {
@@ -142,7 +140,7 @@ class _ChannelAboutWidgetState extends State {
         ),
         Column(
           children: [
-            Divider(),
+            _addHeight == 0 ? SizedBox.shrink() : Divider(height: 0.5,),
             Container(
               height: _addHeight,
               child: Padding(

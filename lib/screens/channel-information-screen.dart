@@ -6,6 +6,7 @@ import 'package:cryout_app/models/safety-channel.dart';
 import 'package:cryout_app/screens/widgets/channel-about-widget.dart';
 import 'package:cryout_app/screens/widgets/channel-posts-widget.dart';
 import 'package:cryout_app/screens/widgets/channel-subscribers-widget.dart';
+import 'package:cryout_app/utils/extensions.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/pub-sub.dart';
@@ -15,9 +16,8 @@ import 'package:cryout_app/utils/translations.dart';
 import 'package:cryout_app/utils/widget-utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart';
-import 'package:cryout_app/utils/extensions.dart';
+import 'package:share/share.dart';
 
 class ChannelInformationScreen extends StatefulWidget {
   final int channelId;
@@ -156,9 +156,7 @@ class _ChannelInformationScreenState extends State with SingleTickerProviderStat
     } else {
       _loadingFailed = false;
     }
-
     dynamic data = jsonDecode(response.body)["data"];
-
     setState(() {
       _channel = SafetyChannel.fromJSON(data);
     });
@@ -202,32 +200,37 @@ class _ChannelInformationScreenState extends State with SingleTickerProviderStat
   }
 
   List<Widget> _getActionButton() {
+    List<Widget> widgets = [];
     if (_channel.role == null) {
-      return [
-        FlatButton.icon(
-          label: Text("Subscribe"),
-          icon: Icon(FontAwesomeIcons.bell, size: 14),
+      widgets.add(
+        IconButton(
+          icon: Icon(Icons.person_add),
           onPressed: _subscriptionUpdating
               ? null
               : () {
                   subscribe();
                 },
-        )
-      ];
-    } else if (_channel.role == "SUBSCRIBER") {
-      return [
-        FlatButton.icon(
-          label: Text("Unsubscribe"),
-          icon: Icon(FontAwesomeIcons.bellSlash, size: 14),
-          onPressed: _subscriptionUpdating
-              ? null
-              : () {
-                  unsubscribe();
-                },
-        )
-      ];
+        ),
+      );
     }
-    return [];
+    if (_channel.role == "SUBSCRIBER") {
+      widgets.add(IconButton(
+        icon: Icon(Icons.check),
+        onPressed: _subscriptionUpdating
+            ? null
+            : () {
+                unsubscribe();
+              },
+      ));
+    }
+
+    widgets.add(IconButton(
+      icon: Icon(Icons.share),
+      onPressed: () {
+        _shareApp();
+      },
+    ));
+    return widgets;
   }
 
   int _tabCount() {
@@ -303,5 +306,9 @@ class _ChannelInformationScreenState extends State with SingleTickerProviderStat
         Navigator.of(context).pop();
       });
     }
+  }
+
+  void _shareApp() {
+    Share.share('Click to join https://cryout.app/ch/$_channelId', subject: 'Join ${_channel.name}!');
   }
 }

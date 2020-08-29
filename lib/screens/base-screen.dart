@@ -1,9 +1,7 @@
 import 'package:cryout_app/screens/channels-screen.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
 
 import 'home-screen.dart';
 
@@ -31,7 +29,7 @@ class _BaseScreenState extends State {
   Translations _translations;
 
   final List<NavScreenHolder> _screens = [
-    NavScreenHolder(HomeScreen(), "screens.base.nav.home", FontAwesomeIcons.userShield),
+    NavScreenHolder(HomeScreen(), "screens.base.nav.home", FontAwesomeIcons.home),
     NavScreenHolder(ChannelsScreen(), "screens.base.nav.channels", FontAwesomeIcons.rss),
   ];
 
@@ -43,9 +41,35 @@ class _BaseScreenState extends State {
       _translations = Translations.of(context);
     }
     return Scaffold(
-      backgroundColor: Theme.of(context).backgroundColor,
-      body: _screens.elementAt(_selectedScreen).screen,
-      bottomNavigationBar: Container(
+        backgroundColor: Theme.of(context).backgroundColor,
+        body: _screens.elementAt(_selectedScreen).screen,
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: Colors.grey.withAlpha(100), width: 0.5))
+          ),
+          child: BottomNavigationBar(
+            currentIndex: _selectedScreen,
+
+            selectedFontSize: 16,
+            selectedItemColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
+            backgroundColor: Theme.of(context).backgroundColor.withAlpha(100),
+            elevation: 0,
+            onTap: (index) {
+              setState(() {
+                _selectedScreen = index;
+              });
+            },
+            items: _screens.map((e) => BottomNavigationBarItem(icon: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Icon(e.icon,),
+            ), title: Text(_translations.text(e.title)))).toList(),
+          ),
+
+        ));
+  }
+}
+/*
+Container(
         decoration: BoxDecoration(
           shape: BoxShape.rectangle,
           border: Border(
@@ -81,6 +105,4 @@ class _BaseScreenState extends State {
           ),
         ),
       ),
-    );
-  }
-}
+ */

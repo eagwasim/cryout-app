@@ -93,7 +93,7 @@ class _ChannelPostsWidgetState extends State with Subscriber {
             ? SizedBox.shrink()
             : Column(
                 children: [
-                  Divider(),
+                  _addHeight == 0 ? SizedBox.shrink() : Divider(height: 0.5,),
                   Container(
                     height: _addHeight,
                     child: Padding(
@@ -188,74 +188,65 @@ class _ChannelPostsWidgetState extends State with Subscriber {
   }
 
   Widget _getItemView(ChannelPost item, int position) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8, right: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0, right: 4, top: 4),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(30),
-                  child: CachedNetworkImage(
-                    fit: BoxFit.cover,
-                    imageUrl: item.creatorImage == null ? "https://via.placeholder.com/44x44?text=|" : item.creatorImage,
-                    fadeOutDuration: const Duration(seconds: 1),
-                    fadeInDuration: const Duration(seconds: 0),
-                    height: 30,
-                    width: 30,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0, right: 4, top: 4),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: CachedNetworkImage(
+                  fit: BoxFit.cover,
+                  imageUrl: item.creatorImage == null ? "https://via.placeholder.com/44x44?text=|" : item.creatorImage,
+                  fadeOutDuration: const Duration(seconds: 1),
+                  fadeInDuration: const Duration(seconds: 0),
+                  height: 30,
+                  width: 30,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
+                    child: Text(
+                      item.creatorName,
+                      textAlign: TextAlign.start,
+                      style: TextStyle(fontSize: 14),
+                    ),
                   ),
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0, left: 8, right: 8),
-                      child: Text(
-                        item.creatorName,
-                        textAlign: TextAlign.start,
-                        style: TextStyle(fontSize: 14),
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2.0, left: 8, right: 8, bottom: 4),
+                    child: Text(
+                      item.dateCreated == null ? "" : timeago.format(DateTime.fromMillisecondsSinceEpoch(item.dateCreated), locale: 'en'),
+                      style: TextStyle(fontStyle: FontStyle.italic, fontSize: 10, color: Colors.grey),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2.0, left: 8, right: 8, bottom: 4),
-                      child: Text(
-                        item.dateCreated == null ? "" : timeago.format(DateTime.fromMillisecondsSinceEpoch(item.dateCreated), locale: 'en'),
-                        style: TextStyle(fontStyle: FontStyle.italic, fontSize: 10, color: Colors.grey),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 8),
-            child: Text(
-              item.title,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 8),
+          child: Text(
+            item.title,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 8),
-            child: Text(item.message, style: TextStyle(fontSize: 15, fontWeight: FontWeight.normal)),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-              left: 8,
-              right: 8,
-            ),
-            child: Divider(
-              color: Colors.grey.withAlpha(150),
-            ),
-          )
-        ],
-      ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 8),
+          child: Text(item.message, style: TextStyle(fontSize: 15, fontWeight: FontWeight.normal)),
+        ),
+        Divider(
+          color: Colors.grey,
+        )
+      ],
     );
   }
 

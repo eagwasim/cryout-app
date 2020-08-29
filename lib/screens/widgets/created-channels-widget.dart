@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:cryout_app/http/channel-resource.dart';
 import 'package:cryout_app/models/my-channel.dart';
-import 'package:cryout_app/screens/channels-screen.dart';
+import 'package:cryout_app/utils/extensions.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/pub-sub.dart';
 import 'package:cryout_app/utils/routes.dart';
@@ -13,7 +13,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_text_drawable/flutter_text_drawable.dart';
 import 'package:http/http.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:cryout_app/utils/extensions.dart';
 
 class CreatedChannels extends StatefulWidget {
   @override

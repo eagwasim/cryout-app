@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cryout_app/http/channel-resource.dart';
 import 'package:cryout_app/models/subscribed-channel.dart';
+import 'package:cryout_app/utils/extensions.dart';
 import 'package:cryout_app/utils/firebase-handler.dart';
 import 'package:cryout_app/utils/navigation-service.dart';
 import 'package:cryout_app/utils/pub-sub.dart';
@@ -13,7 +14,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_text_drawable/flutter_text_drawable.dart';
 import 'package:http/http.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:cryout_app/utils/extensions.dart';
 
 class SubscribedChannels extends StatefulWidget {
   @override
@@ -26,7 +26,6 @@ class _SubscribedChannelsState extends State with Subscriber {
   RefreshController _refreshController = RefreshController(initialRefresh: false);
 
   Translations _translations;
-  bool _isLoading = false;
 
   String _currentCursor;
 
@@ -95,13 +94,20 @@ class _SubscribedChannelsState extends State with Subscriber {
       dynamic data = jsonDecode(response.body)['data'];
 
       List<SubscribedChannel> dataFromServer = (data['data'] as List<dynamic>).map((e) => SubscribedChannel.fromJSON(e)).toList();
-
-      await SubscribedChannelRepository.clear();
       _subscribedChannels.clear();
 
       for (int i = 0; i < dataFromServer.length; i++) {
-        await SubscribedChannelRepository.save(dataFromServer.elementAt(i));
+        SubscribedChannel old = await SubscribedChannelRepository.getById(dataFromServer.elementAt(i).id);
+        if (old != null) {
+          if (old.latestPostId != dataFromServer.elementAt(i).latestPostId || old.readStatus == 'UNREAD') {
+            dataFromServer.elementAt(i).readStatus = "UNREAD";
+          }
+        }
       }
+      await SubscribedChannelRepository.clear();
+      dataFromServer.forEach((element) {
+        SubscribedChannelRepository.save(element);
+      });
       try {
         setState(() {
           _subscribedChannels.addAll(dataFromServer);
@@ -134,14 +140,22 @@ class _SubscribedChannelsState extends State with Subscriber {
     List<SubscribedChannel> signalsFromServer = (data['data'] as List<dynamic>).map((e) => SubscribedChannel.fromJSON(e)).toList();
 
     if (_refreshController.isRefresh) {
-      await SubscribedChannelRepository.clear();
       _subscribedChannels.clear();
     }
 
     for (int i = 0; i < signalsFromServer.length; i++) {
-      await SubscribedChannelRepository.save(signalsFromServer.elementAt(i));
+      SubscribedChannel old = await SubscribedChannelRepository.getById(signalsFromServer.elementAt(i).id);
+      if (old != null) {
+        if (old.latestPostId != signalsFromServer.elementAt(i).latestPostId || old.readStatus == 'UNREAD') {
+          signalsFromServer.elementAt(i).readStatus = "UNREAD";
+        }
+      }
     }
 
+    await SubscribedChannelRepository.clear();
+    signalsFromServer.forEach((element) {
+      SubscribedChannelRepository.save(element);
+    });
     setState(() {
       _subscribedChannels.addAll(signalsFromServer);
     });
@@ -205,12 +219,15 @@ class _SubscribedChannelsState extends State with Subscriber {
     return Padding(
       padding: const EdgeInsets.only(left: 4.0, right: 4, bottom: 0, top: 8),
       child: InkWell(
-        onTap: () {
+        onTap: () async {
           locator<NavigationService>().pushNamed(Routes.CHANNEL_INFORMATION_SCREEN, arguments: item.id).then((value) {
             if (value != null && value) {
               locator<NavigationService>().pop(result: true);
             }
           });
+          item.readStatus = "READ";
+          await SubscribedChannelRepository.save(item);
+          setState(() {});
         },
         child: Padding(
           padding: const EdgeInsets.only(right: 8.0, left: 8.0, top: 8),
@@ -235,7 +252,9 @@ class _SubscribedChannelsState extends State with Subscriber {
                       padding: const EdgeInsets.only(right: 0.0, left: 8.0, top: 0, bottom: 4),
                       child: Row(
                         children: <Widget>[
-                          Expanded(child: Text(item.name.titleCapitalize(), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 16))),
+                          Expanded(
+                              child: Text(item.name.titleCapitalize(),
+                                  maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 16, fontWeight: item.readStatus == "UNREAD" ? FontWeight.bold : FontWeight.normal))),
                         ],
                       ),
                     ),
@@ -248,7 +267,7 @@ class _SubscribedChannelsState extends State with Subscriber {
                             item.latestPostText == null ? item.description.capitalize() : item.latestPostText.capitalize(),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
-                            style: TextStyle(color: Colors.grey),
+                            style: TextStyle(color: Colors.grey, fontWeight: item.readStatus == "UNREAD" ? FontWeight.bold : FontWeight.normal),
                           )),
                         ],
                       ),
