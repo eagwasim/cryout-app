@@ -46,7 +46,7 @@ class _ChannelSearchScreenState extends State {
         backgroundColor: Theme.of(context).backgroundColor,
         appBar: AppBar(
           backgroundColor: Theme.of(context).backgroundColor,
-          elevation: 4,
+          elevation: 2,
           centerTitle: false,
           brightness: Theme.of(context).brightness,
           iconTheme: Theme.of(context).iconTheme,

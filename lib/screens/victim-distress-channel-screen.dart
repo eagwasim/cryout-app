@@ -87,7 +87,7 @@ class _VictimDistressChannelScreenState extends State {
               appBar: AppBar(
                 backgroundColor: Theme.of(context).accentColor,
                 title: Text(_translations.text("choices.distress.categories.${_distressCall.details}")),
-                elevation: 4,
+                elevation: 2,
                 centerTitle: false,
                 brightness: Brightness.dark,
                 actions: <Widget>[
@@ -126,9 +126,6 @@ class _VictimDistressChannelScreenState extends State {
                         );
                       },
                     ),
-                  ),
-                  Divider(
-                    height: 1,
                   ),
                   Container(
                     child: Padding(

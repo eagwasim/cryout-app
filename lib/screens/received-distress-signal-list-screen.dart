@@ -87,7 +87,7 @@ class _ReceivedDistressSignalListScreenState extends State {
               appBar: AppBar(
                 backgroundColor: Theme.of(context).backgroundColor,
                 iconTheme: Theme.of(context).iconTheme,
-                elevation: 4,
+                elevation: 2,
                 centerTitle: false,
                 brightness: Theme.of(context).brightness,
                 title: Text(_translations.text("screens.distress.signals.title"), style: TextStyle(color: Theme.of(context).iconTheme.color)),

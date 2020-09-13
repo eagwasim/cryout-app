@@ -106,7 +106,7 @@ class _MyAppState<MyApp> extends State {
         // Define the default font family.
         fontFamily: 'Raleway',
         backgroundColor: Colors.black,
-        bottomAppBarTheme: BottomAppBarTheme(color: Colors.grey[900]),
+        bottomAppBarTheme: BottomAppBarTheme(color: Colors.grey[400]),
         dividerColor: Colors.grey,
         // Define the default TextTheme. Use this to specify the default
         // text styling for headlines, titles, bodies of text, and more.

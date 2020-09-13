@@ -85,7 +85,7 @@ class _ReceivedSafeWalkListScreenState extends State {
               appBar: AppBar(
                 backgroundColor: Theme.of(context).backgroundColor,
                 iconTheme: Theme.of(context).iconTheme,
-                elevation: 4,
+                elevation: 2,
                 centerTitle: false,
                 brightness: Theme.of(context).brightness,
                 title: Text(_translations.text("screens.safe-walk.signals.title"), style: TextStyle(color: Theme.of(context).iconTheme.color)),

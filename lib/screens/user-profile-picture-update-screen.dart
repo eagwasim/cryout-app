@@ -131,6 +131,21 @@ class _ProfilePictureUpdateScreenState extends State {
                   children: <Widget>[
                     Padding(
                       padding: const EdgeInsets.all(8.0),
+                      child: FlatButton(
+                        child: Text(
+                          "Skip",
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        onPressed: () async {
+                          setState(() {
+                            _isProcessing = false;
+                          });
+                          _save(context, "https://via.placeholder.com/44x44?text=.");
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
                       child: RaisedButton(
                         shape: RoundedRectangleBorder(
                           borderRadius: new BorderRadius.circular(25.0),
@@ -186,7 +201,6 @@ class _ProfilePictureUpdateScreenState extends State {
         WidgetUtils.showAlertDialog(context, _translations.text("common.error.unknown.title"), _translations.text("common.error.unknown.message"));
       }
     } on Exception catch (e) {
-
       setState(() {
         _isProcessing = false;
       });
@@ -206,7 +220,6 @@ class _ProfilePictureUpdateScreenState extends State {
 
       locator<NavigationService>().pushNamedAndRemoveUntil(Routes.BASE_SCREEN);
     } else {
-
       setState(() {
         _isProcessing = false;
       });

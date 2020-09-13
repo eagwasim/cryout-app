@@ -1,4 +1,5 @@
 import 'package:cryout_app/screens/channels-screen.dart';
+import 'package:cryout_app/screens/settings-screen.dart';
 import 'package:cryout_app/utils/translations.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -31,6 +32,7 @@ class _BaseScreenState extends State {
   final List<NavScreenHolder> _screens = [
     NavScreenHolder(HomeScreen(), "screens.base.nav.home", FontAwesomeIcons.home),
     NavScreenHolder(ChannelsScreen(), "screens.base.nav.channels", FontAwesomeIcons.rss),
+    NavScreenHolder(SettingsScreen(), "screens.base.nav.channels", FontAwesomeIcons.cog),
   ];
 
   _BaseScreenState(this._selectedScreen);
@@ -44,27 +46,36 @@ class _BaseScreenState extends State {
         backgroundColor: Theme.of(context).backgroundColor,
         body: _screens.elementAt(_selectedScreen).screen,
         bottomNavigationBar: Container(
-          decoration: BoxDecoration(
-            border: Border(top: BorderSide(color: Colors.grey.withAlpha(100), width: 0.5))
-          ),
+          decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey.withAlpha(100), width: 0.5))),
           child: BottomNavigationBar(
             currentIndex: _selectedScreen,
-
-            selectedFontSize: 16,
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
             selectedItemColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
-            backgroundColor: Theme.of(context).backgroundColor.withAlpha(100),
+            backgroundColor: Theme.of(context).backgroundColor,
             elevation: 0,
             onTap: (index) {
               setState(() {
                 _selectedScreen = index;
               });
             },
-            items: _screens.map((e) => BottomNavigationBarItem(icon: Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Icon(e.icon,),
-            ), title: Text(_translations.text(e.title)))).toList(),
+            items: _screens
+                .map(
+                  (e) => BottomNavigationBarItem(
+                    icon: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Icon(
+                        e.icon,
+                        size: 20,
+                      ),
+                    ),
+                    title: Text(
+                      _translations.text(e.title),
+                    ),
+                  ),
+                )
+                .toList(),
           ),
-
         ));
   }
 }

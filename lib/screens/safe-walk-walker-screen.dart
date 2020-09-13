@@ -91,7 +91,7 @@ class _SafeWalkWalkerScreenState extends State {
                   ],
                   crossAxisAlignment: CrossAxisAlignment.start,
                 ),
-                elevation: 4,
+                elevation: 2,
                 centerTitle: false,
                 brightness: Brightness.dark,
                 actions: <Widget>[

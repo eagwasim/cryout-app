@@ -1,3 +1,5 @@
+import 'package:cryout_app/utils/extensions.dart';
+
 class User {
   String id;
 
@@ -49,11 +51,11 @@ class User {
   }
 
   String shortName() {
-    return "${firstName + " " + lastName.substring(0, 1)}.";
+    return "${firstName + " " + lastName.substring(0, 1)}.".titleCapitalize();
   }
 
   String fullName() {
-    return "${firstName + " " + lastName}";
+    return "${firstName + " " + lastName}".titleCapitalize();
   }
 
   String genderPronoun() {
